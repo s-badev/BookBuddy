@@ -185,6 +185,9 @@ function updateStats() {
 
     // Top 5 this week
     renderTopBooks();
+
+    // Challenges
+    renderChallenges();
 }
 
 /* ---------- Helpers ---------- */
@@ -348,6 +351,95 @@ function renderTopBooks() {
             '</div>'
         );
     }).join('');
+}
+
+/* ========== Challenges ========== */
+
+function renderChallenges() {
+    var container = document.getElementById('challengesList');
+    if (!container) return;
+
+    // Seed defaults on first run
+    ChallengeRepo.seedDefaultChallengesIfEmpty();
+
+    var challenges = ChallengeRepo.getChallenges();
+    var allLogs    = LogRepo.getAllLogs();
+    var settings   = SettingsRepo.getSettings();
+
+    if (challenges.length === 0) {
+        container.innerHTML =
+            '<div class="empty-state empty-state--compact">' +
+                '<span class="empty-state__icon" aria-hidden="true">🏆</span>' +
+                '<p class="empty-state__title">Няма предизвикателства.</p>' +
+            '</div>';
+        return;
+    }
+
+    // Pre-compute values needed by challenges
+    var week      = getWeekRangeISO(new Date());
+    var weekPages = sumLogsInRange(allLogs, week.startISO, week.endISO);
+    var streak    = calculateStreak(allLogs, settings.minPagesForStreakDay);
+
+    var anyChanged = false;
+
+    container.innerHTML = challenges.map(function(ch) {
+        var current = 0;
+        var unit    = '';
+
+        if (ch.type === 'weekly_pages') {
+            current = weekPages;
+            unit = 'стр.';
+        } else if (ch.type === 'streak_days') {
+            current = streak;
+            unit = 'дни';
+        }
+
+        var pct       = Math.min(100, Math.round((current / ch.target) * 100));
+        var completed = current >= ch.target;
+
+        // Mark completed in data if newly achieved
+        if (completed && ch.active) {
+            ch.active = false;
+            anyChanged = true;
+        }
+
+        var statusCls  = completed ? 'pill--finished' : 'pill--reading';
+        var statusText = completed ? 'Завършено' : 'Активно';
+
+        // Pick icon based on type
+        var iconSvg = ch.type === 'weekly_pages'
+            ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>'
+            : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
+
+        var iconColorCls = ch.type === 'streak_days' ? ' challenge-card__icon--streak' : '';
+
+        return (
+            '<div class="challenge-card' + (completed ? ' challenge-card--done' : '') + '">' +
+                '<div class="challenge-card__header">' +
+                    '<div class="challenge-card__icon' + iconColorCls + '">' + iconSvg + '</div>' +
+                    '<div class="challenge-card__info">' +
+                        '<span class="challenge-card__title">' + escapeHtml(ch.title) + '</span>' +
+                        '<span class="challenge-card__desc">' + escapeHtml(ch.description) + '</span>' +
+                    '</div>' +
+                    '<span class="pill ' + statusCls + '">' + statusText + '</span>' +
+                '</div>' +
+                '<div class="challenge-card__progress">' +
+                    '<div class="challenge-card__progress-info">' +
+                        '<span>' + current + ' / ' + ch.target + ' ' + unit + '</span>' +
+                        '<span class="challenge-card__pct">' + pct + '%</span>' +
+                    '</div>' +
+                    '<div class="progress-bar progress-bar--challenge">' +
+                        '<div class="progress-fill progress-fill--challenge' + (completed ? ' progress-fill--done' : '') + '" style="width:' + pct + '%"></div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>'
+        );
+    }).join('');
+
+    // Persist completion state if changed
+    if (anyChanged) {
+        ChallengeRepo.saveChallenges(challenges);
+    }
 }
 
 /* ========== Settings Modal ========== */

@@ -677,6 +677,90 @@ ul{list-style:none}
     transition:width var(--t-slow);
 }
 
+/* ==================== 10d. Challenges ==================== */
+.challenges{
+    padding:var(--sp-10) 0;
+    position:relative;z-index:1;
+}
+.challenges .section-subtitle{margin-bottom:var(--sp-6)}
+
+.challenges__grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));
+    gap:var(--sp-5);
+}
+
+.challenge-card{
+    background:var(--c-surface);
+    border:1px solid var(--c-border-light);
+    border-radius:var(--r-xl);
+    padding:var(--sp-5) var(--sp-6);
+    box-shadow:var(--sh-sm);
+    display:flex;flex-direction:column;gap:var(--sp-4);
+    transition:all var(--t-base);
+    position:relative;overflow:hidden;
+}
+.challenge-card::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:var(--grad-primary);border-radius:0 2px 2px 0;
+}
+.challenge-card:hover{
+    transform:translateY(-2px);box-shadow:var(--sh-card-hover);
+    border-color:var(--c-border);
+}
+.challenge-card--done{
+    border-color:rgba(34,197,94,.2);
+}
+.challenge-card--done::before{
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+}
+
+.challenge-card__header{
+    display:flex;align-items:flex-start;gap:var(--sp-4);
+}
+.challenge-card__icon{
+    width:42px;height:42px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:var(--r-lg);
+    background:var(--c-primary-light);color:var(--c-primary);
+}
+.challenge-card__icon--streak{
+    background:#fef3c7;color:#f59e0b;
+}
+.challenge-card__info{
+    flex:1;min-width:0;
+    display:flex;flex-direction:column;gap:2px;
+}
+.challenge-card__title{
+    font-size:var(--fs-base);font-weight:var(--fw-bold);
+    color:var(--c-text);
+}
+.challenge-card__desc{
+    font-size:var(--fs-xs);color:var(--c-text-muted);
+    line-height:1.5;
+}
+
+.challenge-card__progress{
+    display:flex;flex-direction:column;gap:var(--sp-2);
+}
+.challenge-card__progress-info{
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:var(--fs-sm);color:var(--c-text-secondary);
+}
+.challenge-card__pct{
+    font-size:var(--fs-xs);font-weight:var(--fw-bold);
+    color:var(--c-primary);
+}
+
+.progress-bar--challenge{height:8px}
+.progress-fill--challenge{
+    background:var(--grad-primary);
+    transition:width var(--t-slow);
+}
+.progress-fill--done{
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+}
+
 /* ==================== 11. Books Section ==================== */
 .books{
     padding:var(--sp-12) 0 var(--sp-16);position:relative;z-index:1;
