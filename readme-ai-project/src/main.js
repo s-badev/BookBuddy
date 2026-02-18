@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateStats();
     initNavbarToggle();
     initLogModal();
+    initSettingsModal();
     renderActivityFeed();
 });
 
@@ -178,6 +179,9 @@ function updateStats() {
     if (heroPagesEl) {
         heroPagesEl.textContent = totalPagesRead.toLocaleString();
     }
+
+    // Goal + Streak
+    renderGoalStreak();
 }
 
 /* ---------- Helpers ---------- */
@@ -185,6 +189,169 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/* ========== Date Helpers ========== */
+
+/** Returns YYYY-MM-DD for a Date object */
+function getDayISO(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+/** Returns {startISO, endISO} for the ISO week (Mon–Sun) containing `today` */
+function getWeekRangeISO(today) {
+    const d = new Date(today);
+    const day = d.getDay(); // 0=Sun … 6=Sat
+    const diffToMon = (day === 0 ? -6 : 1 - day);
+    const mon = new Date(d);
+    mon.setDate(d.getDate() + diffToMon);
+    const sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+    return { startISO: getDayISO(mon), endISO: getDayISO(sun) };
+}
+
+/** Sum of log.pages where log.dateISO is between startISO and endISO (inclusive) */
+function sumLogsInRange(logs, startISO, endISO) {
+    return logs.reduce(function(sum, log) {
+        if (log.dateISO >= startISO && log.dateISO <= endISO) {
+            return sum + log.pages;
+        }
+        return sum;
+    }, 0);
+}
+
+/** Count consecutive days backwards from today with total pages >= minPages */
+function calculateStreak(logs, minPages) {
+    // Build a map: dateISO → total pages
+    var dayMap = {};
+    logs.forEach(function(log) {
+        dayMap[log.dateISO] = (dayMap[log.dateISO] || 0) + log.pages;
+    });
+
+    var streak = 0;
+    var d = new Date();
+    // Check today first; if today has no qualifying logs, start from yesterday
+    if (!dayMap[getDayISO(d)] || dayMap[getDayISO(d)] < minPages) {
+        d.setDate(d.getDate() - 1);
+    }
+    while (true) {
+        var key = getDayISO(d);
+        if (dayMap[key] && dayMap[key] >= minPages) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+        } else {
+            break;
+        }
+    }
+    return streak;
+}
+
+/* ========== Goal & Streak Rendering ========== */
+function renderGoalStreak() {
+    var settings = SettingsRepo.getSettings();
+    var allLogs  = LogRepo.getAllLogs();
+
+    // Weekly goal
+    var week         = getWeekRangeISO(new Date());
+    var weekPages    = sumLogsInRange(allLogs, week.startISO, week.endISO);
+    var goalTarget   = settings.weeklyGoalPages;
+    var goalPct      = Math.min(100, Math.round((weekPages / goalTarget) * 100));
+
+    var goalValueEl = document.getElementById('goalValue');
+    var goalFillEl  = document.getElementById('goalFill');
+    var goalPctEl   = document.getElementById('goalPct');
+    if (goalValueEl) goalValueEl.textContent = weekPages + ' / ' + goalTarget + ' стр.';
+    if (goalFillEl)  goalFillEl.style.width  = goalPct + '%';
+    if (goalPctEl)   goalPctEl.textContent   = goalPct + '%';
+
+    // Streak
+    var streak      = calculateStreak(allLogs, settings.minPagesForStreakDay);
+    var streakValEl = document.getElementById('streakValue');
+    if (streakValEl) streakValEl.textContent = streak;
+}
+
+/* ========== Settings Modal ========== */
+function initSettingsModal() {
+    var overlay   = document.getElementById('settingsModal');
+    var form      = document.getElementById('settingsForm');
+    var openBtn   = document.getElementById('editGoalBtn');
+    var closeBtn  = document.getElementById('settingsModalClose');
+    var cancelBtn = document.getElementById('settingsModalCancel');
+
+    if (!overlay || !form || !openBtn) return;
+
+    openBtn.addEventListener('click', function() { openSettingsModal(); });
+    closeBtn.addEventListener('click', function() { closeSettingsModal(); });
+    cancelBtn.addEventListener('click', function() { closeSettingsModal(); });
+
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeSettingsModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !overlay.hasAttribute('hidden')) closeSettingsModal();
+    });
+
+    form.addEventListener('submit', handleSettingsSubmit);
+}
+
+function openSettingsModal() {
+    var overlay     = document.getElementById('settingsModal');
+    var goalInput   = document.getElementById('settingWeeklyGoal');
+    var streakInput = document.getElementById('settingMinStreak');
+    var settings    = SettingsRepo.getSettings();
+
+    goalInput.value   = settings.weeklyGoalPages;
+    streakInput.value = settings.minPagesForStreakDay;
+
+    // Clear previous errors
+    document.getElementById('settingWeeklyGoalError').textContent = '';
+    document.getElementById('settingMinStreakError').textContent   = '';
+
+    overlay.removeAttribute('hidden');
+    overlay.setAttribute('aria-hidden', 'false');
+    goalInput.focus();
+}
+
+function closeSettingsModal() {
+    var overlay = document.getElementById('settingsModal');
+    var form    = document.getElementById('settingsForm');
+    overlay.setAttribute('hidden', '');
+    overlay.setAttribute('aria-hidden', 'true');
+    form.reset();
+}
+
+function handleSettingsSubmit(e) {
+    e.preventDefault();
+
+    var goalVal   = document.getElementById('settingWeeklyGoal').value;
+    var streakVal = document.getElementById('settingMinStreak').value;
+    var valid     = true;
+
+    var goalInt   = parseInt(goalVal);
+    var streakInt = parseInt(streakVal);
+
+    if (!goalVal || isNaN(goalInt) || goalInt < 1) {
+        document.getElementById('settingWeeklyGoalError').textContent = 'Въведи поне 1.';
+        valid = false;
+    }
+    if (!streakVal || isNaN(streakInt) || streakInt < 1) {
+        document.getElementById('settingMinStreakError').textContent = 'Въведи поне 1.';
+        valid = false;
+    }
+    if (!valid) return;
+
+    SettingsRepo.saveSettings({
+        weeklyGoalPages: goalInt,
+        minPagesForStreakDay: streakInt
+    });
+
+    closeSettingsModal();
+    renderGoalStreak();
+    showToast('Целите са обновени!');
 }
 
 /* ========== Reading Log Modal ========== */

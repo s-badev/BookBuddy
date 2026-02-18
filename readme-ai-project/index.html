@@ -119,10 +119,16 @@
             <div class="container">
                 <div class="stats__header">
                     <h2 class="section-title">Моята статистика</h2>
-                    <button id="logReadingBtn" class="btn btn--primary btn--pill">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Логвай четене
-                    </button>
+                    <div class="stats__header-actions">
+                        <button id="editGoalBtn" class="btn btn--ghost btn--pill btn--sm" aria-label="Редактирай цели">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            Цели
+                        </button>
+                        <button id="logReadingBtn" class="btn btn--primary btn--pill">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Логвай четене
+                        </button>
+                    </div>
                 </div>
                 <div class="stats__grid">
                     <div class="stat-card">
@@ -153,6 +159,37 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Goal + Streak row -->
+                <div class="goal-row" id="goalRow">
+                    <div class="goal-card">
+                        <div class="goal-card__header">
+                            <div class="goal-card__icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                            </div>
+                            <div class="goal-card__info">
+                                <span class="goal-card__label">Седмична цел</span>
+                                <span class="goal-card__value" id="goalValue">0 / 100 стр.</span>
+                            </div>
+                        </div>
+                        <div class="goal-card__bar">
+                            <div class="progress-bar progress-bar--goal">
+                                <div class="progress-fill progress-fill--goal" id="goalFill" style="width:0%"></div>
+                            </div>
+                            <span class="goal-card__pct" id="goalPct">0%</span>
+                        </div>
+                    </div>
+                    <div class="streak-card">
+                        <div class="streak-card__icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        </div>
+                        <div class="streak-card__body">
+                            <span class="streak-card__value" id="streakValue">0</span>
+                            <span class="streak-card__label">дни streak</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -230,11 +267,41 @@
         </div>
     </div>
 
+    <!-- ===== Settings Modal (hidden) ===== -->
+    <div class="modal-overlay" id="settingsModal" hidden aria-hidden="true" role="dialog" aria-labelledby="settingsModalTitle">
+        <div class="modal-card modal-card--sm">
+            <div class="modal-card__top"></div>
+            <div class="modal-card__header">
+                <h3 class="modal-card__title" id="settingsModalTitle">Настрой цели</h3>
+                <button class="btn btn--icon" id="settingsModalClose" aria-label="Затвори">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form id="settingsForm" class="modal-card__body" novalidate>
+                <div class="form-group">
+                    <label for="settingWeeklyGoal">Седмична цел (страници) <span class="required">*</span></label>
+                    <input type="number" id="settingWeeklyGoal" min="1" placeholder="напр. 100" required>
+                    <span class="field-error" id="settingWeeklyGoalError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="settingMinStreak">Мин. страници за streak ден <span class="required">*</span></label>
+                    <input type="number" id="settingMinStreak" min="1" placeholder="напр. 1" required>
+                    <span class="field-error" id="settingMinStreakError"></span>
+                </div>
+                <div class="form-actions" style="flex-direction:row;gap:var(--sp-3)">
+                    <button type="submit" class="btn btn--primary btn--lg" style="flex:1">Запази</button>
+                    <button type="button" class="btn btn--ghost btn--lg" id="settingsModalCancel" style="flex:1">Отказ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ===== Toast ===== -->
     <div class="toast" id="toast" aria-live="polite"></div>
 
     <script src="src/services/bookRepo.js"></script>
     <script src="src/services/logRepo.js"></script>
+    <script src="src/services/settingsRepo.js"></script>
     <script src="src/main.js"></script>
 </body>
 </html>

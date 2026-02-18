@@ -488,6 +488,124 @@ ul{list-style:none}
     color:var(--c-text-muted);
 }
 
+/* ==================== 10b. Goal & Streak Row ==================== */
+.goal-row{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:var(--sp-5);
+    margin-top:var(--sp-6);
+    align-items:stretch;
+}
+
+/* — Goal card — */
+.goal-card{
+    background:var(--c-surface);
+    border:1px solid var(--c-border-light);
+    border-radius:var(--r-xl);
+    padding:var(--sp-5) var(--sp-6);
+    box-shadow:var(--sh-sm);
+    display:flex;flex-direction:column;gap:var(--sp-4);
+    transition:all var(--t-base);
+    position:relative;overflow:hidden;
+}
+.goal-card::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:var(--grad-primary);border-radius:0 2px 2px 0;
+}
+.goal-card:hover{
+    transform:translateY(-2px);box-shadow:var(--sh-card-hover);
+}
+.goal-card__header{
+    display:flex;align-items:center;gap:var(--sp-4);
+}
+.goal-card__icon{
+    width:42px;height:42px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:var(--r-lg);
+    background:var(--c-primary-light);color:var(--c-primary);
+}
+.goal-card__info{
+    display:flex;flex-direction:column;gap:2px;
+}
+.goal-card__label{
+    font-size:var(--fs-xs);font-weight:var(--fw-semibold);
+    text-transform:uppercase;letter-spacing:.05em;
+    color:var(--c-text-muted);
+}
+.goal-card__value{
+    font-size:var(--fs-lg);font-weight:var(--fw-bold);
+    color:var(--c-text);letter-spacing:-.01em;
+}
+.goal-card__bar{
+    display:flex;align-items:center;gap:var(--sp-3);
+}
+.goal-card__bar .progress-bar{flex:1}
+.goal-card__pct{
+    font-size:var(--fs-xs);font-weight:var(--fw-bold);
+    color:var(--c-primary);min-width:36px;text-align:right;
+}
+
+/* Goal progress bar (slightly taller) */
+.progress-bar--goal{height:10px}
+.progress-fill--goal{
+    background:var(--grad-primary);
+    transition:width var(--t-slow);
+}
+
+/* — Streak card — */
+.streak-card{
+    background:var(--c-surface);
+    border:1px solid var(--c-border-light);
+    border-radius:var(--r-xl);
+    padding:var(--sp-5) var(--sp-6);
+    box-shadow:var(--sh-sm);
+    display:flex;align-items:center;gap:var(--sp-4);
+    transition:all var(--t-base);
+    min-width:140px;
+    position:relative;overflow:hidden;
+}
+.streak-card::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:linear-gradient(135deg,#f59e0b,#f97316);border-radius:0 2px 2px 0;
+}
+.streak-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 14px 36px rgba(245,158,11,.14);
+}
+.streak-card__icon{
+    width:42px;height:42px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:var(--r-lg);
+    background:#fef3c7;color:#f59e0b;
+}
+.streak-card__body{
+    display:flex;flex-direction:column;gap:2px;
+}
+.streak-card__value{
+    font-size:var(--fs-3xl);font-weight:var(--fw-bold);
+    line-height:1.1;letter-spacing:-.02em;color:var(--c-text);
+}
+.streak-card__label{
+    font-size:var(--fs-xs);font-weight:var(--fw-semibold);
+    text-transform:uppercase;letter-spacing:.05em;
+    color:var(--c-text-muted);
+}
+
+/* Stats header actions group */
+.stats__header-actions{
+    display:flex;align-items:center;gap:var(--sp-3);
+}
+
+/* Small ghost pill button */
+.btn--sm{
+    padding:.4rem .85rem;
+    font-size:var(--fs-xs);
+    gap:var(--sp-1);
+}
+
+/* Small modal variant */
+.modal-card--sm{max-width:380px}
+
 /* ==================== 11. Books Section ==================== */
 .books{
     padding:var(--sp-12) 0 var(--sp-16);position:relative;z-index:1;
@@ -948,7 +1066,10 @@ ul{list-style:none}
 
     /* Stats */
     .stats__header{flex-direction:column;align-items:flex-start}
+    .stats__header-actions{width:100%;justify-content:space-between}
     .stats__grid{grid-template-columns:1fr}
+    .goal-row{grid-template-columns:1fr}
+    .streak-card{min-width:0}
 
     /* Books */
     .books__header{flex-direction:column;align-items:flex-start}
