@@ -117,7 +117,13 @@
         <!-- ===== Stats section ===== -->
         <section class="stats" id="stats">
             <div class="container">
-                <h2 class="section-title">Моята статистика</h2>
+                <div class="stats__header">
+                    <h2 class="section-title">Моята статистика</h2>
+                    <button id="logReadingBtn" class="btn btn--primary btn--pill">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Логвай четене
+                    </button>
+                </div>
                 <div class="stats__grid">
                     <div class="stat-card">
                         <div class="stat-card__icon">
@@ -166,6 +172,15 @@
                 <div id="booksList" class="books-grid"></div>
             </div>
         </section>
+
+        <!-- ===== Activity Feed section ===== -->
+        <section class="activity" id="activity">
+            <div class="container">
+                <h2 class="section-title">Последна активност</h2>
+                <p class="section-subtitle">Твоите последни сесии на четене.</p>
+                <div id="activityFeed" class="activity__feed"></div>
+            </div>
+        </section>
     </main>
 
     <!-- ===== Footer ===== -->
@@ -175,7 +190,51 @@
         </div>
     </footer>
 
+    <!-- ===== Log Reading Modal (hidden) ===== -->
+    <div class="modal-overlay" id="logModal" hidden aria-hidden="true" role="dialog" aria-labelledby="logModalTitle">
+        <div class="modal-card">
+            <div class="modal-card__top"></div>
+            <div class="modal-card__header">
+                <h3 class="modal-card__title" id="logModalTitle">Логвай четене</h3>
+                <button class="btn btn--icon" id="logModalClose" aria-label="Затвори">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form id="logForm" class="modal-card__body" novalidate>
+                <div class="form-group">
+                    <label for="logBook">Книга <span class="required">*</span></label>
+                    <select id="logBook" class="modal-select" required>
+                        <option value="">— Избери книга —</option>
+                    </select>
+                    <span class="field-error" id="logBookError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="logDate">Дата <span class="required">*</span></label>
+                    <input type="date" id="logDate" required>
+                    <span class="field-error" id="logDateError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="logPages">Прочетени страници <span class="required">*</span></label>
+                    <input type="number" id="logPages" min="1" placeholder="напр. 25" required>
+                    <span class="field-error" id="logPagesError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="logNote">Бележка <small>(незадължително, макс. 120 символа)</small></label>
+                    <input type="text" id="logNote" maxlength="120" placeholder="Какво ти направи впечатление…">
+                </div>
+                <div class="form-actions" style="flex-direction:row;gap:var(--sp-3)">
+                    <button type="submit" class="btn btn--primary btn--lg" style="flex:1">Запиши</button>
+                    <button type="button" class="btn btn--ghost btn--lg" id="logModalCancel" style="flex:1">Отказ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== Toast ===== -->
+    <div class="toast" id="toast" aria-live="polite"></div>
+
     <script src="src/services/bookRepo.js"></script>
+    <script src="src/services/logRepo.js"></script>
     <script src="src/main.js"></script>
 </body>
 </html>

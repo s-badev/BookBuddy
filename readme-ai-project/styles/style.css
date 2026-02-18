@@ -314,6 +314,7 @@ ul{list-style:none}
     background:var(--c-subtle);color:var(--c-text-secondary);border:none;
 }
 .btn--icon:hover{background:var(--c-border);color:var(--c-text)}
+.btn--icon.btn--icon-edit:hover{background:var(--c-primary-light);color:var(--c-primary)}
 .btn--icon.btn--icon-danger:hover{background:rgba(239,68,68,.1);color:var(--c-danger)}
 
 /* ==================== 7. Pill / Badge ==================== */
@@ -446,7 +447,6 @@ ul{list-style:none}
 .stats{
     padding:var(--sp-12) 0;position:relative;z-index:1;
 }
-.stats .section-title{margin-bottom:var(--sp-6)}
 .stats__grid{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));
     gap:var(--sp-5);
@@ -738,6 +738,168 @@ ul{list-style:none}
     margin-top:var(--sp-3);
 }
 
+/* ==================== 15a. Stats Header ==================== */
+.stats__header{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:var(--sp-4);margin-bottom:var(--sp-6);flex-wrap:wrap;
+}
+
+/* ==================== 15b. Modal ==================== */
+.modal-overlay{
+    position:fixed;inset:0;z-index:2000;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(15,23,42,.45);
+    backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+    padding:var(--sp-4);
+    transition:opacity var(--t-base);
+}
+.modal-overlay[hidden]{display:none}
+
+.modal-card{
+    background:var(--c-surface);
+    border-radius:var(--r-2xl);
+    box-shadow:var(--sh-xl);
+    width:100%;max-width:460px;
+    position:relative;overflow:hidden;
+    animation:modalIn var(--t-base) both;
+}
+@keyframes modalIn{
+    from{opacity:0;transform:translateY(12px) scale(.97)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+}
+.modal-card__top{
+    height:5px;background:var(--grad-primary);
+}
+.modal-card__header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:var(--sp-6) var(--sp-6) 0;
+}
+.modal-card__title{
+    font-size:var(--fs-xl);font-weight:var(--fw-bold);
+    color:var(--c-text);letter-spacing:-.01em;
+}
+.modal-card__body{
+    padding:var(--sp-6);
+    display:flex;flex-direction:column;gap:var(--sp-5);
+}
+
+/* Modal select */
+.modal-select{
+    width:100%;
+    padding:.7rem 1rem;
+    border:1.5px solid var(--c-border);
+    border-radius:var(--r-lg);
+    font-size:var(--fs-base);font-family:inherit;
+    color:var(--c-text);background:var(--c-surface);
+    transition:all var(--t-fast);
+    min-height:48px;
+    cursor:pointer;
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    padding-right:40px;
+}
+.modal-select:hover{border-color:var(--c-text-muted)}
+.modal-select:focus{
+    outline:2px solid var(--c-primary);outline-offset:0;
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 4px rgba(54,169,174,.12);
+}
+
+/* Field-level error */
+.field-error{
+    font-size:var(--fs-xs);
+    color:var(--c-danger);
+    min-height:0;
+    transition:all var(--t-fast);
+}
+.field-error:empty{display:none}
+
+/* ==================== 15c. Toast ==================== */
+.toast{
+    position:fixed;bottom:var(--sp-8);left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--c-text);color:#fff;
+    font-size:var(--fs-sm);font-weight:var(--fw-semibold);
+    padding:var(--sp-3) var(--sp-6);
+    border-radius:var(--r-full);
+    box-shadow:var(--sh-lg);
+    opacity:0;pointer-events:none;
+    transition:all var(--t-base);
+    z-index:3000;
+    white-space:nowrap;
+}
+.toast--visible{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+    pointer-events:auto;
+}
+
+/* ==================== 15d. Activity Feed ==================== */
+.activity{
+    padding:var(--sp-12) 0 var(--sp-16);
+    position:relative;z-index:1;
+}
+.activity .section-subtitle{margin-bottom:var(--sp-6)}
+
+.activity__feed{
+    display:flex;flex-direction:column;gap:var(--sp-3);
+}
+
+.activity-item{
+    display:flex;align-items:flex-start;gap:var(--sp-4);
+    background:var(--c-surface);
+    border:1px solid var(--c-border-light);
+    border-radius:var(--r-xl);
+    padding:var(--sp-4) var(--sp-5);
+    box-shadow:var(--sh-sm);
+    transition:all var(--t-fast);
+}
+.activity-item:hover{
+    box-shadow:var(--sh-md);
+    border-color:var(--c-border);
+}
+
+.activity-item__icon{
+    width:36px;height:36px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:var(--r-md);
+    background:var(--c-primary-light);color:var(--c-primary);
+}
+
+.activity-item__body{
+    flex:1;min-width:0;
+}
+.activity-item__title{
+    font-size:var(--fs-base);font-weight:var(--fw-medium);
+    color:var(--c-text);
+    display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;
+}
+.activity-item__pages{
+    font-size:var(--fs-xs);font-weight:var(--fw-semibold);
+    color:var(--c-primary);
+    background:var(--c-primary-light);
+    padding:2px 8px;border-radius:var(--r-full);
+    white-space:nowrap;
+}
+.activity-item__meta{
+    font-size:var(--fs-sm);color:var(--c-text-muted);
+    margin-top:var(--sp-1);
+    line-height:1.5;
+    word-break:break-word;
+}
+
+.activity-item__delete{
+    flex-shrink:0;
+    margin-top:2px;
+}
+
+/* Compact empty state for activity feed */
+.empty-state--compact{
+    padding:var(--sp-10) var(--sp-6);
+}
+
 /* ==================== 16. Footer ==================== */
 .footer{
     text-align:center;padding:var(--sp-8) 0;
@@ -785,11 +947,15 @@ ul{list-style:none}
     .features__grid{grid-template-columns:1fr}
 
     /* Stats */
+    .stats__header{flex-direction:column;align-items:flex-start}
     .stats__grid{grid-template-columns:1fr}
 
     /* Books */
     .books__header{flex-direction:column;align-items:flex-start}
     .books-grid{grid-template-columns:1fr}
+
+    /* Modal */
+    .modal-card{max-width:100%}
 
     /* Form */
     .form-row{grid-template-columns:1fr}
@@ -829,7 +995,7 @@ ul{list-style:none}
 
 /* ==================== 19. Print ==================== */
 @media print{
-    .navbar,.bg-blobs,.hero__visual,.footer{display:none}
+    .navbar,.bg-blobs,.hero__visual,.footer,.modal-overlay,.toast{display:none}
     .hero{padding:var(--sp-4) 0}
     .book-card{break-inside:avoid;box-shadow:none;border:1px solid #ccc}
 }

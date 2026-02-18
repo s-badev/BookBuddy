@@ -1,10 +1,45 @@
-// Form page logic - handles adding new books
+// Form page logic - handles adding and editing books
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('bookForm');
     const notesTextarea = document.getElementById('notes');
     const charCount = document.getElementById('charCount');
     const currentPageInput = document.getElementById('currentPage');
     const totalPagesInput = document.getElementById('totalPages');
+
+    // --- Edit mode detection ---
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('id') ? Number(params.get('id')) : null;
+    let editingBook = null;
+
+    if (editId) {
+        editingBook = BookRepo.getBookById(editId);
+        if (editingBook) {
+            // Prefill fields
+            document.getElementById('title').value = editingBook.title;
+            document.getElementById('author').value = editingBook.author;
+            totalPagesInput.value = editingBook.totalPages;
+            currentPageInput.value = editingBook.currentPage;
+            notesTextarea.value = editingBook.notes || '';
+            charCount.textContent = `${(editingBook.notes || '').length} / 300`;
+
+            // Update heading & button text
+            const heading = document.querySelector('.auth-card__title');
+            if (heading) heading.textContent = 'Редактирай книга';
+            const subtitle = document.querySelector('.auth-card__subtitle');
+            if (subtitle) subtitle.textContent = 'Промени данните и натисни „Запази промените".';
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.textContent = 'Запази промените';
+        } else {
+            // Book not found — show error and disable form
+            const heading = document.querySelector('.auth-card__title');
+            if (heading) heading.textContent = 'Книгата не е намерена';
+            const subtitle = document.querySelector('.auth-card__subtitle');
+            if (subtitle) subtitle.textContent = 'Тази книга не съществува. Ще бъдете пренасочени…';
+            form.style.display = 'none';
+            setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+            return;
+        }
+    }
 
     // Navbar mobile toggle (shared pattern)
     const toggle = document.querySelector('.navbar__toggle');
@@ -51,8 +86,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Save the book
-        BookRepo.addBook(formData);
+        if (editingBook) {
+            // Update existing book
+            BookRepo.updateBook(editId, formData);
+        } else {
+            // Save new book
+            BookRepo.addBook(formData);
+        }
 
         // Redirect to main page
         window.location.href = 'index.html';

@@ -42,5 +42,28 @@ const BookRepo = {
         const books = this.getAllBooks();
         const filteredBooks = books.filter(b => b.id !== bookId);
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredBooks));
+    },
+
+    // Get a single book by id
+    getBookById(bookId) {
+        const books = this.getAllBooks();
+        return books.find(b => b.id === bookId) || null;
+    },
+
+    // Update an existing book (keeps same id and createdAt)
+    updateBook(bookId, updatedData) {
+        const books = this.getAllBooks();
+        const idx = books.findIndex(b => b.id === bookId);
+        if (idx === -1) return null;
+        books[idx] = {
+            ...books[idx],
+            title: updatedData.title,
+            author: updatedData.author,
+            totalPages: parseInt(updatedData.totalPages),
+            currentPage: parseInt(updatedData.currentPage) || 0,
+            notes: updatedData.notes || ''
+        };
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(books));
+        return books[idx];
     }
 };
