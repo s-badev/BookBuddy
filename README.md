@@ -20,4 +20,4 @@ BookBuddy е минималистично уеб приложение за **о�
 ## Стартиране
 1) Клонирай репото:
 ```bash
-git clone <repo-url>
+git clone <https://github.com/s-badev/BookBuddy.git>
