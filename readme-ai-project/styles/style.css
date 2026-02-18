@@ -606,6 +606,77 @@ ul{list-style:none}
 /* Small modal variant */
 .modal-card--sm{max-width:380px}
 
+/* ==================== 10c. Top Books This Week ==================== */
+.top-books{
+    padding:var(--sp-10) 0;
+    position:relative;z-index:1;
+}
+.top-books .section-subtitle{margin-bottom:var(--sp-6)}
+
+.top-books__list{
+    display:flex;flex-direction:column;gap:var(--sp-3);
+}
+
+.top-book-item{
+    display:flex;align-items:center;gap:var(--sp-4);
+    background:var(--c-surface);
+    border:1px solid var(--c-border-light);
+    border-radius:var(--r-xl);
+    padding:var(--sp-4) var(--sp-5);
+    box-shadow:var(--sh-sm);
+    transition:all var(--t-fast);
+}
+.top-book-item:hover{
+    box-shadow:var(--sh-md);
+    border-color:var(--c-border);
+}
+
+.top-book-item__rank{
+    width:32px;height:32px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:var(--r-md);
+    background:var(--c-primary-light);color:var(--c-primary);
+    font-size:var(--fs-sm);font-weight:var(--fw-bold);
+}
+/* Gold / silver / bronze accents for top 3 */
+.top-book-item:nth-child(1) .top-book-item__rank{
+    background:#fef3c7;color:#d97706;
+}
+.top-book-item:nth-child(2) .top-book-item__rank{
+    background:#f1f5f9;color:#64748b;
+}
+.top-book-item:nth-child(3) .top-book-item__rank{
+    background:#fff7ed;color:#c2410c;
+}
+
+.top-book-item__body{
+    flex:1;min-width:0;
+    display:flex;flex-direction:column;gap:var(--sp-2);
+}
+.top-book-item__header{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:var(--sp-3);
+}
+.top-book-item__title{
+    font-size:var(--fs-base);font-weight:var(--fw-semibold);
+    color:var(--c-text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.top-book-item__pages{
+    font-size:var(--fs-xs);font-weight:var(--fw-semibold);
+    color:var(--c-primary);
+    background:var(--c-primary-light);
+    padding:2px 8px;border-radius:var(--r-full);
+    white-space:nowrap;flex-shrink:0;
+}
+
+/* Tiny progress bar for share visualisation */
+.progress-bar--top{height:6px}
+.progress-fill--top{
+    background:var(--grad-primary);
+    transition:width var(--t-slow);
+}
+
 /* ==================== 11. Books Section ==================== */
 .books{
     padding:var(--sp-12) 0 var(--sp-16);position:relative;z-index:1;

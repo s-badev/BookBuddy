@@ -182,6 +182,9 @@ function updateStats() {
 
     // Goal + Streak
     renderGoalStreak();
+
+    // Top 5 this week
+    renderTopBooks();
 }
 
 /* ---------- Helpers ---------- */
@@ -271,6 +274,80 @@ function renderGoalStreak() {
     var streak      = calculateStreak(allLogs, settings.minPagesForStreakDay);
     var streakValEl = document.getElementById('streakValue');
     if (streakValEl) streakValEl.textContent = streak;
+}
+
+/* ========== Top 5 Books This Week ========== */
+
+/** Returns top N books by pages logged this week [{bookId, title, weekPages}] */
+function getTopBooksThisWeek(books, logs, limit) {
+    limit = limit || 5;
+    var week = getWeekRangeISO(new Date());
+
+    // Sum pages per book for this week
+    var pagesByBook = {};
+    logs.forEach(function(log) {
+        if (log.dateISO >= week.startISO && log.dateISO <= week.endISO) {
+            pagesByBook[String(log.bookId)] = (pagesByBook[String(log.bookId)] || 0) + log.pages;
+        }
+    });
+
+    // Build a title map
+    var titleMap = {};
+    books.forEach(function(b) { titleMap[String(b.id)] = b.title; });
+
+    // Convert to array, sort DESC, take top N
+    var entries = [];
+    for (var id in pagesByBook) {
+        if (pagesByBook.hasOwnProperty(id)) {
+            entries.push({
+                bookId: id,
+                title: titleMap[id] || 'Изтрита книга',
+                weekPages: pagesByBook[id]
+            });
+        }
+    }
+    entries.sort(function(a, b) { return b.weekPages - a.weekPages; });
+    return entries.slice(0, limit);
+}
+
+function renderTopBooks() {
+    var container = document.getElementById('topBooksThisWeek');
+    if (!container) return;
+
+    var books = BookRepo.getAllBooks();
+    var logs  = LogRepo.getAllLogs();
+    var top   = getTopBooksThisWeek(books, logs, 5);
+
+    if (top.length === 0) {
+        container.innerHTML =
+            '<div class="empty-state empty-state--compact">' +
+                '<span class="empty-state__icon" aria-hidden="true">📊</span>' +
+                '<p class="empty-state__title">Все още няма логове за тази седмица.</p>' +
+                '<p class="empty-state__text">Логни сесия на четене и виж класацията си тук.</p>' +
+            '</div>';
+        return;
+    }
+
+    // Max pages (for relative bar width)
+    var maxPages = top[0].weekPages;
+
+    container.innerHTML = top.map(function(item, i) {
+        var barPct = Math.round((item.weekPages / maxPages) * 100);
+        return (
+            '<div class="top-book-item">' +
+                '<span class="top-book-item__rank">' + (i + 1) + '</span>' +
+                '<div class="top-book-item__body">' +
+                    '<div class="top-book-item__header">' +
+                        '<span class="top-book-item__title">' + escapeHtml(item.title) + '</span>' +
+                        '<span class="top-book-item__pages">' + item.weekPages + ' стр.</span>' +
+                    '</div>' +
+                    '<div class="progress-bar progress-bar--top">' +
+                        '<div class="progress-fill progress-fill--top" style="width:' + barPct + '%"></div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>'
+        );
+    }).join('');
 }
 
 /* ========== Settings Modal ========== */
