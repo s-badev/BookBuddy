@@ -1,5 +1,6 @@
 // Form page logic - handles adding and editing books
 document.addEventListener('DOMContentLoaded', function() {
+    ThemeSwitcher.initTheme();
     const form = document.getElementById('bookForm');
     const notesTextarea = document.getElementById('notes');
     const charCount = document.getElementById('charCount');

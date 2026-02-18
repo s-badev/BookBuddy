@@ -1,5 +1,6 @@
 // Main page logic - displays list of books
 document.addEventListener('DOMContentLoaded', function() {
+    ThemeSwitcher.initTheme();
     displayBooks();
     updateStats();
     initNavbarToggle();

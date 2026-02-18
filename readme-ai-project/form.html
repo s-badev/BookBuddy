@@ -31,6 +31,16 @@
             <div class="navbar__actions">
                 <a href="index.html" class="btn btn--outline btn--pill">Моите книги</a>
             </div>
+
+            <!-- Theme switcher -->
+            <div class="theme-switch">
+                <span class="theme-switch__label">Тема</span>
+                <select id="themeSelect" class="theme-switch__select" aria-label="Избери тема">
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
         </div>
     </nav>
 
@@ -102,6 +112,7 @@
         </div>
     </footer>
 
+    <script src="src/utils/theme.js"></script>
     <script src="src/utils/validate.js"></script>
     <script src="src/services/bookRepo.js"></script>
     <script src="src/form.js"></script>

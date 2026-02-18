@@ -38,6 +38,16 @@
                 </a>
             </div>
 
+            <!-- Theme switcher -->
+            <div class="theme-switch">
+                <span class="theme-switch__label">Тема</span>
+                <select id="themeSelect" class="theme-switch__select" aria-label="Избери тема">
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+
             <!-- Mobile toggle -->
             <button class="navbar__toggle" aria-label="Отвори менюто" aria-expanded="false">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -337,6 +347,7 @@
     <!-- ===== Toast ===== -->
     <div class="toast" id="toast" aria-live="polite"></div>
 
+    <script src="src/utils/theme.js"></script>
     <script src="src/services/bookRepo.js"></script>
     <script src="src/services/logRepo.js"></script>
     <script src="src/services/settingsRepo.js"></script>
