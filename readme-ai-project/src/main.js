@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initNavbarToggle();
     initLogModal();
     initSettingsModal();
+    initBooksToolbar();
     renderActivityFeed();
 });
 
@@ -19,18 +20,109 @@ function initNavbarToggle() {
     });
 }
 
+/* ---------- Book View State (search / filter / sort) ---------- */
+var bookViewState = { query: '', filter: 'all', sort: 'recent' };
+var _searchTimer = null;
+
+function applyBookViewState(books, state) {
+    var result = books.slice(); // shallow copy
+
+    // 1. Search — case-insensitive match on title or author
+    if (state.query) {
+        var q = state.query.toLowerCase();
+        result = result.filter(function(b) {
+            return b.title.toLowerCase().indexOf(q) !== -1 ||
+                   b.author.toLowerCase().indexOf(q) !== -1;
+        });
+    }
+
+    // 2. Filter
+    if (state.filter === 'reading') {
+        result = result.filter(function(b) {
+            var pct = calculateProgress(b.currentPage, b.totalPages);
+            return pct > 0 && pct < 100;
+        });
+    } else if (state.filter === 'finished') {
+        result = result.filter(function(b) {
+            return calculateProgress(b.currentPage, b.totalPages) >= 100;
+        });
+    } else if (state.filter === 'wishlist') {
+        result = result.filter(function(b) {
+            return calculateProgress(b.currentPage, b.totalPages) === 0;
+        });
+    }
+
+    // 3. Sort
+    if (state.sort === 'progress') {
+        result.sort(function(a, b) {
+            return calculateProgress(b.currentPage, b.totalPages) -
+                   calculateProgress(a.currentPage, a.totalPages);
+        });
+    } else if (state.sort === 'title') {
+        result.sort(function(a, b) {
+            return a.title.localeCompare(b.title, 'bg');
+        });
+    } else {
+        // 'recent' — newest first (by id = Date.now() at creation)
+        result.sort(function(a, b) { return b.id - a.id; });
+    }
+
+    return result;
+}
+
+function initBooksToolbar() {
+    var searchInput = document.getElementById('bookSearch');
+    var filterSelect = document.getElementById('bookFilter');
+    var sortSelect   = document.getElementById('bookSort');
+
+    if (!searchInput || !filterSelect || !sortSelect) return;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(_searchTimer);
+        var val = this.value;
+        _searchTimer = setTimeout(function() {
+            bookViewState.query = val.trim();
+            displayBooks();
+        }, 250);
+    });
+
+    filterSelect.addEventListener('change', function() {
+        bookViewState.filter = this.value;
+        displayBooks();
+    });
+
+    sortSelect.addEventListener('change', function() {
+        bookViewState.sort = this.value;
+        displayBooks();
+    });
+}
+
 /* ---------- Display books ---------- */
 function displayBooks() {
     const booksList = document.getElementById('booksList');
-    const books = BookRepo.getAllBooks();
+    const allBooks = BookRepo.getAllBooks();
 
-    if (books.length === 0) {
+    if (allBooks.length === 0) {
         booksList.innerHTML = `
             <div class="empty-state">
                 <span class="empty-state__icon" aria-hidden="true">📚</span>
                 <p class="empty-state__title">Все още няма книги</p>
                 <p class="empty-state__text">Добави първата си книга и започни да следиш прогреса си.</p>
                 <a href="form.html" class="btn btn--primary btn--pill">+ Добави книга</a>
+            </div>
+        `;
+        updateStats();
+        return;
+    }
+
+    const books = applyBookViewState(allBooks, bookViewState);
+
+    if (books.length === 0) {
+        booksList.innerHTML = `
+            <div class="empty-state empty-state--compact">
+                <span class="empty-state__icon" aria-hidden="true">🔍</span>
+                <p class="empty-state__title">Няма намерени книги</p>
+                <p class="empty-state__text">Опитай с различно търсене или филтър.</p>
             </div>
         `;
         updateStats();

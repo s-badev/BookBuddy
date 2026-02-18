@@ -224,6 +224,26 @@
                         Добави книга
                     </a>
                 </div>
+
+                <!-- Books toolbar: search / filter / sort -->
+                <div class="books-toolbar" id="booksToolbar">
+                    <div class="books-toolbar__search">
+                        <svg class="books-toolbar__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="bookSearch" class="books-toolbar__input" placeholder="Търси по заглавие или автор…" aria-label="Търсене на книги">
+                    </div>
+                    <select id="bookFilter" class="books-toolbar__select" aria-label="Филтрирай книги">
+                        <option value="all">Всички</option>
+                        <option value="reading">Чета</option>
+                        <option value="finished">Прочетени</option>
+                        <option value="wishlist">За четене</option>
+                    </select>
+                    <select id="bookSort" class="books-toolbar__select" aria-label="Сортирай книги">
+                        <option value="recent">Последно обновени</option>
+                        <option value="progress">Прогрес %</option>
+                        <option value="title">Заглавие А-Я</option>
+                    </select>
+                </div>
+
                 <div id="booksList" class="books-grid"></div>
             </div>
         </section>

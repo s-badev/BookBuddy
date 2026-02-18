@@ -771,6 +771,56 @@ ul{list-style:none}
 }
 .books__header .section-subtitle{margin-top:var(--sp-1)}
 
+/* ==================== 11b. Books Toolbar ==================== */
+.books-toolbar{
+    display:flex;align-items:center;gap:var(--sp-3);
+    margin-bottom:var(--sp-6);flex-wrap:wrap;
+}
+
+.books-toolbar__search{
+    position:relative;flex:1;min-width:180px;
+}
+.books-toolbar__search-icon{
+    position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    color:var(--c-text-muted);pointer-events:none;
+}
+.books-toolbar__input{
+    width:100%;
+    padding:.6rem .85rem .6rem 36px;
+    border:1.5px solid var(--c-border);
+    border-radius:var(--r-lg);
+    font-size:var(--fs-sm);font-family:inherit;
+    color:var(--c-text);background:var(--c-surface);
+    transition:all var(--t-fast);
+}
+.books-toolbar__input::placeholder{color:var(--c-text-muted)}
+.books-toolbar__input:hover{border-color:var(--c-text-muted)}
+.books-toolbar__input:focus{
+    outline:2px solid var(--c-primary);outline-offset:0;
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 4px rgba(54,169,174,.12);
+}
+
+.books-toolbar__select{
+    padding:.6rem .85rem;padding-right:32px;
+    border:1.5px solid var(--c-border);
+    border-radius:var(--r-lg);
+    font-size:var(--fs-sm);font-family:inherit;
+    color:var(--c-text);background:var(--c-surface);
+    cursor:pointer;
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    transition:all var(--t-fast);
+}
+.books-toolbar__select:hover{border-color:var(--c-text-muted)}
+.books-toolbar__select:focus{
+    outline:2px solid var(--c-primary);outline-offset:0;
+    border-color:var(--c-primary);
+    box-shadow:0 0 0 4px rgba(54,169,174,.12);
+}
+
 /* ==================== 12. Books Grid ==================== */
 .books-grid{
     display:grid;
@@ -1228,6 +1278,9 @@ ul{list-style:none}
 
     /* Books */
     .books__header{flex-direction:column;align-items:flex-start}
+    .books-toolbar{flex-direction:column;align-items:stretch}
+    .books-toolbar__search{min-width:0}
+    .books-toolbar__select{width:100%}
     .books-grid{grid-template-columns:1fr}
 
     /* Modal */
