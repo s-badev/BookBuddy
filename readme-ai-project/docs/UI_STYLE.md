@@ -11,35 +11,35 @@
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--c-primary` | `#36A9AE` | Primary actions, links, progress bars |
-| `--c-primary-hover` | `#2E9499` | Primary hover |
-| `--c-primary-light` | `#e6f7f7` | Light backgrounds, icon containers |
-| `--c-primary-dark` | `#1b6e72` | Dark primary text on light bg |
-| `--c-accent` | `#3BB6BB` | Gradient endpoint, secondary emphasis |
-| `--c-accent-hover` | `#2FA4A9` | Accent hover |
-| `--c-accent-light` | `#e0f5f5` | Accent pill backgrounds |
+| `--c-primary` | `#4a4080` | Primary actions, links, progress bars |
+| `--c-primary-hover` | `#3d3570` | Primary hover |
+| `--c-primary-light` | `rgba(74,64,128,.08)` | Light backgrounds, icon containers |
+| `--c-primary-dark` | `#2e2860` | Dark primary text on light bg |
+| `--c-accent` | `#bf9b5a` | Gradient endpoint, secondary emphasis |
+| `--c-accent-hover` | `#a88740` | Accent hover |
+| `--c-accent-light` | `rgba(191,155,90,.10)` | Accent pill backgrounds |
 | `--c-danger` | `#ef4444` | Delete actions |
 | `--c-danger-hover` | `#dc2626` | Delete hover |
-| `--c-success` | `#22c55e` | Success states |
+| `--c-success` | `#3db878` | Success states |
 
 #### Neutrals
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--c-text` | `#0f172a` | Primary body text |
-| `--c-text-secondary` | `#475569` | Subtitles, descriptions |
-| `--c-text-muted` | `#94a3b8` | Placeholder, hint text |
-| `--c-text-light` | `#cbd5e1` | Input placeholders |
-| `--c-bg` | `#f8fafc` | Body background |
+| `--c-text` | `#1e1a2b` | Primary body text |
+| `--c-text-secondary` | `#504a65` | Subtitles, descriptions |
+| `--c-text-muted` | `#8a849c` | Placeholder, hint text |
+| `--c-text-light` | `#b5b0c4` | Input placeholders |
+| `--c-bg` | `#faf9f7` | Body background |
 | `--c-surface` | `#ffffff` | Card/modal surfaces |
-| `--c-subtle` | `#f1f5f9` | Subtle backgrounds |
-| `--c-border` | `#e2e8f0` | Standard borders |
-| `--c-border-light` | `rgba(226,232,240,.55)` | Softer borders on cards |
+| `--c-subtle` | `#f3f1ee` | Subtle backgrounds |
+| `--c-border` | `#e4e0d8` | Standard borders |
+| `--c-border-light` | `rgba(228,224,216,.55)` | Softer borders on cards |
 
 #### Gradients
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--grad-primary` | `linear-gradient(135deg, #36A9AE 0%, #3BB6BB 100%)` | Buttons, progress bars, top stripes |
-| `--grad-hero` | `linear-gradient(135deg, #36A9AE, #3BB6BB 60%, #7dc4c7)` | Hero card |
+| `--grad-primary` | `linear-gradient(135deg, #4a4080 0%, #6a5aad 100%)` | Buttons, progress bars, top stripes |
+| `--grad-hero` | `linear-gradient(135deg, #4a4080, #6a5aad 50%, #bf9b5a)` | Hero card |
 | `--grad-text` | Same as primary | Gradient text effect |
 
 ### 1.2 Spacing Scale
@@ -73,12 +73,12 @@
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--sh-xs` | `0 1px 2px rgba(0,0,0,.04)` | Minimal elevation |
-| `--sh-sm` | `0 4px 12px rgba(0,0,0,.05)` | Cards at rest |
-| `--sh-md` | `0 6px 16px rgba(0,0,0,.06)` | Dropdowns |
-| `--sh-lg` | `0 10px 30px rgba(0,0,0,.06)` | Auth card |
-| `--sh-xl` | `0 16px 48px rgba(0,0,0,.08)` | Hero card |
-| `--sh-card-hover` | `0 14px 36px rgba(54,169,174,.14)` | Card hover (teal-tinted) |
+| `--sh-xs` | `0 1px 2px rgba(30,27,46,.04)` | Minimal elevation |
+| `--sh-sm` | `0 4px 14px rgba(30,27,46,.05)` | Cards at rest |
+| `--sh-md` | `0 6px 16px rgba(30,27,46,.07)` | Dropdowns |
+| `--sh-lg` | `0 10px 30px rgba(30,27,46,.08)` | Auth card |
+| `--sh-xl` | `0 16px 48px rgba(30,27,46,.10)` | Hero card |
+| `--sh-card-hover` | `0 14px 40px rgba(74,64,128,.10)` | Card hover (indigo-tinted) |
 
 ### 1.5 Typography
 
@@ -120,18 +120,18 @@ Hover: `translateY(-1px)` + increased shadow. Active: `translateY(0)`.
 ### 2.3 Pills / Badges (`.pill`)
 | Modifier | Background | Color | Used for |
 |----------|-----------|-------|----------|
-| `.pill--accent` | teal-50 | teal-600 | Hero pill label (with sparkle icon) |
-| `.pill--primary` | teal-light | teal-800 | General |
-| `.pill--reading` | blue-100 | blue-700 | "Чета" status |
-| `.pill--finished` | green-100 | green-700 | "Прочетена" status |
-| `.pill--wishlist` | amber-100 | amber-700 | "За четене" status |
+| `.pill--accent` | accent-light | accent-hover | Hero pill label (with sparkle icon) |
+| `.pill--primary` | primary-light | primary-dark | General |
+| `.pill--reading` | `rgba(74,64,128,.08)` | `#4a4080` | "Чета" status |
+| `.pill--finished` | `#e8f5ec` | `#2a9a60` | "Прочетена" status |
+| `.pill--wishlist` | `rgba(191,155,90,.10)` | `#a07830` | "За четене" status |
 
 > The hero pill has `align-self:flex-start` so it stays compact (never stretches full width).
 
 ### 2.4 Stat Card (`.stat-card`)
 - White surface, 16px radius, left gradient accent stripe (4px)
 - Icon container: 48×48px rounded square with tinted background
-- Variants: default (teal), `--pages` (teal accent), `--progress` (violet)
+- Variants: default (indigo), `--pages` (gold accent), `--progress` (indigo-tinted)
 
 ### 2.5 Book Card (`.book-card`)
 - Structure: `.book-card__top` (6px gradient stripe) → `.book-card__body`
