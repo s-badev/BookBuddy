@@ -1,8 +1,7 @@
 // Main page logic - displays list of books
 document.addEventListener('DOMContentLoaded', function() {
     ThemeSwitcher.initTheme();
-    displayBooks();
-    updateStats();
+    displayBooks();          // calls updateStats() internally
     initNavbarToggle();
     initFeatureCardScroll();
     initLogModal();
@@ -987,8 +986,7 @@ function showToast(message) {
 
 /* ========== Full Dashboard Refresh ========== */
 function refreshAll() {
-    displayBooks();
-    updateStats();
+    displayBooks();          // calls updateStats() internally
     renderActivityFeed();
 }
 
@@ -1015,20 +1013,20 @@ function seedDemoData() {
         { id: 9000008, title: 'Deep Work', author: 'Кал Нюпорт', totalPages: 296, currentPage: 112, notes: 'Много практични съвети за фокусирана работа.', createdAt: new Date(now - 86400000 * 15).toISOString() }
     ];
 
-    // --- 12 Demo reading logs (spread over last 7 days, covering 6 books) ---
+    // --- 12 Demo reading logs (stable IDs; spread over last 7 days, covering 6 books) ---
     var demoLogs = [
-        { id: String(now - 12), bookId: '9000001', dateISO: daysAgo(0), pages: 30, note: 'Глава за SpaceX', createdAt: now - 12 },
-        { id: String(now - 11), bookId: '9000001', dateISO: daysAgo(1), pages: 25, note: '', createdAt: now - 100000 },
-        { id: String(now - 10), bookId: '9000002', dateISO: daysAgo(0), pages: 18, note: 'Ранните години', createdAt: now - 200000 },
-        { id: String(now - 9),  bookId: '9000002', dateISO: daysAgo(2), pages: 20, note: '', createdAt: now - 300000 },
-        { id: String(now - 8),  bookId: '9000004', dateISO: daysAgo(1), pages: 35, note: 'Система 1 и Система 2', createdAt: now - 400000 },
-        { id: String(now - 7),  bookId: '9000004', dateISO: daysAgo(3), pages: 40, note: '', createdAt: now - 500000 },
-        { id: String(now - 6),  bookId: '9000006', dateISO: daysAgo(2), pages: 25, note: 'Началото е мрачно', createdAt: now - 600000 },
-        { id: String(now - 5),  bookId: '9000006', dateISO: daysAgo(4), pages: 20, note: '', createdAt: now - 700000 },
-        { id: String(now - 4),  bookId: '9000008', dateISO: daysAgo(0), pages: 22, note: 'Правила за дълбока работа', createdAt: now - 800000 },
-        { id: String(now - 3),  bookId: '9000008', dateISO: daysAgo(3), pages: 30, note: '', createdAt: now - 900000 },
-        { id: String(now - 2),  bookId: '9000003', dateISO: daysAgo(5), pages: 40, note: 'Последните глави', createdAt: now - 1000000 },
-        { id: String(now - 1),  bookId: '9000001', dateISO: daysAgo(6), pages: 35, note: 'Тесла фабриката', createdAt: now - 1100000 }
+        { id: 'demo-log-01', bookId: '9000001', dateISO: daysAgo(0), pages: 30, note: 'Глава за SpaceX', createdAt: now - 12 },
+        { id: 'demo-log-02', bookId: '9000001', dateISO: daysAgo(1), pages: 25, note: '', createdAt: now - 100000 },
+        { id: 'demo-log-03', bookId: '9000002', dateISO: daysAgo(0), pages: 18, note: 'Ранните години', createdAt: now - 200000 },
+        { id: 'demo-log-04', bookId: '9000002', dateISO: daysAgo(2), pages: 20, note: '', createdAt: now - 300000 },
+        { id: 'demo-log-05', bookId: '9000004', dateISO: daysAgo(1), pages: 35, note: 'Система 1 и Система 2', createdAt: now - 400000 },
+        { id: 'demo-log-06', bookId: '9000004', dateISO: daysAgo(3), pages: 40, note: '', createdAt: now - 500000 },
+        { id: 'demo-log-07', bookId: '9000006', dateISO: daysAgo(2), pages: 25, note: 'Началото е мрачно', createdAt: now - 600000 },
+        { id: 'demo-log-08', bookId: '9000006', dateISO: daysAgo(4), pages: 20, note: '', createdAt: now - 700000 },
+        { id: 'demo-log-09', bookId: '9000008', dateISO: daysAgo(0), pages: 22, note: 'Правила за дълбока работа', createdAt: now - 800000 },
+        { id: 'demo-log-10', bookId: '9000008', dateISO: daysAgo(3), pages: 30, note: '', createdAt: now - 900000 },
+        { id: 'demo-log-11', bookId: '9000003', dateISO: daysAgo(5), pages: 40, note: 'Последните глави', createdAt: now - 1000000 },
+        { id: 'demo-log-12', bookId: '9000001', dateISO: daysAgo(6), pages: 35, note: 'Тесла фабриката', createdAt: now - 1100000 }
     ];
 
     // Write directly via storage keys (same as repos)

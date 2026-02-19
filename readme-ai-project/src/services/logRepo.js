@@ -2,14 +2,26 @@
 const LogRepo = {
     STORAGE_KEY: 'bookbuddy_logs',
 
-    // Get all logs sorted by createdAt DESC
+    // Get all logs sorted by createdAt DESC, deduplicated by id
     getAllLogs() {
         const logs = localStorage.getItem(this.STORAGE_KEY);
         const parsed = logs ? JSON.parse(logs) : [];
-        return parsed.sort((a, b) => b.createdAt - a.createdAt);
+
+        // Deduplicate by id (keep the latest entry if duplicate ids exist)
+        const seen = {};
+        const unique = [];
+        for (var i = 0; i < parsed.length; i++) {
+            var key = String(parsed[i].id);
+            if (!seen[key]) {
+                seen[key] = true;
+                unique.push(parsed[i]);
+            }
+        }
+
+        return unique.sort((a, b) => b.createdAt - a.createdAt);
     },
 
-    // Add a new reading log
+    // Add a new reading log (with content-based duplicate guard)
     addLog(log) {
         const logs = this.getAllLogs();
         const newLog = {
@@ -20,6 +32,16 @@ const LogRepo = {
             note: (log.note || '').slice(0, 120),
             createdAt: Date.now()
         };
+
+        // Prevent content-identical duplicates (same book + date + pages + note)
+        var contentKey = newLog.bookId + '|' + newLog.dateISO + '|' + newLog.pages + '|' + newLog.note;
+        var isDup = logs.some(function(existing) {
+            return (String(existing.bookId) + '|' + existing.dateISO + '|' + existing.pages + '|' + (existing.note || '')) === contentKey;
+        });
+        if (isDup) return logs.find(function(existing) {
+            return (String(existing.bookId) + '|' + existing.dateISO + '|' + existing.pages + '|' + (existing.note || '')) === contentKey;
+        });
+
         logs.push(newLog);
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(logs));
         return newLog;
