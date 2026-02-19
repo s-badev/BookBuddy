@@ -32,6 +32,25 @@ const LogRepo = {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filtered));
     },
 
+    // Update an existing log by id (merge provided fields)
+    updateLog(logId, updates) {
+        const logs = this.getAllLogs();
+        const idx = logs.findIndex(l => l.id === String(logId));
+        if (idx === -1) return null;
+        if (updates.bookId !== undefined)  logs[idx].bookId  = String(updates.bookId);
+        if (updates.dateISO !== undefined) logs[idx].dateISO = updates.dateISO;
+        if (updates.pages !== undefined)   logs[idx].pages   = parseInt(updates.pages);
+        if (updates.note !== undefined)    logs[idx].note    = (updates.note || '').slice(0, 120);
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(logs));
+        return logs[idx];
+    },
+
+    // Get a single log by id
+    getLogById(logId) {
+        const logs = this.getAllLogs();
+        return logs.find(l => l.id === String(logId)) || null;
+    },
+
     // Get the latest N logs (default 10)
     getLatestLogs(limit = 10) {
         return this.getAllLogs().slice(0, limit);

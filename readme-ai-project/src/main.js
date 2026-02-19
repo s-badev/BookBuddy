@@ -674,9 +674,15 @@ function initLogModal() {
 }
 
 function openLogModal() {
+    _editingLogId = null; // add mode
     const overlay = document.getElementById('logModal');
     const select  = document.getElementById('logBook');
     const dateInput = document.getElementById('logDate');
+    const titleEl = document.getElementById('logModalTitle');
+    const submitBtn = document.getElementById('logSubmitBtn');
+
+    titleEl.textContent = 'Логвай четене';
+    submitBtn.textContent = 'Запиши';
 
     // Populate book dropdown
     const books = BookRepo.getAllBooks();
@@ -690,6 +696,8 @@ function openLogModal() {
 
     // Default date to today
     dateInput.value = new Date().toISOString().slice(0, 10);
+    document.getElementById('logPages').value = '';
+    document.getElementById('logNote').value = '';
 
     // Clear previous errors
     clearLogErrors();
@@ -699,7 +707,47 @@ function openLogModal() {
     select.focus();
 }
 
+function openEditLogModal(logId) {
+    const log = LogRepo.getLogById(logId);
+    if (!log) return;
+
+    _editingLogId = logId; // edit mode
+    const overlay = document.getElementById('logModal');
+    const select  = document.getElementById('logBook');
+    const dateInput = document.getElementById('logDate');
+    const pagesInput = document.getElementById('logPages');
+    const noteInput = document.getElementById('logNote');
+    const titleEl = document.getElementById('logModalTitle');
+    const submitBtn = document.getElementById('logSubmitBtn');
+
+    titleEl.textContent = 'Редактирай запис';
+    submitBtn.textContent = 'Запази';
+
+    // Populate book dropdown
+    const books = BookRepo.getAllBooks();
+    select.innerHTML = '<option value="">— Избери книга —</option>';
+    books.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.textContent = b.title;
+        select.appendChild(opt);
+    });
+
+    // Pre-fill from existing log
+    select.value = String(log.bookId);
+    dateInput.value = log.dateISO;
+    pagesInput.value = log.pages;
+    noteInput.value = log.note || '';
+
+    clearLogErrors();
+
+    overlay.removeAttribute('hidden');
+    overlay.setAttribute('aria-hidden', 'false');
+    select.focus();
+}
+
 function closeLogModal() {
+    _editingLogId = null;
     const overlay = document.getElementById('logModal');
     const form    = document.getElementById('logForm');
     overlay.setAttribute('hidden', '');
@@ -739,20 +787,67 @@ function handleLogSubmit(e) {
 
     if (!valid) return;
 
-    // Save the log
-    LogRepo.addLog({ bookId, dateISO, pages: pagesInt, note });
+    if (_editingLogId) {
+        // ---- EDIT MODE ----
+        const oldLog = LogRepo.getLogById(_editingLogId);
+        if (!oldLog) { closeLogModal(); return; }
 
-    // Update book progress: currentPage + pages, capped at totalPages
-    const book = BookRepo.getBookById(Number(bookId));
-    if (book) {
-        const newPage = Math.min(book.totalPages, book.currentPage + pagesInt);
-        BookRepo.updateProgress(Number(bookId), newPage);
+        const oldBookId = Number(oldLog.bookId);
+        const newBookId = Number(bookId);
+        const oldPages = oldLog.pages;
+        const newPages = pagesInt;
+
+        // Update the log entry
+        LogRepo.updateLog(_editingLogId, {
+            bookId: bookId,
+            dateISO: dateISO,
+            pages: newPages,
+            note: note
+        });
+
+        // Adjust book progress using delta logic
+        if (oldBookId === newBookId) {
+            // Same book — apply delta
+            const book = BookRepo.getBookById(newBookId);
+            if (book) {
+                const delta = newPages - oldPages;
+                const newPage = Math.max(0, Math.min(book.totalPages, book.currentPage + delta));
+                BookRepo.updateProgress(newBookId, newPage);
+            }
+        } else {
+            // Different book — subtract from old, add to new
+            const oldBook = BookRepo.getBookById(oldBookId);
+            if (oldBook) {
+                const reverted = Math.max(0, oldBook.currentPage - oldPages);
+                BookRepo.updateProgress(oldBookId, reverted);
+            }
+            const newBook = BookRepo.getBookById(newBookId);
+            if (newBook) {
+                const advanced = Math.min(newBook.totalPages, newBook.currentPage + newPages);
+                BookRepo.updateProgress(newBookId, advanced);
+            }
+        }
+
+        closeLogModal();
+        displayBooks();
+        renderActivityFeed();
+        showToast('Записът е обновен!');
+    } else {
+        // ---- ADD MODE ----
+        LogRepo.addLog({ bookId, dateISO, pages: pagesInt, note });
+
+        // Update book progress: currentPage + pages, capped at totalPages
+        const book = BookRepo.getBookById(Number(bookId));
+        if (book) {
+            const newPage = Math.min(book.totalPages, book.currentPage + pagesInt);
+            BookRepo.updateProgress(Number(bookId), newPage);
+        }
+
+        closeLogModal();
+        displayBooks();
+        renderActivityFeed();
+        showToast('Сесията е записана!');
     }
-
-    closeLogModal();
-    displayBooks();
-    renderActivityFeed();
-    showToast('Сесията е записана!');
 }
 
 /* ========== Activity Feed ========== */
@@ -778,7 +873,7 @@ function renderActivityFeed() {
 
     container.innerHTML = logs.map(log => {
         const bookTitle = bookMap[String(log.bookId)] || 'Изтрита книга';
-        const dateFormatted = formatDateBG(log.dateISO);
+        const dayLabel = getRelativeDayLabel(log.dateISO);
         return `
             <div class="activity-item" data-log-id="${log.id}">
                 <div class="activity-item__icon">
@@ -786,24 +881,48 @@ function renderActivityFeed() {
                 </div>
                 <div class="activity-item__body">
                     <p class="activity-item__title">
-                        <strong>${escapeHtml(bookTitle)}</strong>
-                        <span class="activity-item__pages">${log.pages} стр.</span>
+                        <strong>Прочетени ${log.pages} стр.</strong>
+                        ${log.note ? '<span class="activity-item__note">— ' + escapeHtml(log.note) + '</span>' : ''}
                     </p>
-                    <p class="activity-item__meta">${dateFormatted}${log.note ? ' — ' + escapeHtml(log.note) : ''}</p>
+                    <p class="activity-item__meta">${escapeHtml(bookTitle)}</p>
                 </div>
-                <button class="btn btn--icon btn--icon-danger activity-item__delete"
-                        data-log-id="${log.id}"
-                        aria-label="Изтрий запис">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </button>
+                <span class="activity-item__day">${dayLabel}</span>
+                <div class="activity-item__actions">
+                    <button class="btn btn--icon btn--icon-edit activity-item__edit"
+                            data-log-id="${log.id}"
+                            aria-label="Редактирай запис">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="btn btn--icon btn--icon-danger activity-item__delete"
+                            data-log-id="${log.id}"
+                            aria-label="Изтрий запис">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
             </div>
         `;
     }).join('');
+
+    // Wire edit buttons
+    container.querySelectorAll('.activity-item__edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            openEditLogModal(this.dataset.logId);
+        });
+    });
 
     // Wire delete buttons
     container.querySelectorAll('.activity-item__delete').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.logId;
+            const log = LogRepo.getLogById(id);
+            if (log) {
+                // Subtract pages from book progress
+                const book = BookRepo.getBookById(Number(log.bookId));
+                if (book) {
+                    const newPage = Math.max(0, book.currentPage - log.pages);
+                    BookRepo.updateProgress(Number(log.bookId), newPage);
+                }
+            }
             LogRepo.deleteLog(id);
             displayBooks();
             renderActivityFeed();
@@ -817,6 +936,23 @@ function formatDateBG(isoStr) {
     const [y, m, d] = isoStr.split('-');
     return `${d}.${m}.${y}`;
 }
+
+/** Returns a relative day label in Bulgarian for a given ISO date string */
+function getRelativeDayLabel(dateISO) {
+    if (!dateISO) return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(dateISO + 'T00:00:00');
+    const diffMs = today.getTime() - target.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Днес';
+    if (diffDays === 1) return 'Вчера';
+    if (diffDays > 1 && diffDays <= 365) return 'Преди ' + diffDays + ' дни';
+    return formatDateBG(dateISO);
+}
+
+/* ========== Log Edit State ========== */
+var _editingLogId = null; // null = add mode, string = edit mode
 
 /* ========== Toast ========== */
 function showToast(message) {
