@@ -402,37 +402,37 @@ function renderGoalStreak() {
     if (streakValEl) streakValEl.textContent = streak;
 }
 
-/* ========== Top 5 Books This Week ========== */
+/* ========== Top 5 Most-Read Books (by total progress) ========== */
 
-/** Returns top N books by pages logged this week [{bookId, title, weekPages}] */
-function getTopBooksThisWeek(books, logs, limit) {
+/**
+ * Returns top N books by actual read pages (currentPage).
+ * "Прочетена" books are normalised so readPages = totalPages.
+ * [{bookId, title, readPages, totalPages}]
+ */
+function getTopBooks(books, limit) {
     limit = limit || 5;
-    var week = getWeekRangeISO(new Date());
 
-    // Sum pages per book for this week
-    var pagesByBook = {};
-    logs.forEach(function(log) {
-        if (log.dateISO >= week.startISO && log.dateISO <= week.endISO) {
-            pagesByBook[String(log.bookId)] = (pagesByBook[String(log.bookId)] || 0) + log.pages;
-        }
-    });
-
-    // Build entries for ALL books (default weekPages = 0)
     var entries = books.map(function(b) {
-        var id = String(b.id);
-        var progress = b.totalPages > 0 ? b.currentPage / b.totalPages : 0;
+        var total = Math.max(Number(b.totalPages) || 0, 0);
+        var read  = Number(b.currentPage) || 0;
+
+        // Normalise completed books (progress >= 100 %)
+        if (total > 0 && read >= total) { read = total; }
+
+        // Clamp to [0, total]
+        read = Math.max(0, Math.min(read, total));
+
         return {
-            bookId: id,
+            bookId: String(b.id),
             title: b.title,
-            weekPages: pagesByBook[id] || 0,
-            progress: progress
+            readPages: read,
+            totalPages: total
         };
     });
 
-    // Sort: weekPages DESC → progress DESC → title ASC
+    // Sort: readPages DESC → title ASC (Bulgarian locale)
     entries.sort(function(a, b) {
-        if (b.weekPages !== a.weekPages) return b.weekPages - a.weekPages;
-        if (b.progress !== a.progress) return b.progress - a.progress;
+        if (b.readPages !== a.readPages) return b.readPages - a.readPages;
         return a.title.localeCompare(b.title, 'bg');
     });
 
@@ -444,31 +444,30 @@ function renderTopBooks() {
     if (!container) return;
 
     var books = BookRepo.getAllBooks();
-    var logs  = LogRepo.getAllLogs();
-    var top   = getTopBooksThisWeek(books, logs, 5);
+    var top   = getTopBooks(books, 5);
 
     if (top.length === 0) {
         container.innerHTML =
             '<div class="empty-state empty-state--compact">' +
                 '<span class="empty-state__icon" aria-hidden="true">📊</span>' +
                 '<p class="empty-state__title">Все още няма добавени книги.</p>' +
-                '<p class="empty-state__text">Добави книга и логни сесия, за да видиш класацията.</p>' +
+                '<p class="empty-state__text">Добави книга, за да видиш класацията.</p>' +
             '</div>';
         return;
     }
 
-    // Max pages (for relative bar width); minimum 1 to avoid division by zero
-    var maxPages = Math.max(top[0].weekPages, 1);
+    // Max readPages for relative bar width; minimum 1 to avoid division by zero
+    var maxPages = Math.max(top[0].readPages, 1);
 
     container.innerHTML = top.map(function(item, i) {
-        var barPct = Math.round((item.weekPages / maxPages) * 100);
+        var barPct = Math.round((item.readPages / maxPages) * 100);
         return (
             '<div class="top-book-item">' +
                 '<span class="top-book-item__rank">' + (i + 1) + '</span>' +
                 '<div class="top-book-item__body">' +
                     '<div class="top-book-item__header">' +
                         '<span class="top-book-item__title">' + escapeHtml(item.title) + '</span>' +
-                        '<span class="top-book-item__pages">' + item.weekPages + ' стр.</span>' +
+                        '<span class="top-book-item__pages">' + item.readPages + ' / ' + item.totalPages + ' стр.</span>' +
                     '</div>' +
                     '<div class="progress-bar progress-bar--top">' +
                         '<div class="progress-fill progress-fill--top" style="width:' + barPct + '%"></div>' +
