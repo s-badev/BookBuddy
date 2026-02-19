@@ -997,7 +997,7 @@ ul{list-style:none}
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));
     gap:var(--sp-6);
-    align-items:start;
+    align-items:stretch;
 }
 
 /* ==================== 13. Book Card ==================== */
@@ -1093,6 +1093,7 @@ ul{list-style:none}
     font-style:italic;font-size:var(--fs-sm);
     color:var(--c-text-secondary);line-height:1.65;
     word-wrap:break-word;overflow-wrap:break-word;
+    max-height:110px;overflow-y:auto;
 }
 
 /* Card footer */
