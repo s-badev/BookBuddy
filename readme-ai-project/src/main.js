@@ -779,7 +779,7 @@ function handleLogSubmit(e) {
         document.getElementById('logDateError').textContent = 'Въведи дата.';
         valid = false;
     }
-    const pagesInt = parseInt(pages);
+    const pagesInt = parseInt(pages, 10);
     if (!pages || isNaN(pagesInt) || pagesInt < 1) {
         document.getElementById('logPagesError').textContent = 'Въведи поне 1 страница.';
         valid = false;
@@ -874,6 +874,7 @@ function renderActivityFeed() {
     container.innerHTML = logs.map(log => {
         const bookTitle = bookMap[String(log.bookId)] || 'Изтрита книга';
         const dayLabel = getRelativeDayLabel(log.dateISO);
+        const safePages = Number(log.pages) || 0;
         return `
             <div class="activity-item" data-log-id="${log.id}">
                 <div class="activity-item__icon">
@@ -881,7 +882,7 @@ function renderActivityFeed() {
                 </div>
                 <div class="activity-item__body">
                     <p class="activity-item__title">
-                        <strong>Прочетени ${log.pages} стр.</strong>
+                        <strong>Прочетени ${safePages} стр.</strong>
                         ${log.note ? '<span class="activity-item__note">— ' + escapeHtml(log.note) + '</span>' : ''}
                     </p>
                     <p class="activity-item__meta">${escapeHtml(bookTitle)}</p>

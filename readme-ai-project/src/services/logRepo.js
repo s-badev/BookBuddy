@@ -16,7 +16,7 @@ const LogRepo = {
             id: String(Date.now()),
             bookId: String(log.bookId),
             dateISO: log.dateISO,
-            pages: parseInt(log.pages),
+            pages: parseInt(log.pages, 10) || 0,
             note: (log.note || '').slice(0, 120),
             createdAt: Date.now()
         };
@@ -39,7 +39,7 @@ const LogRepo = {
         if (idx === -1) return null;
         if (updates.bookId !== undefined)  logs[idx].bookId  = String(updates.bookId);
         if (updates.dateISO !== undefined) logs[idx].dateISO = updates.dateISO;
-        if (updates.pages !== undefined)   logs[idx].pages   = parseInt(updates.pages);
+        if (updates.pages !== undefined)   logs[idx].pages   = parseInt(updates.pages, 10) || 0;
         if (updates.note !== undefined)    logs[idx].note    = (updates.note || '').slice(0, 120);
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(logs));
         return logs[idx];
