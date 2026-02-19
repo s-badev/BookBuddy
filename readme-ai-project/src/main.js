@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initSettingsModal();
     initBooksToolbar();
     renderActivityFeed();
+    initDemoButtons();
 });
 
 /* ---------- Navbar mobile toggle ---------- */
@@ -966,4 +967,102 @@ function showToast(message) {
     toast.textContent = message;
     toast.classList.add('toast--visible');
     setTimeout(() => { toast.classList.remove('toast--visible'); }, 2200);
+}
+
+/* ========== Full Dashboard Refresh ========== */
+function refreshAll() {
+    displayBooks();
+    updateStats();
+    renderActivityFeed();
+}
+
+/* ========== Demo Data Seed ========== */
+function seedDemoData() {
+    var now = Date.now();
+
+    // Helper: ISO date string N days ago
+    function daysAgo(n) {
+        var d = new Date(now);
+        d.setDate(d.getDate() - n);
+        return d.toISOString().slice(0, 10);
+    }
+
+    // --- 8 Demo books ---
+    var demoBooks = [
+        { id: 9000001, title: 'Илон Мъск', author: 'Уолтър Айзъксън', totalPages: 688, currentPage: 150, notes: 'Вдъхновяваща книга за иновациите и упоритостта.', createdAt: new Date(now - 86400000 * 30).toISOString() },
+        { id: 9000002, title: 'Стив Джобс', author: 'Уолтър Айзъксън', totalPages: 656, currentPage: 78, notes: '', createdAt: new Date(now - 86400000 * 25).toISOString() },
+        { id: 9000003, title: 'Atomic Habits', author: 'Джеймс Клиър', totalPages: 320, currentPage: 320, notes: 'Страхотна за изграждане на навици. Препоръчвам на всеки!', createdAt: new Date(now - 86400000 * 60).toISOString() },
+        { id: 9000004, title: 'Мислене – бързо и бавно', author: 'Даниел Канеман', totalPages: 512, currentPage: 210, notes: 'Сложна, но много полезна.', createdAt: new Date(now - 86400000 * 20).toISOString() },
+        { id: 9000005, title: 'Sapiens', author: 'Ювал Ноа Харари', totalPages: 443, currentPage: 443, notes: 'Фантастичен преглед на човешката история. Четиво, което те кара да мислиш.', createdAt: new Date(now - 86400000 * 90).toISOString() },
+        { id: 9000006, title: '1984', author: 'Джордж Оруел', totalPages: 328, currentPage: 45, notes: '', createdAt: new Date(now - 86400000 * 10).toISOString() },
+        { id: 9000007, title: 'Малкият принц', author: 'Антоан дьо Сент-Екзюпери', totalPages: 96, currentPage: 0, notes: 'Подарък от приятел, чака ме на рафта.', createdAt: new Date(now - 86400000 * 5).toISOString() },
+        { id: 9000008, title: 'Deep Work', author: 'Кал Нюпорт', totalPages: 296, currentPage: 112, notes: 'Много практични съвети за фокусирана работа.', createdAt: new Date(now - 86400000 * 15).toISOString() }
+    ];
+
+    // --- 12 Demo reading logs (spread over last 7 days, covering 6 books) ---
+    var demoLogs = [
+        { id: String(now - 12), bookId: '9000001', dateISO: daysAgo(0), pages: 30, note: 'Глава за SpaceX', createdAt: now - 12 },
+        { id: String(now - 11), bookId: '9000001', dateISO: daysAgo(1), pages: 25, note: '', createdAt: now - 100000 },
+        { id: String(now - 10), bookId: '9000002', dateISO: daysAgo(0), pages: 18, note: 'Ранните години', createdAt: now - 200000 },
+        { id: String(now - 9),  bookId: '9000002', dateISO: daysAgo(2), pages: 20, note: '', createdAt: now - 300000 },
+        { id: String(now - 8),  bookId: '9000004', dateISO: daysAgo(1), pages: 35, note: 'Система 1 и Система 2', createdAt: now - 400000 },
+        { id: String(now - 7),  bookId: '9000004', dateISO: daysAgo(3), pages: 40, note: '', createdAt: now - 500000 },
+        { id: String(now - 6),  bookId: '9000006', dateISO: daysAgo(2), pages: 25, note: 'Началото е мрачно', createdAt: now - 600000 },
+        { id: String(now - 5),  bookId: '9000006', dateISO: daysAgo(4), pages: 20, note: '', createdAt: now - 700000 },
+        { id: String(now - 4),  bookId: '9000008', dateISO: daysAgo(0), pages: 22, note: 'Правила за дълбока работа', createdAt: now - 800000 },
+        { id: String(now - 3),  bookId: '9000008', dateISO: daysAgo(3), pages: 30, note: '', createdAt: now - 900000 },
+        { id: String(now - 2),  bookId: '9000003', dateISO: daysAgo(5), pages: 40, note: 'Последните глави', createdAt: now - 1000000 },
+        { id: String(now - 1),  bookId: '9000001', dateISO: daysAgo(6), pages: 35, note: 'Тесла фабриката', createdAt: now - 1100000 }
+    ];
+
+    // Write directly via storage keys (same as repos)
+    localStorage.setItem(BookRepo.STORAGE_KEY, JSON.stringify(demoBooks));
+    localStorage.setItem(LogRepo.STORAGE_KEY, JSON.stringify(demoLogs));
+
+    // Reset challenges so they re-seed with defaults
+    localStorage.removeItem(ChallengeRepo.STORAGE_KEY);
+
+    // Keep settings (or reset to defaults if missing)
+    if (!localStorage.getItem(SettingsRepo.STORAGE_KEY)) {
+        SettingsRepo.saveSettings(SettingsRepo.DEFAULTS);
+    }
+
+    refreshAll();
+    showToast('Демо данните са заредени успешно!');
+}
+
+/* ========== Clear All BookBuddy Data ========== */
+function clearAllData() {
+    localStorage.removeItem(BookRepo.STORAGE_KEY);
+    localStorage.removeItem(LogRepo.STORAGE_KEY);
+    localStorage.removeItem(SettingsRepo.STORAGE_KEY);
+    localStorage.removeItem(ChallengeRepo.STORAGE_KEY);
+    // Also clear theme preference if stored
+    localStorage.removeItem('bookbuddy_theme');
+
+    refreshAll();
+    showToast('Всички данни бяха изчистени.');
+}
+
+/* ========== Demo / Clear Button Listeners ========== */
+function initDemoButtons() {
+    var seedBtn  = document.getElementById('seedDemoBtn');
+    var clearBtn = document.getElementById('clearDataBtn');
+
+    if (seedBtn) {
+        seedBtn.addEventListener('click', function() {
+            var books = BookRepo.getAllBooks();
+            if (books.length > 0) {
+                if (!confirm('Това ще презапише текущите ти данни. Продължаваш ли?')) return;
+            }
+            seedDemoData();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            if (!confirm('Сигурен ли си, че искаш да изчистиш всички данни?')) return;
+            clearAllData();
+        });
+    }
 }

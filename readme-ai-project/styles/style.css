@@ -1420,7 +1420,13 @@ ul{list-style:none}
 }
 .footer__inner{
     font-size:var(--fs-xs);color:var(--c-text-muted);
+    display:flex;flex-direction:column;align-items:center;gap:var(--sp-3);
 }
+.footer__actions{
+    display:flex;gap:var(--sp-3);flex-wrap:wrap;justify-content:center;
+}
+.btn--ghost-danger{color:var(--c-danger)}
+.btn--ghost-danger:hover{background:rgba(239,68,68,.08);color:var(--c-danger)}
 
 /* ==================== 17. Responsive ==================== */
 
