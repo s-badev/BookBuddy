@@ -417,22 +417,25 @@ function getTopBooksThisWeek(books, logs, limit) {
         }
     });
 
-    // Build a title map
-    var titleMap = {};
-    books.forEach(function(b) { titleMap[String(b.id)] = b.title; });
+    // Build entries for ALL books (default weekPages = 0)
+    var entries = books.map(function(b) {
+        var id = String(b.id);
+        var progress = b.totalPages > 0 ? b.currentPage / b.totalPages : 0;
+        return {
+            bookId: id,
+            title: b.title,
+            weekPages: pagesByBook[id] || 0,
+            progress: progress
+        };
+    });
 
-    // Convert to array, sort DESC, take top N
-    var entries = [];
-    for (var id in pagesByBook) {
-        if (pagesByBook.hasOwnProperty(id)) {
-            entries.push({
-                bookId: id,
-                title: titleMap[id] || 'Изтрита книга',
-                weekPages: pagesByBook[id]
-            });
-        }
-    }
-    entries.sort(function(a, b) { return b.weekPages - a.weekPages; });
+    // Sort: weekPages DESC → progress DESC → title ASC
+    entries.sort(function(a, b) {
+        if (b.weekPages !== a.weekPages) return b.weekPages - a.weekPages;
+        if (b.progress !== a.progress) return b.progress - a.progress;
+        return a.title.localeCompare(b.title, 'bg');
+    });
+
     return entries.slice(0, limit);
 }
 
@@ -448,14 +451,14 @@ function renderTopBooks() {
         container.innerHTML =
             '<div class="empty-state empty-state--compact">' +
                 '<span class="empty-state__icon" aria-hidden="true">📊</span>' +
-                '<p class="empty-state__title">Все още няма логове за тази седмица.</p>' +
-                '<p class="empty-state__text">Логни сесия на четене и виж класацията си тук.</p>' +
+                '<p class="empty-state__title">Все още няма добавени книги.</p>' +
+                '<p class="empty-state__text">Добави книга и логни сесия, за да видиш класацията.</p>' +
             '</div>';
         return;
     }
 
-    // Max pages (for relative bar width)
-    var maxPages = top[0].weekPages;
+    // Max pages (for relative bar width); minimum 1 to avoid division by zero
+    var maxPages = Math.max(top[0].weekPages, 1);
 
     container.innerHTML = top.map(function(item, i) {
         var barPct = Math.round((item.weekPages / maxPages) * 100);

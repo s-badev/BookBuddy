@@ -1500,9 +1500,21 @@ ul{list-style:none}
     .btn--add-mobile{display:inline-flex}
 }
 
+/* ---- Wide desktop 1280+ ---- */
+@media(min-width:1280px){
+    :root{--container-max:min(1320px, calc(100% - 80px));--container-pad:2.5rem}
+    .books-grid{grid-template-columns:repeat(3,1fr)}
+}
+
 /* ---- Large desktop 1440+ ---- */
 @media(min-width:1440px){
-    :root{--container-pad:2.5rem;--container-max:1200px}
+    :root{--container-max:min(1440px, calc(100% - 96px));--container-pad:2.5rem}
+}
+
+/* ---- XL desktop 1920+ ---- */
+@media(min-width:1920px){
+    :root{--container-max:1600px;--container-pad:3rem}
+    .books-grid{grid-template-columns:repeat(4,1fr)}
 }
 
 /* ==================== 18. Accessibility ==================== */
