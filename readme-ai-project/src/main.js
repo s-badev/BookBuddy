@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     displayBooks();
     updateStats();
     initNavbarToggle();
+    initFeatureCardScroll();
     initLogModal();
     initSettingsModal();
     initBooksToolbar();
@@ -19,6 +20,35 @@ function initNavbarToggle() {
         const expanded = nav.classList.toggle('is-open');
         this.setAttribute('aria-expanded', expanded);
     });
+}
+
+/* ---------- Feature card scroll navigation ---------- */
+function initFeatureCardScroll() {
+    var cards = document.querySelectorAll('[data-scroll-target]');
+    cards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            scrollToSection(this.dataset.scrollTarget);
+        });
+        card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                scrollToSection(this.dataset.scrollTarget);
+            }
+        });
+    });
+}
+
+function scrollToSection(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Brief highlight on the target section
+    el.classList.add('section-highlight');
+    setTimeout(function() {
+        el.classList.remove('section-highlight');
+    }, 900);
 }
 
 /* ---------- Book View State (search / filter / sort) ---------- */

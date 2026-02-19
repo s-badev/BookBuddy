@@ -575,6 +575,7 @@ ul{list-style:none}
     box-shadow:var(--sh-sm);
     transition:all var(--t-base);
 }
+.feature-card[data-scroll-target]{cursor:pointer}
 .feature-card:hover{
     transform:translateY(-4px);box-shadow:var(--sh-lg);
     border-color:var(--c-border);
@@ -592,6 +593,15 @@ ul{list-style:none}
 }
 .feature-card p{
     font-size:var(--fs-sm);color:var(--c-text-secondary);line-height:1.65;
+}
+
+/* ==================== 9b. Section scroll-highlight ==================== */
+.section-highlight{
+    outline:2px solid rgba(54,169,174,.25);
+    outline-offset:4px;
+    box-shadow:0 0 0 6px rgba(54,169,174,.08);
+    border-radius:var(--r-xl);
+    transition:outline-color .35s var(--ease), box-shadow .35s var(--ease);
 }
 
 /* ==================== 10. Stats ==================== */
