@@ -888,7 +888,6 @@ function renderActivityFeed() {
                         <strong>${escapeHtml(bookTitle)} — Прочетени ${displayPages} стр.</strong>
                         ${log.note ? '<span class="activity-item__note">— ' + escapeHtml(log.note) + '</span>' : ''}
                     </p>
-                    <p class="activity-item__meta">Сесия: ${safeSessionPages} стр.</p>
                 </div>
                 <span class="activity-item__day">${dayLabel}</span>
                 <div class="activity-item__actions">
