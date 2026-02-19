@@ -222,7 +222,7 @@ function createBookCard(book) {
                     </div>
                 </div>
 
-                ${book.notes ? `<div class="book-card__notes">${escapeHtml(book.notes)}</div>` : ''}
+                <div class="book-card__notes">${escapeHtml(getBookNote(book))}</div>
 
                 <div class="book-card__footer">
                     <a href="form.html?id=${book.id}"
@@ -319,6 +319,22 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/* ---------- Book note fallback ---------- */
+var _BOOK_NOTE_OVERRIDES = {
+    '1984': 'Мрачна антиутопия за властта и контрола над съзнанието.',
+    'стив джобс': 'История за визия, амбиция и създаване на революционни продукти.'
+};
+var _BOOK_NOTE_DEFAULT = 'Няма добавено мнение.';
+
+function getBookNote(book) {
+    var raw = (book.notes || '').trim();
+    if (raw) return raw;
+
+    // Normalise title: lowercase, strip parenthesised subtitles
+    var norm = (book.title || '').toLowerCase().replace(/\s*\(.*?\)\s*/g, '').trim();
+    return _BOOK_NOTE_OVERRIDES[norm] || _BOOK_NOTE_DEFAULT;
 }
 
 /* ========== Date Helpers ========== */
