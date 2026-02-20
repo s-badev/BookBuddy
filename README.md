@@ -24,27 +24,6 @@ BookBuddy е модерно, минималистично уеб приложе�
 
 ---
 
-### Home / Dashboard
-![BookBuddy Dashboard](./docs/screenshots/dashboard.png)
-
-### Library Section
-![BookBuddy Library](./docs/screenshots/library.png)
-
-### Last Activity
-![BookBuddy Activity](./docs/screenshots/activity.png)
-
-### Add/Edit Book Form
-![BookBuddy Form](./docs/screenshots/form.png)
-
-### Goals / Settings Modal
-![BookBuddy Goals Modal](./docs/screenshots/goals-modal.png)
-
-### Log Reading Modal
-![BookBuddy Log Modal](./docs/screenshots/log-modal.png)
-
-</details>
-
----
 
 ## Features
 
