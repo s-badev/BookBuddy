@@ -878,13 +878,25 @@ function renderActivityFeed() {
     const logs = LogRepo.getLatestLogs(10);
     const books = BookRepo.getAllBooks();
     const bookMap = {};
-    const bookObjMap = {};
-    books.forEach(b => { bookMap[String(b.id)] = b.title; bookObjMap[String(b.id)] = b; });
+    books.forEach(b => { bookMap[String(b.id)] = b.title; });
 
     // Filter out orphan logs whose book no longer exists
     const validLogs = logs.filter(log => bookMap.hasOwnProperty(String(log.bookId)));
 
-    if (validLogs.length === 0) {
+    // Content-based dedup: guard against storage-level duplicates that share
+    // the same bookId + dateISO + pages + note (but different ids).
+    const dedupSeen = {};
+    const dedupedLogs = [];
+    for (let i = 0; i < validLogs.length; i++) {
+        const l = validLogs[i];
+        const key = String(l.bookId) + '|' + l.dateISO + '|' + l.pages + '|' + (l.note || '');
+        if (!dedupSeen[key]) {
+            dedupSeen[key] = true;
+            dedupedLogs.push(l);
+        }
+    }
+
+    if (dedupedLogs.length === 0) {
         container.innerHTML = `
             <div class="empty-state empty-state--compact">
                 <span class="empty-state__icon" aria-hidden="true">📖</span>
@@ -895,12 +907,10 @@ function renderActivityFeed() {
         return;
     }
 
-    container.innerHTML = validLogs.map(log => {
+    container.innerHTML = dedupedLogs.map(log => {
         const bookTitle = bookMap[String(log.bookId)];
-        const bookObj = bookObjMap[String(log.bookId)];
         const dayLabel = getRelativeDayLabel(log.dateISO);
-        const safeSessionPages = Number(log.pages) || 0;
-        const displayPages = bookObj ? bookObj.currentPage : safeSessionPages;
+        const sessionPages = Number(log.pages) || 0;
         return `
             <div class="activity-item" data-log-id="${log.id}">
                 <div class="activity-item__icon">
@@ -908,7 +918,7 @@ function renderActivityFeed() {
                 </div>
                 <div class="activity-item__body">
                     <p class="activity-item__title">
-                        <strong>${escapeHtml(bookTitle)} — Прочетени ${displayPages} стр.</strong>
+                        <strong>${escapeHtml(bookTitle)} — Прочетени ${sessionPages} стр.</strong>
                         ${log.note ? '<span class="activity-item__note">— ' + escapeHtml(log.note) + '</span>' : ''}
                     </p>
                 </div>
