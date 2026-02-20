@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ThemeSwitcher.initTheme();
     displayBooks();          // calls updateStats() internally
     initNavbarToggle();
+    initHeroCTAs();
     initFeatureCardScroll();
     initLogModal();
     initSettingsModal();
@@ -20,6 +21,26 @@ function initNavbarToggle() {
         const expanded = nav.classList.toggle('is-open');
         this.setAttribute('aria-expanded', expanded);
     });
+}
+
+/* ---------- Hero CTAs ---------- */
+function initHeroCTAs() {
+    const addBookBtn = document.getElementById('heroAddBookBtn');
+    const featuresBtn = document.getElementById('heroFeaturesBtn');
+    
+    if (addBookBtn) {
+        addBookBtn.addEventListener('click', function() {
+            // Navigate to form.html to add a book
+            window.location.href = 'form.html';
+        });
+    }
+    
+    if (featuresBtn) {
+        featuresBtn.addEventListener('click', function() {
+            // Scroll to features section
+            scrollToSection('features');
+        });
+    }
 }
 
 /* ---------- Feature card scroll navigation ---------- */
