@@ -270,7 +270,9 @@ function updateBookProgress(bookId, newPage, totalPages) {
 function deleteBook(bookId) {
     if (confirm('Сигурни ли сте, че искате да изтриете тази книга?')) {
         BookRepo.deleteBook(bookId);
-        displayBooks();
+        LogRepo.deleteLogsByBookId(bookId);   // cascade: remove orphan logs
+        displayBooks();                        // re-renders books + calls updateStats()
+        renderActivityFeed();                  // purge deleted-book entries from feed
     }
 }
 
@@ -282,9 +284,8 @@ function updateStats() {
     const totalBooks = books.length;
     document.getElementById('statBooks').textContent = totalBooks;
     
-    // Total Pages Read (derived from reading logs)
-    const allLogs = LogRepo.getAllLogs();
-    const totalPagesRead = allLogs.reduce((sum, log) => sum + log.pages, 0);
+    // Total Pages Read — derived ONLY from books (single source of truth)
+    const totalPagesRead = books.reduce((sum, book) => sum + (Number(book.currentPage) || 0), 0);
     document.getElementById('statPagesRead').textContent = totalPagesRead.toLocaleString();
     
     // Average Progress
@@ -398,10 +399,10 @@ function calculateStreak(logs, minPages) {
 function renderGoalStreak() {
     var settings = SettingsRepo.getSettings();
     var allLogs  = LogRepo.getAllLogs();
+    var allBooks = BookRepo.getAllBooks();
 
-    // Weekly goal
-    var week         = getWeekRangeISO(new Date());
-    var weekPages    = sumLogsInRange(allLogs, week.startISO, week.endISO);
+    // Weekly goal — books are the single source of truth for pages read
+    var weekPages    = allBooks.reduce(function(sum, b) { return sum + (Number(b.currentPage) || 0); }, 0);
     var goalTarget   = settings.weeklyGoalPages;
     var goalPct      = Math.min(100, Math.round((weekPages / goalTarget) * 100));
 
@@ -505,6 +506,7 @@ function renderChallenges() {
 
     var challenges = ChallengeRepo.getChallenges();
     var allLogs    = LogRepo.getAllLogs();
+    var allBooks   = BookRepo.getAllBooks();
     var settings   = SettingsRepo.getSettings();
 
     if (challenges.length === 0) {
@@ -517,8 +519,8 @@ function renderChallenges() {
     }
 
     // Pre-compute values needed by challenges
-    var week      = getWeekRangeISO(new Date());
-    var weekPages = sumLogsInRange(allLogs, week.startISO, week.endISO);
+    // Weekly pages: derived from books (single source of truth)
+    var totalBookPages = allBooks.reduce(function(sum, b) { return sum + (Number(b.currentPage) || 0); }, 0);
     var streak    = calculateStreak(allLogs, settings.minPagesForStreakDay);
 
     var anyChanged = false;
@@ -528,7 +530,7 @@ function renderChallenges() {
         var unit    = '';
 
         if (ch.type === 'weekly_pages') {
-            current = weekPages;
+            current = totalBookPages;
             unit = 'стр.';
         } else if (ch.type === 'streak_days') {
             current = streak;
@@ -879,7 +881,10 @@ function renderActivityFeed() {
     const bookObjMap = {};
     books.forEach(b => { bookMap[String(b.id)] = b.title; bookObjMap[String(b.id)] = b; });
 
-    if (logs.length === 0) {
+    // Filter out orphan logs whose book no longer exists
+    const validLogs = logs.filter(log => bookMap.hasOwnProperty(String(log.bookId)));
+
+    if (validLogs.length === 0) {
         container.innerHTML = `
             <div class="empty-state empty-state--compact">
                 <span class="empty-state__icon" aria-hidden="true">📖</span>
@@ -890,8 +895,8 @@ function renderActivityFeed() {
         return;
     }
 
-    container.innerHTML = logs.map(log => {
-        const bookTitle = bookMap[String(log.bookId)] || 'Изтрита книга';
+    container.innerHTML = validLogs.map(log => {
+        const bookTitle = bookMap[String(log.bookId)];
         const bookObj = bookObjMap[String(log.bookId)];
         const dayLabel = getRelativeDayLabel(log.dateISO);
         const safeSessionPages = Number(log.pages) || 0;

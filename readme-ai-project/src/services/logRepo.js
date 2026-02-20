@@ -54,6 +54,13 @@ const LogRepo = {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filtered));
     },
 
+    // Delete all logs for a given bookId (cascade delete)
+    deleteLogsByBookId(bookId) {
+        const logs = this.getAllLogs();
+        const filtered = logs.filter(l => String(l.bookId) !== String(bookId));
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filtered));
+    },
+
     // Update an existing log by id (merge provided fields)
     updateLog(logId, updates) {
         const logs = this.getAllLogs();
