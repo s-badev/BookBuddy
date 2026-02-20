@@ -24,16 +24,15 @@ BookBuddy е модерно, минималистично уеб приложе�
 
 ---
 
-
 ## Features
 
 ### 📚 Library (Books)
 - ✅ Добавяне на книга (заглавие, автор, общо страници, текуща страница, бележки)
-- ✅ Редакция на книга 
+- ✅ Редакция на книга
 - ✅ Изтриване на книга
 - ✅ Прогрес бар + процент
 - ✅ Inline update на текуща страница от картата
-- ✅ Търсене по заглавие/автор 
+- ✅ Търсене по заглавие/автор
 - ✅ Филтриране
 - ✅ Сортиране
 
@@ -108,6 +107,7 @@ BookBuddy е **localStorage-only** приложение с client-side логи�
 - **Safe persistence** → defaults, guards, validation, dedup
 
 ---
+
 ## Architecture Diagram
 
 BookBuddy follows a local-first, browser-only architecture.
@@ -166,7 +166,11 @@ BookBuddy follows a local-first, browser-only architecture.
 │  • Challenges                                                │
 │  • Theme Preference                                          │
 └──────────────────────────────────────────────────────────────┘
+```
 
+## Data Flow (Example: Log Reading)
+
+```text
 User clicks "Логвай четене"
         │
         ▼
@@ -192,6 +196,12 @@ Re-render UI sections
   • Top 5
   • Last Activity
   • Book Cards
+```
+
+### Notes
+- `LogRepo` пази reading logs и прилага dedup защита.
+- `BookRepo` обновява `currentPage` (capped до `totalPages`).
+- UI се ререндерира след всяка промяна, за да останат секциите синхронизирани.
 
 ---
 
@@ -205,7 +215,124 @@ Re-render UI sections
 | `bookbuddy_challenges` | Challenges (seeded defaults + progress) |
 | `bookbuddy_theme` | Theme preference (`system`, `light`, `dark`) |
 
+---
+
+## Data Model (Simplified)
+
+### Book
+```json
+{
+  "id": 1739980000000,
+  "title": "1984",
+  "author": "George Orwell",
+  "totalPages": 328,
+  "currentPage": 120,
+  "notes": "Мрачна антиутопия...",
+  "createdAt": "2026-02-20T10:00:00.000Z"
+}
+```
+
+### Reading Log
+```json
+{
+  "id": "1739981111111",
+  "bookId": "1739980000000",
+  "dateISO": "2026-02-20",
+  "pages": 25,
+  "note": "Глава 5",
+  "createdAt": 1739981111111
+}
+```
+
+### Settings
+```json
+{
+  "weeklyGoalPages": 100,
+  "minPagesForStreakDay": 1
+}
+```
+
+### Challenge
+```json
+{
+  "id": "weekly_sprint",
+  "type": "weekly_pages",
+  "title": "Седмичен спринт",
+  "description": "Прочети 100 страници тази седмица",
+  "target": 100,
+  "createdAt": 1739980000000,
+  "active": true
+}
+```
+
+---
+
+## UI / UX Principles
+
+### Visual Style
+- **Modern SaaS dashboard** визия
+- **Indigo + gold** color system
+- Меки градиенти, rounded cards, subtle shadows
+- Чист typography scale с `Inter`
+
+### Theming
+- `System` → следва OS preference
+- `Light` / `Dark` → принудително чрез `data-theme`
+- CSS variables за tokens (`--c-primary`, `--c-accent`, `--c-bg`, `--c-surface` и др.)
+
+### Progressive Disclosure
+- Основни действия са видими веднага
+- Secondary действия са в modals (логване, настройки)
+- Empty states показват следваща стъпка
+
+### Feedback & State
+- Прогрес барове
+- Status pills (`Чета`, `Прочетена`, `За четене`)
+- Section highlight при scroll navigation
+- Theme persistence между страниците
+
+---
+
+## Responsive Breakpoints
+
+| Size | Width | Layout |
+|---|---:|---|
+| S (Phone) | `0–600px` | Single column, stacked cards |
+| M (Tablet) | `601–1024px` | Two-column sections where possible |
+| L (Desktop) | `1025–1440px` | Full dashboard layout |
+| XL (Wide) | `1441px+` | Wider container / better whitespace usage |
+
+---
+
+## Project Structure
+
+```bash
+BookBuddy/
+├── index.html
+├── form.html
+├── README.md
+├── docs/
+│   ├── AI_CONTEXT.md
+│   ├── UI_REFERENCE.md
+│   ├── UI_STYLE.md
+│   └── screenshots/
+├── styles/
+│   └── style.css
+└── src/
+    ├── main.js
+    ├── form.js
+    ├── theme.js
+    ├── validate.js
+    ├── bookRepo.js
+    ├── logRepo.js
+    ├── settingsRepo.js
+    └── challengeRepo.js
+```
+
+---
+
 ## Стартиране (локално)
 1) Клонирай репото:
 ```bash
 git clone https://github.com/s-badev/BookBuddy.git
+```
