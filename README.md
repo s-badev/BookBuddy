@@ -328,11 +328,3 @@ BookBuddy/
     ├── settingsRepo.js
     └── challengeRepo.js
 ```
-
----
-
-## Стартиране (локално)
-1) Клонирай репото:
-```bash
-git clone https://github.com/s-badev/BookBuddy.git
-```
