@@ -31,20 +31,6 @@ https://bookbuddy-bg.netlify.app/
 
 ---
 
-### Login
-![Login](docs/login.png)
-
-### Dashboard
-![Dashboard](docs/dashboard.png)
-
-### Library
-![Library](docs/library.png)
-
-### Log Reading
-![Log Reading](docs/log-reading.png)
-
----
-
 ## 🧱 Tech Stack
 
 - **Frontend:** Vanilla JavaScript (ES Modules), Bootstrap
