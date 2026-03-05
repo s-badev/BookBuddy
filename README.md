@@ -31,16 +31,6 @@ https://bookbuddy-bg.netlify.app/
 
 ---
 
-## 📸 Screenshots
-
-> Add these files to `docs/` (repo root) to enable screenshots in GitHub.
-
-- `docs/login.png`
-- `docs/dashboard.png`
-- `docs/library.png`
-- `docs/log-reading.png`
-- `docs/admin-users.png` (optional, if you keep an admin-like screen)
-
 ### Login
 ![Login](docs/login.png)
 
