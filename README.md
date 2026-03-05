@@ -212,6 +212,7 @@ BookBuddy е **localStorage-only** приложение с client-side логи�
 
 ## 🔁 Data Flow (Example: Log Reading)
 
+```text
 User clicks "Логвай четене"
         │
         ▼
