@@ -5,6 +5,13 @@ A lightweight, offline-first reading tracker that helps you log progress, keep s
 ## 🌐 Live Demo
 https://bookbuddy-bg.netlify.app/
 
+Note: The Live Demo may be temporarily paused due to Netlify free-tier usage limits.
+The full source code, screenshots and functionality can be reviewed in this repository.
+
+If the demo is paused, the project can still be fully reviewed through:
+- the source code
+- the architecture documentation in this repository
+
 ---
 
 ## ✨ Features
