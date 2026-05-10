@@ -1,16 +1,86 @@
-# BookBuddy
+# 📚 BookBuddy — Offline-first Reading Tracker
 
-A lightweight, offline-first reading tracker that helps you log progress, keep streaks, and stay consistent — built with **Vanilla JavaScript**, **Bootstrap**, and **Vite**.
+<p align="left">
+  <a href="https://bookbuddy-bg.netlify.app/">
+    <img src="https://img.shields.io/badge/Live%20Demo-Open%20App-brightgreen?style=for-the-badge&logo=netlify" alt="Live Demo"/>
+  </a>
+  <a href="https://github.com/s-badev/BookBuddy">
+    <img src="https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github" alt="GitHub Repository"/>
+  </a>
+</p>
+
+<p align="left">
+  <img src="https://img.shields.io/badge/JavaScript-ES6+-yellow?logo=javascript" />
+  <img src="https://img.shields.io/badge/HTML-5-orange?logo=html5" />
+  <img src="https://img.shields.io/badge/CSS-3-blue?logo=css3" />
+  <img src="https://img.shields.io/badge/Bootstrap-5-purple?logo=bootstrap" />
+  <img src="https://img.shields.io/badge/Vite-Build%20Tool-646CFF?logo=vite" />
+  <img src="https://img.shields.io/badge/localStorage-Offline%20First-blueviolet" />
+  <img src="https://img.shields.io/badge/Netlify-Deployed-00C7B7?logo=netlify" />
+  <img src="https://img.shields.io/badge/Status-Portfolio%20Project-success" />
+</p>
+
+BookBuddy is a lightweight, offline-first reading tracker that helps users manage a personal book library, log reading progress, track goals, keep streaks, and stay consistent.
+
+The project is built with **Vanilla JavaScript**, **Bootstrap**, **Vite**, and browser-based **localStorage** persistence — no backend required.
+
+---
+
+## ✨ Highlights
+
+- 📚 Personal book library
+- 📝 Reading logs with pages, date, and notes
+- 🎯 Daily reading goals
+- 🔥 Streak tracking
+- 📊 Reading statistics and activity history
+- 🎨 Theme preference saved locally
+- ⚡ Offline-first localStorage persistence
+- 🧩 Modular JavaScript structure
+- 🚀 Deployed on Netlify
+
+---
+
+## 🧭 Application Flow
+
+```mermaid
+flowchart TD
+    A[Open BookBuddy] --> B[Add or select a book]
+    B --> C[Log reading session]
+    C --> D[Save pages, date, and notes]
+    D --> E[Update book progress]
+    E --> F[Update reading history]
+    E --> G[Update goals and streaks]
+    G --> H[View statistics and activity]
+```
+
+---
 
 ## 🌐 Live Demo
-https://bookbuddy-bg.netlify.app/
 
-Note: The Live Demo may be temporarily paused due to Netlify free-tier usage limits.
-The full source code, screenshots and functionality can be reviewed in this repository.
+**[https://bookbuddy-bg.netlify.app/](https://bookbuddy-bg.netlify.app/)**
 
-If the demo is paused, the project can still be fully reviewed through:
+> Note: The Live Demo may be temporarily paused due to Netlify free-tier usage limits.  
+> The full source code, screenshots, and functionality can still be reviewed in this repository.
+
+If the demo is paused, the project can still be reviewed through:
+
 - the source code
 - the architecture documentation in this repository
+
+---
+
+## ✅ Quick Smoke Test
+
+1. Open the live demo: [https://bookbuddy-bg.netlify.app/](https://bookbuddy-bg.netlify.app/)
+2. Add a new book or use an existing one if seeded.
+3. Open a book and click **"Логвай четене"**.
+4. Enter pages, date, and optional note, then save.
+5. Verify that:
+   - the book stats update
+   - logs appear in history
+   - streak / goal widgets update correctly
+
+---
 
 ---
 
