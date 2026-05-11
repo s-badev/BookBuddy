@@ -258,8 +258,3 @@ npm run preview
 - **Clean separation** — UI vs repositories vs storage
 - **Data safety** — dedup guard for logs
 - **Maintainability** — modular structure (easy to extend)
-
----
-
-## 📄 License
-For educational/demo purposes.
