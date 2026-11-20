@@ -3,243 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookBuddy — Твоят личен дневник за четене</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>BookBuddy · Читалня и библиотека</title>
+    <script src="src/utils/theme.js"></script>
     <link rel="stylesheet" href="styles/style.css">
 </head>
-<body>
-    <!-- ===== Background decorative blobs ===== -->
-    <div class="bg-blobs" aria-hidden="true">
-        <span class="blob blob--1"></span>
-        <span class="blob blob--2"></span>
-        <span class="blob blob--3"></span>
-    </div>
-
-    <!-- ===== Navbar ===== -->
-    <nav class="navbar" role="navigation" aria-label="Основна навигация">
+<body class="homepage">
+    <header class="navbar">
         <div class="container navbar__inner">
-            <a href="index.html" class="navbar__brand" aria-label="BookBuddy начало">
-                <!-- inline SVG logo icon — open book -->
-                <svg class="navbar__logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                <span class="navbar__brand-text">BookBuddy</span>
+            <a href="#home" class="navbar__brand" aria-label="BookBuddy – начало">
+                <span class="navbar__mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14M12 7C9 4 5 4 2 5v14c4-1 7-.5 10 2 3-2.5 6-3 10-2V5c-3-1-7-1-10 2Z"/></svg></span>
+                BookBuddy
             </a>
 
-            <ul class="navbar__links">
-                <li><a href="#stats" class="navbar__link">Статистики</a></li>
-                <li><a href="#books" class="navbar__link">Моите книги</a></li>
-            </ul>
+            <nav class="navbar__navigation" aria-label="Основна навигация">
+                <ul class="navbar__links">
+                    <li><a href="#home" class="navbar__link" aria-current="location">Начало</a></li>
+                    <li><a href="#books" class="navbar__link">Библиотека</a></li>
+                    <li><a href="#journal" class="navbar__link">Дневник</a></li>
+                </ul>
+            </nav>
 
             <div class="navbar__actions">
-                <a href="form.html" class="btn btn--primary btn--pill">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Добави книга
+                <a href="form.html" class="btn btn--outline navbar__add" aria-label="Добави книга">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Добави книга</span>
                 </a>
+                <div class="theme-switch">
+                    <label for="themeSelect" class="theme-switch__label">Тема</label>
+                    <select id="themeSelect" class="theme-switch__select">
+                        <option value="system">Системна</option>
+                        <option value="light">Светла</option>
+                        <option value="dark">Тъмна</option>
+                    </select>
+                </div>
             </div>
-
-            <!-- Theme switcher -->
-            <div class="theme-switch">
-                <span class="theme-switch__label">Тема</span>
-                <select id="themeSelect" class="theme-switch__select" aria-label="Избери тема">
-                    <option value="system">System</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                </select>
-            </div>
-
-            <!-- Mobile toggle -->
-            <button class="navbar__toggle" aria-label="Отвори менюто" aria-expanded="false">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            </button>
         </div>
+    </header>
+
+    <nav class="bottom-nav" aria-label="Мобилна навигация">
+        <a href="#home" class="bottom-nav__link" aria-current="location">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v11h-6v-7H9v7H3Z"/></svg>
+            Начало
+        </a>
+        <a href="#books" class="bottom-nav__link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h4v16H2zM9 4h4v16H9zM16 5l4-1 3 15-4 1z"/></svg>
+            Библиотека
+        </a>
+        <a href="#journal" class="bottom-nav__link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="15" height="18" rx="2"/><path d="M3 8h4m-4 8h4m3-8h6m-6 4h6"/></svg>
+            Дневник
+        </a>
     </nav>
 
     <main>
-        <!-- ===== Hero section ===== -->
-        <section class="hero">
-            <div class="container hero__inner">
-                <div class="hero__text">
-                    <span class="pill pill--accent">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.59 8.41L23 12l-8.41 2.59L12 23l-2.59-8.41L1 12l8.41-2.59L12 0z"/></svg>
-                        Новият начин да четеш повече
-                    </span>
-                    <h1 class="hero__title">Чети. <span class="gradient-text">Следи.</span> Напредвай.</h1>
-                    <p class="hero__subtitle">Организирай библиотеката си, следи прогреса страница по страница и постигай целите си — всичко на едно място.</p>
-                    <div class="hero__cta">
-                        <button id="heroAddBookBtn" class="btn btn--primary btn--lg">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
-                            Добави нова книга
+        <div class="container reading-overview" id="home">
+            <section class="reading-card" aria-labelledby="readingTitle">
+                <div class="reading-card__copy">
+                    <p id="readingEyebrow" class="reading-card__eyebrow" hidden>В момента четеш</p>
+                    <h1 id="readingTitle" tabindex="-1">Твоето четене</h1>
+                    <p id="readingAuthor" class="reading-card__author" hidden></p>
+                    <div id="readingProgress" class="reading-card__progress" hidden>
+                        <div class="reading-card__labels">
+                            <span id="readingPages"></span>
+                            <span id="readingPercent"></span>
+                        </div>
+                        <progress class="reading-meter" id="readingMeter" max="100" value="0" aria-label="Напредък в книгата"></progress>
+                    </div>
+                    <div class="reading-card__actions">
+                        <button type="button" class="btn btn--primary" id="logReadingBtn" hidden>
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                            Запиши четене
                         </button>
-                        <button id="heroFeaturesBtn" class="btn btn--outline btn--lg">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                            Разгледай функциите
-                        </button>
+                        <a href="form.html" class="btn btn--primary" id="firstBookLink">Добави първата си книга</a>
                     </div>
                 </div>
-                <div class="hero__visual" aria-hidden="true">
-                    <div class="hero-card">
-                        <div class="hero-card__icons">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        </div>
-                        <div class="hero-card__stat" id="heroStat">
-                            <span class="hero-card__number" id="heroPagesRead">0</span>
-                            <span class="hero-card__label">прочетени страници</span>
-                        </div>
-                    </div>
+                <div class="reading-card__art" aria-hidden="true">
+                    <span id="readingPlaceholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14M12 7C9 4 5 4 2 5v14c4-1 7-.5 10 2 3-2.5 6-3 10-2V5c-3-1-7-1-10 2Z"/></svg></span>
+                    <div id="readingCover" hidden></div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- ===== Why choose BookBuddy ===== -->
-        <section class="features" id="features">
-            <div class="container">
-                <h2 class="section-title">Защо да избереш <span class="gradient-text">BookBuddy</span>?</h2>
-                <p class="section-subtitle">Всичко, от което се нуждаеш, за да изградиш навик за четене.</p>
-                <div class="features__grid">
-                    <div class="feature-card" data-scroll-target="books" role="button" tabindex="0">
-                        <div class="feature-card__icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                        </div>
-                        <h3>Личен каталог</h3>
-                        <p>Добави книги, следи напредъка и води бележки — на едно място.</p>
-                    </div>
-                    <div class="feature-card" data-scroll-target="stats" role="button" tabindex="0">
-                        <div class="feature-card__icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        </div>
-                        <h3>Подробна статистика</h3>
-                        <p>Виж колко книги и страници си прочел и какъв е средният ти прогрес.</p>
-                    </div>
-                    <div class="feature-card" data-scroll-target="activity" role="button" tabindex="0">
-                        <div class="feature-card__icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-                        </div>
-                        <h3>Чисто и бързо</h3>
-                        <p>Без реклами, без регистрация — работи изцяло в браузъра ти.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <section class="goal-card" aria-labelledby="goalTitle">
+                <h2 id="goalTitle">Седмична цел</h2>
+                <p class="goal-card__value"><span id="goalPages">0</span> <small id="goalTarget"></small></p>
+                <progress class="reading-meter reading-meter--gold" id="goalMeter" max="1" value="0" aria-labelledby="goalTitle"></progress>
+                <p class="goal-card__detail" id="goalDetail"></p>
+                <a href="#journal" class="goal-card__link">Към дневника <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+            </section>
+        </div>
 
-        <!-- ===== Stats section ===== -->
-        <section class="stats" id="stats">
-            <div class="container">
-                <div class="stats__header">
-                    <h2 class="section-title">Моята статистика</h2>
-                    <div class="stats__header-actions">
-                        <button id="editGoalBtn" class="btn btn--ghost btn--pill btn--sm" aria-label="Редактирай цели">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                            Цели
-                        </button>
-                        <button id="logReadingBtn" class="btn btn--primary btn--pill">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            Логвай четене
-                        </button>
-                    </div>
-                </div>
-                <div class="stats__grid">
-                    <div class="stat-card">
-                        <div class="stat-card__icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                        </div>
-                        <div class="stat-card__body">
-                            <span class="stat-card__value" id="statBooks">0</span>
-                            <span class="stat-card__label">Книги</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card__icon stat-card__icon--pages">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        </div>
-                        <div class="stat-card__body">
-                            <span class="stat-card__value" id="statPagesRead">0</span>
-                            <span class="stat-card__label">Прочетени страници</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card__icon stat-card__icon--progress">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        </div>
-                        <div class="stat-card__body">
-                            <span class="stat-card__value" id="statAvgProgress">0%</span>
-                            <span class="stat-card__label">Среден прогрес</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Goal + Streak row -->
-                <div class="goal-row" id="goalRow">
-                    <div class="goal-card">
-                        <div class="goal-card__header">
-                            <div class="goal-card__icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                            </div>
-                            <div class="goal-card__info">
-                                <span class="goal-card__label">Седмична цел</span>
-                                <span class="goal-card__value" id="goalValue">0 / 100 стр.</span>
-                            </div>
-                        </div>
-                        <div class="goal-card__bar">
-                            <div class="progress-bar progress-bar--goal">
-                                <div class="progress-fill progress-fill--goal" id="goalFill" style="width:0%"></div>
-                            </div>
-                            <span class="goal-card__pct" id="goalPct">0%</span>
-                        </div>
-                    </div>
-                    <div class="streak-card">
-                        <div class="streak-card__icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        </div>
-                        <div class="streak-card__body">
-                            <span class="streak-card__value" id="streakValue">0</span>
-                            <span class="streak-card__label">дни streak</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- ===== Top 5 Most-Read Books ===== -->
-        <section class="top-books" id="topBooks">
-            <div class="container">
-                <h2 class="section-title">Топ 5 най-четени книги</h2>
-                <p class="section-subtitle">Класация по брой прочетени страници.</p>
-                <div id="topBooksThisWeek" class="top-books__list"></div>
-            </div>
-        </section>
-
-        <!-- ===== Challenges section ===== -->
-        <section class="challenges" id="challenges">
-            <div class="container">
-                <h2 class="section-title">Предизвикателства</h2>
-                <p class="section-subtitle">Постигай целите си и поддържай навика за четене.</p>
-                <div id="challengesList" class="challenges__grid"></div>
-            </div>
-        </section>
-
-        <!-- ===== Books section ===== -->
         <section class="books" id="books">
             <div class="container">
                 <div class="books__header">
-                    <div>
-                        <h2 class="section-title">Моите книги</h2>
-                        <p class="section-subtitle">Управлявай библиотеката си и следи прогреса.</p>
-                    </div>
-                    <a href="form.html" class="btn btn--primary btn--pill btn--add-mobile">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Добави книга
-                    </a>
+                    <h2 class="section-title" tabindex="-1">Моята библиотека</h2>
+                    <p class="section-subtitle" id="libraryCount"></p>
                 </div>
 
                 <!-- Books toolbar: search / filter / sort -->
                 <div class="books-toolbar" id="booksToolbar">
                     <div class="books-toolbar__search">
                         <svg class="books-toolbar__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="text" id="bookSearch" class="books-toolbar__input" placeholder="Търси по заглавие или автор…" aria-label="Търсене на книги">
+                        <input type="search" id="bookSearch" class="books-toolbar__input" placeholder="Търси по заглавие или автор…" aria-label="Търсене на книги">
                     </div>
                     <select id="bookFilter" class="books-toolbar__select" aria-label="Филтрирай книги">
                         <option value="all">Всички</option>
@@ -248,43 +112,134 @@
                         <option value="wishlist">За четене</option>
                     </select>
                     <select id="bookSort" class="books-toolbar__select" aria-label="Сортирай книги">
-                        <option value="recent">Последно обновени</option>
-                        <option value="progress">Прогрес %</option>
+                        <option value="recent">Най-нови</option>
+                        <option value="progress">По напредък</option>
                         <option value="title">Заглавие А-Я</option>
                     </select>
                 </div>
 
+                <p id="bookResultsStatus" class="visually-hidden" role="status"></p>
                 <div id="booksList" class="books-grid"></div>
             </div>
         </section>
 
-        <!-- ===== Activity Feed section ===== -->
-        <section class="activity" id="activity">
+        <section id="journal" class="journal" aria-labelledby="journalTitle">
             <div class="container">
-                <h2 class="section-title">Последна активност</h2>
-                <p class="section-subtitle">Твоите последни сесии на четене.</p>
-                <div id="activityFeed" class="activity__feed"></div>
+                <h2 id="journalTitle" class="section-title" tabindex="-1">Дневник</h2>
+                <nav class="journal__links" aria-label="Раздели на дневника">
+                    <a href="#activity">Активност</a>
+                    <a href="#stats">Статистика</a>
+                    <a href="#challenges">Предизвикателства</a>
+                </nav>
             </div>
+            <section class="activity" id="activity">
+                <div class="container">
+                    <h3 class="section-title" tabindex="-1">Последна активност</h3>
+                        <div id="activityFeed" class="activity__feed"></div>
+                </div>
+            </section>
+            <section class="stats" id="stats">
+                <div class="container">
+                    <div class="stats__header">
+                        <h3 class="section-title" tabindex="-1">Моята статистика</h3>
+                        <div class="stats__header-actions">
+                            <button id="editGoalBtn" class="btn btn--outline" aria-label="Редактирай цели">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                Цели
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stats__grid">
+                        <div class="stat-card">
+                            <div class="stat-card__icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                            </div>
+                            <div class="stat-card__body">
+                                <span class="stat-card__value" id="statBooks">0</span>
+                                <span class="stat-card__label">Книги</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card__icon stat-card__icon--pages">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            </div>
+                            <div class="stat-card__body">
+                                <span class="stat-card__value" id="statPagesRead">0</span>
+                                <span class="stat-card__label">Прочетени страници</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card__icon stat-card__icon--progress">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            </div>
+                            <div class="stat-card__body">
+                                <span class="stat-card__value" id="statAvgProgress">0%</span>
+                                <span class="stat-card__label">Среден прогрес</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="streak-row">
+                        <div class="streak-card">
+                            <div class="streak-card__icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            </div>
+                            <div class="streak-card__body">
+                                <span class="streak-card__value" id="streakValue">0</span>
+                                <span class="streak-card__label">Поредни дни с четене</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section class="top-books" id="topBooks">
+                <div class="container">
+                    <h3 class="section-title" tabindex="-1">Топ 5 най-четени книги</h3>
+                    <div id="topBooksThisWeek" class="top-books__list"></div>
+                </div>
+            </section>
+
+            <!-- ===== Challenges section ===== -->
+            <section class="challenges" id="challenges">
+                <div class="container">
+                    <h3 class="section-title" tabindex="-1">Предизвикателства</h3>
+                    <div id="challengesList" class="challenges__grid"></div>
+                </div>
+            </section>
         </section>
     </main>
 
     <!-- ===== Footer ===== -->
     <footer class="footer">
+        <div class="container">
+            <details class="footer__about">
+                <summary>Защо да избереш BookBuddy?</summary>
+                <dl>
+                    <dt><a href="#books">Личен каталог</a></dt>
+                    <dd>Добави книги, следи напредъка и води бележки — на едно място.</dd>
+                    <dt><a href="#stats">Подробна статистика</a></dt>
+                    <dd>Виж колко книги и страници си прочел и какъв е средният ти прогрес.</dd>
+                    <dt>Чисто и бързо</dt>
+                    <dd>Без реклами, без регистрация — работи изцяло в браузъра ти.</dd>
+                </dl>
+            </details>
+        </div>
         <div class="container footer__inner">
             <span>© 2026 BookBuddy. Всички права запазени.</span>
             <div class="footer__actions">
-                <button type="button" id="seedDemoBtn" class="btn btn--ghost btn--sm">🗂️ Зареди демо данни</button>
-                <button type="button" id="clearDataBtn" class="btn btn--ghost btn--sm btn--ghost-danger">🗑️ Изчисти данните</button>
+                <button type="button" id="seedDemoBtn" class="btn btn--ghost btn--sm">Зареди демо данни</button>
+                <button type="button" id="clearDataBtn" class="btn btn--ghost btn--sm btn--ghost-danger">Изчисти данните</button>
             </div>
         </div>
     </footer>
 
-    <!-- ===== Log Reading Modal (hidden) ===== -->
-    <div class="modal-overlay" id="logModal" hidden aria-hidden="true" role="dialog" aria-labelledby="logModalTitle">
+    <dialog class="modal-dialog" id="logModal" aria-labelledby="logModalTitle">
         <div class="modal-card">
             <div class="modal-card__top"></div>
             <div class="modal-card__header">
-                <h3 class="modal-card__title" id="logModalTitle">Логвай четене</h3>
+                <h2 class="modal-card__title" id="logModalTitle">Запиши четене</h2>
                 <button class="btn btn--icon" id="logModalClose" aria-label="Затвори">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
@@ -292,20 +247,20 @@
             <form id="logForm" class="modal-card__body" novalidate>
                 <div class="form-group">
                     <label for="logBook">Книга <span class="required">*</span></label>
-                    <select id="logBook" class="modal-select" required>
+                    <select id="logBook" class="modal-select" aria-describedby="logBookError" required autofocus>
                         <option value="">— Избери книга —</option>
                     </select>
-                    <span class="field-error" id="logBookError"></span>
+                    <span class="field-error" aria-live="polite" id="logBookError"></span>
                 </div>
                 <div class="form-group">
                     <label for="logDate">Дата <span class="required">*</span></label>
-                    <input type="date" id="logDate" required>
-                    <span class="field-error" id="logDateError"></span>
+                    <input type="date" id="logDate" aria-describedby="logDateError" required>
+                    <span class="field-error" aria-live="polite" id="logDateError"></span>
                 </div>
                 <div class="form-group">
                     <label for="logPages">Прочетени страници <span class="required">*</span></label>
-                    <input type="number" id="logPages" min="1" placeholder="напр. 25" required>
-                    <span class="field-error" id="logPagesError"></span>
+                    <input type="number" id="logPages" aria-describedby="logPagesError" min="1" placeholder="напр. 25" required>
+                    <span class="field-error" aria-live="polite" id="logPagesError"></span>
                 </div>
                 <div class="form-group">
                     <label for="logNote">Бележка <small>(незадължително, макс. 120 символа)</small></label>
@@ -317,14 +272,13 @@
                 </div>
             </form>
         </div>
-    </div>
+    </dialog>
 
-    <!-- ===== Settings Modal (hidden) ===== -->
-    <div class="modal-overlay" id="settingsModal" hidden aria-hidden="true" role="dialog" aria-labelledby="settingsModalTitle">
-        <div class="modal-card modal-card--sm">
+    <dialog class="modal-dialog modal-dialog--settings" id="settingsModal" aria-labelledby="settingsModalTitle">
+        <div class="modal-card">
             <div class="modal-card__top"></div>
             <div class="modal-card__header">
-                <h3 class="modal-card__title" id="settingsModalTitle">Настрой цели</h3>
+                <h2 class="modal-card__title" id="settingsModalTitle">Настрой цели</h2>
                 <button class="btn btn--icon" id="settingsModalClose" aria-label="Затвори">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
@@ -332,11 +286,11 @@
             <form id="settingsForm" class="modal-card__body" novalidate>
                 <div class="form-group">
                     <label for="settingWeeklyGoal">Седмична цел (страници) <span class="required">*</span></label>
-                    <input type="number" id="settingWeeklyGoal" min="1" placeholder="напр. 100" required>
+                    <input type="number" id="settingWeeklyGoal" min="1" autofocus placeholder="напр. 100" required>
                     <span class="field-error" id="settingWeeklyGoalError"></span>
                 </div>
                 <div class="form-group">
-                    <label for="settingMinStreak">Мин. страници за streak ден <span class="required">*</span></label>
+                    <label for="settingMinStreak">Минимум страници за ден от поредицата <span class="required">*</span></label>
                     <input type="number" id="settingMinStreak" min="1" placeholder="напр. 1" required>
                     <span class="field-error" id="settingMinStreakError"></span>
                 </div>
@@ -346,12 +300,11 @@
                 </div>
             </form>
         </div>
-    </div>
+    </dialog>
 
     <!-- ===== Toast ===== -->
     <div class="toast" id="toast" aria-live="polite"></div>
 
-    <script src="src/utils/theme.js"></script>
     <script src="src/services/bookRepo.js"></script>
     <script src="src/services/logRepo.js"></script>
     <script src="src/services/settingsRepo.js"></script>

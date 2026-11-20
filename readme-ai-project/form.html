@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добави книга — BookBuddy</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="src/utils/theme.js"></script>
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
@@ -25,20 +23,20 @@
             </a>
 
             <ul class="navbar__links">
-                <li><a href="index.html" class="navbar__link">← Обратно към книгите</a></li>
+                <li><a href="index.html#books" class="navbar__link">← Към библиотеката</a></li>
             </ul>
 
             <div class="navbar__actions">
-                <a href="index.html" class="btn btn--outline btn--pill">Моите книги</a>
+                <a href="index.html#books" class="btn btn--outline btn--pill">Библиотека</a>
             </div>
 
             <!-- Theme switcher -->
             <div class="theme-switch">
-                <span class="theme-switch__label">Тема</span>
-                <select id="themeSelect" class="theme-switch__select" aria-label="Избери тема">
-                    <option value="system">System</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
+                <label for="themeSelect" class="theme-switch__label">Тема</label>
+                <select id="themeSelect" class="theme-switch__select">
+                    <option value="system">Системна</option>
+                    <option value="light">Светла</option>
+                    <option value="dark">Тъмна</option>
                 </select>
             </div>
         </div>
@@ -112,7 +110,6 @@
         </div>
     </footer>
 
-    <script src="src/utils/theme.js"></script>
     <script src="src/utils/validate.js"></script>
     <script src="src/services/bookRepo.js"></script>
     <script src="src/form.js"></script>

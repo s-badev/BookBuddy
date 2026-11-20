@@ -35,12 +35,10 @@ const LogRepo = {
 
         // Prevent content-identical duplicates (same book + date + pages + note)
         var contentKey = newLog.bookId + '|' + newLog.dateISO + '|' + newLog.pages + '|' + newLog.note;
-        var isDup = logs.some(function(existing) {
+        const isDup = logs.some(function(existing) {
             return (String(existing.bookId) + '|' + existing.dateISO + '|' + existing.pages + '|' + (existing.note || '')) === contentKey;
         });
-        if (isDup) return logs.find(function(existing) {
-            return (String(existing.bookId) + '|' + existing.dateISO + '|' + existing.pages + '|' + (existing.note || '')) === contentKey;
-        });
+        if (isDup) return null;
 
         logs.push(newLog);
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(logs));

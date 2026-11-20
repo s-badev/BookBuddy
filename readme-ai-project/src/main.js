@@ -1,75 +1,41 @@
 // Main page logic - displays list of books
 document.addEventListener('DOMContentLoaded', function() {
     ThemeSwitcher.initTheme();
-    displayBooks();          // calls updateStats() internally
-    initNavbarToggle();
-    initHeroCTAs();
-    initFeatureCardScroll();
+    initNavigation();
     initLogModal();
     initSettingsModal();
     initBooksToolbar();
-    renderActivityFeed();
+    refreshAll();
     initDemoButtons();
 });
 
-/* ---------- Navbar mobile toggle ---------- */
-function initNavbarToggle() {
-    const toggle = document.querySelector('.navbar__toggle');
-    if (!toggle) return;
-    toggle.addEventListener('click', function() {
-        const nav = this.closest('.navbar');
-        const expanded = nav.classList.toggle('is-open');
-        this.setAttribute('aria-expanded', expanded);
-    });
-}
-
-/* ---------- Hero CTAs ---------- */
-function initHeroCTAs() {
-    const addBookBtn = document.getElementById('heroAddBookBtn');
-    const featuresBtn = document.getElementById('heroFeaturesBtn');
-    
-    if (addBookBtn) {
-        addBookBtn.addEventListener('click', function() {
-            // Navigate to form.html to add a book
-            window.location.href = 'form.html';
-        });
-    }
-    
-    if (featuresBtn) {
-        featuresBtn.addEventListener('click', function() {
-            // Scroll to features section
-            scrollToSection('features');
-        });
-    }
-}
-
-/* ---------- Feature card scroll navigation ---------- */
-function initFeatureCardScroll() {
-    var cards = document.querySelectorAll('[data-scroll-target]');
-    cards.forEach(function(card) {
-        card.addEventListener('click', function() {
-            scrollToSection(this.dataset.scrollTarget);
-        });
-        card.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                scrollToSection(this.dataset.scrollTarget);
+function initNavigation() {
+    const links = document.querySelectorAll('.navbar__navigation a, .bottom-nav a');
+    function updateCurrentSection() {
+        const hash = window.location.hash;
+        const target = document.getElementById(hash.slice(1));
+        const current = target?.closest('#journal') ? '#journal' : hash || '#home';
+        links.forEach(link => {
+            if (link.hash === current) {
+                link.setAttribute('aria-current', 'location');
+            } else {
+                link.removeAttribute('aria-current');
             }
         });
+    }
+
+    window.addEventListener('hashchange', updateCurrentSection);
+    updateCurrentSection();
+
+    document.addEventListener('click', event => {
+        if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        const link = event.target.closest('a[href^="#"]');
+        if (!link) return;
+        const section = document.getElementById(link.hash.slice(1));
+        const heading = section?.querySelector('[tabindex="-1"]');
+        // Let the browser navigate to the fragment before moving keyboard focus.
+        if (heading) requestAnimationFrame(() => heading.focus({ preventScroll: true }));
     });
-}
-
-function scrollToSection(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    // Brief highlight on the target section
-    el.classList.add('section-highlight');
-    setTimeout(function() {
-        el.classList.remove('section-highlight');
-    }, 900);
 }
 
 /* ---------- Book View State (search / filter / sort) ---------- */
@@ -89,19 +55,8 @@ function applyBookViewState(books, state) {
     }
 
     // 2. Filter
-    if (state.filter === 'reading') {
-        result = result.filter(function(b) {
-            var pct = calculateProgress(b.currentPage, b.totalPages);
-            return pct > 0 && pct < 100;
-        });
-    } else if (state.filter === 'finished') {
-        result = result.filter(function(b) {
-            return calculateProgress(b.currentPage, b.totalPages) >= 100;
-        });
-    } else if (state.filter === 'wishlist') {
-        result = result.filter(function(b) {
-            return calculateProgress(b.currentPage, b.totalPages) === 0;
-        });
+    if (state.filter !== 'all') {
+        result = result.filter(book => getBookStatus(book) === state.filter);
     }
 
     // 3. Sort
@@ -134,172 +89,181 @@ function initBooksToolbar() {
         var val = this.value;
         _searchTimer = setTimeout(function() {
             bookViewState.query = val.trim();
-            displayBooks();
+            renderCatalogue();
         }, 250);
     });
 
     filterSelect.addEventListener('change', function() {
         bookViewState.filter = this.value;
-        displayBooks();
+        renderCatalogue();
     });
 
     sortSelect.addEventListener('change', function() {
         bookViewState.sort = this.value;
-        displayBooks();
+        renderCatalogue();
     });
 }
 
-/* ---------- Display books ---------- */
-function displayBooks() {
+function renderCatalogue(allBooks = BookRepo.getAllBooks()) {
     const booksList = document.getElementById('booksList');
-    const allBooks = BookRepo.getAllBooks();
-
-    if (allBooks.length === 0) {
-        booksList.innerHTML = `
-            <div class="empty-state">
-                <span class="empty-state__icon" aria-hidden="true">📚</span>
-                <p class="empty-state__title">Все още няма книги</p>
-                <p class="empty-state__text">Добави първата си книга и започни да следиш прогреса си.</p>
-                <a href="form.html" class="btn btn--primary btn--pill">+ Добави книга</a>
-            </div>
-        `;
-        updateStats();
-        return;
-    }
-
+    const openCards = new Set(Array.from(booksList.querySelectorAll('details[open]'), card => card.id));
     const books = applyBookViewState(allBooks, bookViewState);
+    document.getElementById('libraryCount').textContent = formatBookCount(allBooks.length);
+    document.getElementById('bookResultsStatus').textContent = 'Намерени: ' + formatBookCount(books.length);
 
     if (books.length === 0) {
-        booksList.innerHTML = `
+        booksList.innerHTML = allBooks.length ? `
             <div class="empty-state empty-state--compact">
-                <span class="empty-state__icon" aria-hidden="true">🔍</span>
                 <p class="empty-state__title">Няма намерени книги</p>
                 <p class="empty-state__text">Опитай с различно търсене или филтър.</p>
-            </div>
-        `;
-        updateStats();
+            </div>` : `
+            <div class="empty-state empty-state--compact">
+                <p class="empty-state__title">Все още няма книги</p>
+            </div>`;
         return;
     }
 
-    booksList.innerHTML = books.map(book => createBookCard(book)).join('');
+    booksList.innerHTML = books.map(book => createBookCard(book, openCards.has('manage-' + book.id))).join('');
 
-    // Add event listeners for progress updates and delete buttons
     books.forEach(book => {
-        const progressInput = document.getElementById(`progress-${book.id}`);
-        const deleteBtn = document.getElementById(`delete-${book.id}`);
-
-        if (progressInput) {
-            progressInput.addEventListener('change', function() {
-                updateBookProgress(book.id, this.value, book.totalPages);
-            });
-        }
-
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', function() {
-                deleteBook(book.id);
-            });
-        }
+        document.getElementById('progress-form-' + book.id).addEventListener('submit', event => {
+            event.preventDefault();
+            const input = event.currentTarget.elements.currentPage;
+            updateBookProgress(book.id, input.valueAsNumber);
+        });
+        document.getElementById('delete-' + book.id).addEventListener('click', () => deleteBook(book.id));
     });
-    
-    updateStats();
 }
 
-/* ---------- Book card template ---------- */
-function createBookCard(book) {
+function formatBookCount(count) {
+    return count + (count === 1 ? ' книга' : ' книги');
+}
+
+function createCover(book) {
+    const palettes = ['indigo', 'wine', 'pine', 'blue', 'ochre', 'plum'];
+    const palette = palettes[Number(book.id) % palettes.length] || palettes[0];
+    return `
+        <div class="book-cover book-cover--${palette}" aria-hidden="true">
+            <div class="book-cover__copy">
+                <span class="book-cover__author">${escapeHtml(book.author)}</span>
+                <span class="book-cover__title">${escapeHtml(book.title)}</span>
+            </div>
+            <span class="book-cover__imprint"></span>
+        </div>`;
+}
+
+function createBookCard(book, expanded) {
     const progress = calculateProgress(book.currentPage, book.totalPages);
-    const statusLabel = getStatusLabel(progress);
+    const status = getBookStatus(book);
+    const statusLabel = { finished: 'Прочетена', reading: 'Чета', wishlist: 'За четене' }[status];
+    const title = escapeHtml(book.title);
 
     return `
-        <article class="book-card" aria-label="${escapeHtml(book.title)}">
-            <div class="book-card__top"></div>
-            <div class="book-card__body">
-                <div class="book-card__header">
-                    <div class="book-card__info">
-                        <h3 class="book-card__title">${escapeHtml(book.title)}</h3>
-                        <p class="book-card__author">от ${escapeHtml(book.author)}</p>
-                    </div>
-                    <span class="pill ${statusLabel.cls}">${statusLabel.text}</span>
-                </div>
-
-                <div class="book-card__progress">
-                    <div class="book-card__progress-info">
-                        <span>
-                            <input type="number"
-                                   class="book-card__progress-input"
-                                   id="progress-${book.id}"
-                                   value="${book.currentPage}"
-                                   min="0"
-                                   max="${book.totalPages}"
-                                   aria-label="Текуща страница">
-                            / ${book.totalPages} стр.
-                        </span>
-                        <span class="book-card__pct">${progress}%</span>
-                    </div>
-                    <div class="progress-bar" role="progressbar"
-                         aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"
-                         aria-label="Прогрес на четенето ${progress}%">
-                        <div class="progress-fill" style="width:${progress}%"></div>
+        <article class="book-card" aria-labelledby="book-title-${book.id}">
+            ${createCover(book)}
+            <h3 class="book-card__title" id="book-title-${book.id}">${title}</h3>
+            <p class="book-card__author">${escapeHtml(book.author)}</p>
+            <p class="book-card__status book-card__status--${status}">${statusLabel} · ${progress}%</p>
+            <details class="book-card__manage" id="manage-${book.id}"${expanded ? " open" : ""}>
+                <summary aria-label="Управление на ${title}">Управление</summary>
+                <div class="book-card__details">
+                    <form class="book-card__progress" id="progress-form-${book.id}">
+                        <label for="progress-${book.id}">Текуща страница</label>
+                        <div class="book-card__progress-field">
+                            <input type="number" name="currentPage" id="progress-${book.id}"
+                                   value="${book.currentPage}" min="0" max="${book.totalPages}" required>
+                            <span>/ ${book.totalPages}</span>
+                        </div>
+                        <button class="btn btn--outline" type="submit">Запази</button>
+                    </form>
+                    <p class="book-card__notes">${escapeHtml(getBookNote(book))}</p>
+                    <div class="book-card__footer">
+                        <a href="form.html?id=${book.id}" class="btn btn--icon btn--icon-edit"
+                           aria-label="Редактирай ${title}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </a>
+                        <button id="delete-${book.id}" type="button" class="btn btn--icon btn--icon-danger"
+                                aria-label="Изтрий ${title}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
                     </div>
                 </div>
-
-                <div class="book-card__notes">${escapeHtml(getBookNote(book))}</div>
-
-                <div class="book-card__footer">
-                    <a href="form.html?id=${book.id}"
-                       id="edit-${book.id}"
-                       class="btn btn--icon btn--icon-edit"
-                       aria-label="Редактирай ${escapeHtml(book.title)}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </a>
-                    <button id="delete-${book.id}"
-                            class="btn btn--icon btn--icon-danger"
-                            aria-label="Изтрий ${escapeHtml(book.title)}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>
-                </div>
-            </div>
-        </article>
-    `;
+            </details>
+        </article>`;
 }
 
-/* ---------- Status badge helper ---------- */
-function getStatusLabel(progress) {
-    if (progress >= 100) return { text: 'Прочетена', cls: 'pill--finished' };
-    if (progress > 0)    return { text: 'Чета', cls: 'pill--reading' };
-    return { text: 'За четене', cls: 'pill--wishlist' };
+function getBookStatus(book) {
+    if (book.currentPage <= 0 || !book.totalPages) return 'wishlist';
+    return book.currentPage < book.totalPages ? 'reading' : 'finished';
 }
 
 /* ---------- Progress helpers ---------- */
 function calculateProgress(current, total) {
-    if (total === 0) return 0;
-    return Math.round((current / total) * 100);
+    if (total <= 0 || current <= 0) return 0;
+    if (current >= total) return 100;
+    return Math.max(1, Math.min(99, Math.round((current / total) * 100)));
 }
 
-function updateBookProgress(bookId, newPage, totalPages) {
-    const pageNum = parseInt(newPage);
-    
-    if (pageNum < 0 || pageNum > totalPages) {
-        alert(`Страницата трябва да е между 0 и ${totalPages}`);
-        displayBooks();
-        return;
-    }
-
-    BookRepo.updateProgress(bookId, pageNum);
+function updateBookProgress(bookId, newPage) {
+    BookRepo.updateProgress(bookId, newPage);
     displayBooks();
+    const updatedInput = document.getElementById('progress-' + bookId);
+    (updatedInput || document.getElementById('bookFilter')).focus({ preventScroll: true });
+    showToast('Напредъкът е обновен.');
 }
 
 function deleteBook(bookId) {
     if (confirm('Сигурни ли сте, че искате да изтриете тази книга?')) {
         BookRepo.deleteBook(bookId);
         LogRepo.deleteLogsByBookId(bookId);   // cascade: remove orphan logs
-        displayBooks();                        // re-renders books + calls updateStats()
-        renderActivityFeed();                  // purge deleted-book entries from feed
+        refreshAll();
+        document.getElementById('bookSearch').focus();
+    }
+}
+
+function displayBooks() {
+    const books = BookRepo.getAllBooks();
+    renderCatalogue(books);
+    updateStats(books);
+}
+
+function renderFeaturedBook(books, logs) {
+    const inProgress = books.filter(book => getBookStatus(book) === 'reading');
+    const booksById = new Map(inProgress.map(book => [String(book.id), book]));
+    // Logs already have newest-created first order for sessions on the same date.
+    const latest = logs.reduce((selected, log) => {
+        if (booksById.has(String(log.bookId)) && (!selected || log.dateISO > selected.dateISO)) {
+            return log;
+        }
+        return selected;
+    }, null);
+    const featured = latest ? booksById.get(String(latest.bookId)) : inProgress[0];
+    const openButton = document.getElementById('logReadingBtn');
+    const cover = document.getElementById('readingCover');
+    const author = document.getElementById('readingAuthor');
+
+    openButton.hidden = books.length === 0;
+    openButton.dataset.bookId = featured?.id ?? '';
+    document.getElementById('firstBookLink').hidden = books.length > 0;
+    document.getElementById('readingTitle').textContent = featured?.title ?? 'Твоето четене';
+    author.textContent = featured?.author ?? '';
+    author.hidden = !featured;
+    document.getElementById('readingEyebrow').hidden = !featured;
+    document.getElementById('readingProgress').hidden = !featured;
+    document.getElementById('readingPlaceholder').hidden = Boolean(featured);
+    cover.hidden = !featured;
+    cover.innerHTML = featured ? createCover(featured) : '';
+
+    if (featured) {
+        const percent = calculateProgress(featured.currentPage, featured.totalPages);
+        document.getElementById('readingPages').textContent = featured.currentPage + ' / ' + featured.totalPages + ' стр.';
+        document.getElementById('readingPercent').textContent = percent + '%';
+        document.getElementById('readingMeter').value = percent;
     }
 }
 
 /* ---------- Stats ---------- */
-function updateStats() {
-    const books = BookRepo.getAllBooks();
+function updateStats(books = BookRepo.getAllBooks()) {
     
     // Total Books
     const totalBooks = books.length;
@@ -319,27 +283,23 @@ function updateStats() {
     }
     document.getElementById('statAvgProgress').textContent = `${avgProgress}%`;
 
-    // Hero stat (if present on page)
-    const heroPagesEl = document.getElementById('heroPagesRead');
-    if (heroPagesEl) {
-        heroPagesEl.textContent = totalPagesRead.toLocaleString();
-    }
-
-    // Goal + Streak
-    renderGoalStreak();
-
-    // Top 5 this week
+    const logs = LogRepo.getAllLogs();
+    const settings = SettingsRepo.getSettings();
+    const week = getWeekRangeISO(new Date());
+    const weekPages = sumLogsInRange(logs, week.startISO, week.endISO);
+    const streak = calculateStreak(logs, settings.minPagesForStreakDay);
+    renderFeaturedBook(books, logs);
+    renderGoal(weekPages, settings.weeklyGoalPages);
+    document.getElementById('streakValue').textContent = streak;
     renderTopBooks();
-
-    // Challenges
-    renderChallenges();
+    renderChallenges(weekPages, streak);
 }
 
 /* ---------- Helpers ---------- */
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
-    return div.innerHTML;
+    return div.innerHTML.replace(/"/g, '&quot;');
 }
 
 /* ---------- Book note fallback ---------- */
@@ -384,7 +344,7 @@ function getWeekRangeISO(today) {
 function sumLogsInRange(logs, startISO, endISO) {
     return logs.reduce(function(sum, log) {
         if (log.dateISO >= startISO && log.dateISO <= endISO) {
-            return sum + log.pages;
+            return sum + (Number(log.pages) || 0);
         }
         return sum;
     }, 0);
@@ -417,27 +377,17 @@ function calculateStreak(logs, minPages) {
 }
 
 /* ========== Goal & Streak Rendering ========== */
-function renderGoalStreak() {
-    var settings = SettingsRepo.getSettings();
-    var allLogs  = LogRepo.getAllLogs();
-    var allBooks = BookRepo.getAllBooks();
-
-    // Weekly goal — books are the single source of truth for pages read
-    var weekPages    = allBooks.reduce(function(sum, b) { return sum + (Number(b.currentPage) || 0); }, 0);
-    var goalTarget   = settings.weeklyGoalPages;
-    var goalPct      = Math.min(100, Math.round((weekPages / goalTarget) * 100));
-
-    var goalValueEl = document.getElementById('goalValue');
-    var goalFillEl  = document.getElementById('goalFill');
-    var goalPctEl   = document.getElementById('goalPct');
-    if (goalValueEl) goalValueEl.textContent = weekPages + ' / ' + goalTarget + ' стр.';
-    if (goalFillEl)  goalFillEl.style.width  = goalPct + '%';
-    if (goalPctEl)   goalPctEl.textContent   = goalPct + '%';
-
-    // Streak
-    var streak      = calculateStreak(allLogs, settings.minPagesForStreakDay);
-    var streakValEl = document.getElementById('streakValue');
-    if (streakValEl) streakValEl.textContent = streak;
+function renderGoal(weekPages, target) {
+    const meter = document.getElementById('goalMeter');
+    meter.max = target;
+    meter.value = Math.min(weekPages, target);
+    meter.setAttribute('aria-valuetext', weekPages + ' от ' + target + ' страници');
+    document.getElementById('goalPages').textContent = weekPages;
+    document.getElementById('goalTarget').textContent = '/ ' + target + ' стр.';
+    const remaining = target - weekPages;
+    document.getElementById('goalDetail').textContent = remaining > 0
+        ? 'Остават ' + remaining + ' стр. до целта.'
+        : 'Целта за тази седмица е постигната.';
 }
 
 /* ========== Top 5 Most-Read Books (by total progress) ========== */
@@ -518,7 +468,7 @@ function renderTopBooks() {
 
 /* ========== Challenges ========== */
 
-function renderChallenges() {
+function renderChallenges(weekPages, streak) {
     var container = document.getElementById('challengesList');
     if (!container) return;
 
@@ -526,9 +476,6 @@ function renderChallenges() {
     ChallengeRepo.seedDefaultChallengesIfEmpty();
 
     var challenges = ChallengeRepo.getChallenges();
-    var allLogs    = LogRepo.getAllLogs();
-    var allBooks   = BookRepo.getAllBooks();
-    var settings   = SettingsRepo.getSettings();
 
     if (challenges.length === 0) {
         container.innerHTML =
@@ -539,11 +486,6 @@ function renderChallenges() {
         return;
     }
 
-    // Pre-compute values needed by challenges
-    // Weekly pages: derived from books (single source of truth)
-    var totalBookPages = allBooks.reduce(function(sum, b) { return sum + (Number(b.currentPage) || 0); }, 0);
-    var streak    = calculateStreak(allLogs, settings.minPagesForStreakDay);
-
     var anyChanged = false;
 
     container.innerHTML = challenges.map(function(ch) {
@@ -551,7 +493,7 @@ function renderChallenges() {
         var unit    = '';
 
         if (ch.type === 'weekly_pages') {
-            current = totalBookPages;
+            current = weekPages;
             unit = 'стр.';
         } else if (ch.type === 'streak_days') {
             current = streak;
@@ -561,14 +503,17 @@ function renderChallenges() {
         var pct       = Math.min(100, Math.round((current / ch.target) * 100));
         var completed = current >= ch.target;
 
-        // Mark completed in data if newly achieved
-        if (completed && ch.active) {
-            ch.active = false;
+        // Weekly challenges can become active again when their date range rolls over.
+        if ((ch.type === 'weekly_pages' || completed) && ch.active === completed) {
+            ch.active = !completed;
             anyChanged = true;
         }
 
         var statusCls  = completed ? 'pill--finished' : 'pill--reading';
         var statusText = completed ? 'Завършено' : 'Активно';
+        const title = ch.id === 'streak_14' && ch.title === 'Читателски streak'
+            ? 'Читателска поредица'
+            : ch.title;
 
         // Pick icon based on type
         var iconSvg = ch.type === 'weekly_pages'
@@ -582,7 +527,7 @@ function renderChallenges() {
                 '<div class="challenge-card__header">' +
                     '<div class="challenge-card__icon' + iconColorCls + '">' + iconSvg + '</div>' +
                     '<div class="challenge-card__info">' +
-                        '<span class="challenge-card__title">' + escapeHtml(ch.title) + '</span>' +
+                        '<span class="challenge-card__title">' + escapeHtml(title) + '</span>' +
                         '<span class="challenge-card__desc">' + escapeHtml(ch.description) + '</span>' +
                     '</div>' +
                     '<span class="pill ' + statusCls + '">' + statusText + '</span>' +
@@ -608,31 +553,18 @@ function renderChallenges() {
 
 /* ========== Settings Modal ========== */
 function initSettingsModal() {
-    var overlay   = document.getElementById('settingsModal');
-    var form      = document.getElementById('settingsForm');
-    var openBtn   = document.getElementById('editGoalBtn');
-    var closeBtn  = document.getElementById('settingsModalClose');
-    var cancelBtn = document.getElementById('settingsModalCancel');
-
-    if (!overlay || !form || !openBtn) return;
-
-    openBtn.addEventListener('click', function() { openSettingsModal(); });
-    closeBtn.addEventListener('click', function() { closeSettingsModal(); });
-    cancelBtn.addEventListener('click', function() { closeSettingsModal(); });
-
-    overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) closeSettingsModal();
+    const dialog = document.getElementById('settingsModal');
+    document.getElementById('editGoalBtn').addEventListener('click', openSettingsModal);
+    document.getElementById('settingsModalClose').addEventListener('click', () => dialog.close());
+    document.getElementById('settingsModalCancel').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
     });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !overlay.hasAttribute('hidden')) closeSettingsModal();
-    });
-
-    form.addEventListener('submit', handleSettingsSubmit);
+    document.getElementById('settingsForm').addEventListener('submit', handleSettingsSubmit);
 }
 
 function openSettingsModal() {
-    var overlay     = document.getElementById('settingsModal');
+    var dialog      = document.getElementById('settingsModal');
     var goalInput   = document.getElementById('settingWeeklyGoal');
     var streakInput = document.getElementById('settingMinStreak');
     var settings    = SettingsRepo.getSettings();
@@ -644,17 +576,7 @@ function openSettingsModal() {
     document.getElementById('settingWeeklyGoalError').textContent = '';
     document.getElementById('settingMinStreakError').textContent   = '';
 
-    overlay.removeAttribute('hidden');
-    overlay.setAttribute('aria-hidden', 'false');
-    goalInput.focus();
-}
-
-function closeSettingsModal() {
-    var overlay = document.getElementById('settingsModal');
-    var form    = document.getElementById('settingsForm');
-    overlay.setAttribute('hidden', '');
-    overlay.setAttribute('aria-hidden', 'true');
-    form.reset();
+    dialog.showModal();
 }
 
 function handleSettingsSubmit(e) {
@@ -682,123 +604,48 @@ function handleSettingsSubmit(e) {
         minPagesForStreakDay: streakInt
     });
 
-    closeSettingsModal();
-    renderGoalStreak();
+    document.getElementById('settingsModal').close();
+    updateStats();
     showToast('Целите са обновени!');
 }
 
 /* ========== Reading Log Modal ========== */
 function initLogModal() {
-    const overlay = document.getElementById('logModal');
-    const form    = document.getElementById('logForm');
+    const dialog = document.getElementById('logModal');
+    const form = document.getElementById('logForm');
     const openBtn = document.getElementById('logReadingBtn');
-    const closeBtn = document.getElementById('logModalClose');
-    const cancelBtn = document.getElementById('logModalCancel');
 
-    if (!overlay || !form || !openBtn) return;
-
-    openBtn.addEventListener('click', () => openLogModal());
-    closeBtn.addEventListener('click', () => closeLogModal());
-    cancelBtn.addEventListener('click', () => closeLogModal());
-
-    // Close on overlay click (not card)
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeLogModal();
+    openBtn.addEventListener('click', () => openLogModal(openBtn.dataset.bookId));
+    document.getElementById('logModalClose').addEventListener('click', () => dialog.close());
+    document.getElementById('logModalCancel').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
     });
-
-    // Close on Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !overlay.hasAttribute('hidden')) closeLogModal();
-    });
-
     form.addEventListener('submit', handleLogSubmit);
 }
 
-function openLogModal() {
-    _editingLogId = null; // add mode
-    const overlay = document.getElementById('logModal');
-    const select  = document.getElementById('logBook');
-    const dateInput = document.getElementById('logDate');
-    const titleEl = document.getElementById('logModalTitle');
-    const submitBtn = document.getElementById('logSubmitBtn');
-
-    titleEl.textContent = 'Логвай четене';
-    submitBtn.textContent = 'Запиши';
-
-    // Populate book dropdown
-    const books = BookRepo.getAllBooks();
-    select.innerHTML = '<option value="">— Избери книга —</option>';
-    books.forEach(b => {
-        const opt = document.createElement('option');
-        opt.value = b.id;
-        opt.textContent = b.title;
-        select.appendChild(opt);
-    });
-
-    // Default date to today
-    dateInput.value = new Date().toISOString().slice(0, 10);
-    document.getElementById('logPages').value = '';
-    document.getElementById('logNote').value = '';
-
-    // Clear previous errors
+function openLogModal(bookId = '', log = null) {
+    _editingLogId = log?.id ?? null;
+    const select = document.getElementById('logBook');
+    const options = BookRepo.getAllBooks().map(book => new Option(book.title, book.id));
+    select.replaceChildren(new Option('— Избери книга —', ''), ...options);
+    select.value = String(log?.bookId ?? bookId);
+    document.getElementById('logDate').value = log?.dateISO ?? getDayISO(new Date());
+    document.getElementById('logPages').value = log?.pages ?? '';
+    document.getElementById('logNote').value = log?.note ?? '';
+    document.getElementById('logModalTitle').textContent = log ? 'Редактирай запис' : 'Запиши четене';
+    document.getElementById('logSubmitBtn').textContent = log ? 'Запази' : 'Запиши';
     clearLogErrors();
-
-    overlay.removeAttribute('hidden');
-    overlay.setAttribute('aria-hidden', 'false');
-    select.focus();
+    document.getElementById('logModal').showModal();
 }
 
 function openEditLogModal(logId) {
     const log = LogRepo.getLogById(logId);
-    if (!log) return;
-
-    _editingLogId = logId; // edit mode
-    const overlay = document.getElementById('logModal');
-    const select  = document.getElementById('logBook');
-    const dateInput = document.getElementById('logDate');
-    const pagesInput = document.getElementById('logPages');
-    const noteInput = document.getElementById('logNote');
-    const titleEl = document.getElementById('logModalTitle');
-    const submitBtn = document.getElementById('logSubmitBtn');
-
-    titleEl.textContent = 'Редактирай запис';
-    submitBtn.textContent = 'Запази';
-
-    // Populate book dropdown
-    const books = BookRepo.getAllBooks();
-    select.innerHTML = '<option value="">— Избери книга —</option>';
-    books.forEach(b => {
-        const opt = document.createElement('option');
-        opt.value = b.id;
-        opt.textContent = b.title;
-        select.appendChild(opt);
-    });
-
-    // Pre-fill from existing log
-    select.value = String(log.bookId);
-    dateInput.value = log.dateISO;
-    pagesInput.value = log.pages;
-    noteInput.value = log.note || '';
-
-    clearLogErrors();
-
-    overlay.removeAttribute('hidden');
-    overlay.setAttribute('aria-hidden', 'false');
-    select.focus();
-}
-
-function closeLogModal() {
-    _editingLogId = null;
-    const overlay = document.getElementById('logModal');
-    const form    = document.getElementById('logForm');
-    overlay.setAttribute('hidden', '');
-    overlay.setAttribute('aria-hidden', 'true');
-    form.reset();
-    clearLogErrors();
+    if (log) openLogModal(log.bookId, log);
 }
 
 function clearLogErrors() {
-    document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+    document.querySelectorAll('#logForm .field-error').forEach(el => el.textContent = '');
 }
 
 function handleLogSubmit(e) {
@@ -806,13 +653,14 @@ function handleLogSubmit(e) {
     clearLogErrors();
 
     const bookId = document.getElementById('logBook').value;
+    const selectedBook = BookRepo.getBookById(Number(bookId));
     const dateISO = document.getElementById('logDate').value;
-    const pages  = document.getElementById('logPages').value;
+    const pages = document.getElementById('logPages').valueAsNumber;
     const note   = document.getElementById('logNote').value.trim();
 
     let valid = true;
 
-    if (!bookId) {
+    if (!bookId || !selectedBook) {
         document.getElementById('logBookError').textContent = 'Избери книга.';
         valid = false;
     }
@@ -820,23 +668,23 @@ function handleLogSubmit(e) {
         document.getElementById('logDateError').textContent = 'Въведи дата.';
         valid = false;
     }
-    const pagesInt = parseInt(pages, 10);
-    if (!pages || isNaN(pagesInt) || pagesInt < 1) {
-        document.getElementById('logPagesError').textContent = 'Въведи поне 1 страница.';
+    if (!Number.isInteger(pages) || pages < 1) {
+        document.getElementById('logPagesError').textContent = 'Въведи положителен цял брой страници.';
         valid = false;
     }
 
     if (!valid) return;
 
+    const dialog = document.getElementById('logModal');
     if (_editingLogId) {
         // ---- EDIT MODE ----
         const oldLog = LogRepo.getLogById(_editingLogId);
-        if (!oldLog) { closeLogModal(); return; }
+        if (!oldLog) { dialog.close(); return; }
 
         const oldBookId = Number(oldLog.bookId);
         const newBookId = Number(bookId);
         const oldPages = oldLog.pages;
-        const newPages = pagesInt;
+        const newPages = pages;
 
         // Update the log entry
         LogRepo.updateLog(_editingLogId, {
@@ -869,24 +717,23 @@ function handleLogSubmit(e) {
             }
         }
 
-        closeLogModal();
-        displayBooks();
-        renderActivityFeed();
+        dialog.close();
+        refreshAll();
+        const editButton = Array.from(document.querySelectorAll('.activity-item__edit'))
+            .find(button => button.dataset.logId === _editingLogId);
+        (editButton || document.querySelector('#activity h3')).focus({ preventScroll: true });
         showToast('Записът е обновен!');
     } else {
-        // ---- ADD MODE ----
-        LogRepo.addLog({ bookId, dateISO, pages: pagesInt, note });
-
-        // Update book progress: currentPage + pages, capped at totalPages
-        const book = BookRepo.getBookById(Number(bookId));
-        if (book) {
-            const newPage = Math.min(book.totalPages, book.currentPage + pagesInt);
-            BookRepo.updateProgress(Number(bookId), newPage);
+        const log = LogRepo.addLog({ bookId, dateISO, pages, note });
+        if (!log) {
+            document.getElementById('logPagesError').textContent = 'Такава сесия вече е записана.';
+            return;
         }
+        const newPage = Math.min(selectedBook.totalPages, selectedBook.currentPage + pages);
+        BookRepo.updateProgress(selectedBook.id, newPage);
 
-        closeLogModal();
-        displayBooks();
-        renderActivityFeed();
+        dialog.close();
+        refreshAll();
         showToast('Сесията е записана!');
     }
 }
@@ -920,9 +767,8 @@ function renderActivityFeed() {
     if (dedupedLogs.length === 0) {
         container.innerHTML = `
             <div class="empty-state empty-state--compact">
-                <span class="empty-state__icon" aria-hidden="true">📖</span>
-                <p class="empty-state__title">Все още няма логнати сесии</p>
-                <p class="empty-state__text">Натисни „Логвай четене", за да запишеш първата си сесия.</p>
+                <p class="empty-state__title">Все още няма записани сесии</p>
+                <p class="empty-state__text"><a href="#home">Към четенето</a></p>
             </div>
         `;
         return;
@@ -983,8 +829,8 @@ function renderActivityFeed() {
                 }
             }
             LogRepo.deleteLog(id);
-            displayBooks();
-            renderActivityFeed();
+            refreshAll();
+            document.querySelector('#activity h3').focus({ preventScroll: true });
             showToast('Записът е изтрит.');
         });
     });
@@ -1036,7 +882,7 @@ function seedDemoData() {
     function daysAgo(n) {
         var d = new Date(now);
         d.setDate(d.getDate() - n);
-        return d.toISOString().slice(0, 10);
+        return getDayISO(d);
     }
 
     // --- 8 Demo books ---
@@ -1091,6 +937,8 @@ function clearAllData() {
     localStorage.removeItem(ChallengeRepo.STORAGE_KEY);
     // Also clear theme preference if stored
     localStorage.removeItem('bookbuddy_theme');
+    ThemeSwitcher.applyTheme('system');
+    document.getElementById('themeSelect').value = 'system';
 
     refreshAll();
     showToast('Всички данни бяха изчистени.');
