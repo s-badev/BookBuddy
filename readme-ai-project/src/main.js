@@ -513,7 +513,62 @@ function initLogModal() {
         afterLogClose = null;
         if (action) action();
         else restoreDetailsAfterReading();
+        runPendingFinish();
     });
+}
+
+/* ========== Finished book: stamp and shelf flash ========== */
+// Set by handleLogSubmit when a session finishes a book; played after the
+// log dialog has closed and any dialog it returns to has reopened.
+let pendingFinish = null;
+
+function runPendingFinish() {
+    if (!pendingFinish) return;
+    const { bookId, moveFocus } = pendingFinish;
+    pendingFinish = null;
+    requestAnimationFrame(() => celebrateFinish(bookId, moveFocus));
+}
+
+function isInViewport(element) {
+    const rect = element.getBoundingClientRect();
+    const top = document.querySelector('.navbar').getBoundingClientRect().bottom;
+    const nav = document.querySelector('.bottom-nav');
+    const bottom = nav.offsetHeight ? nav.getBoundingClientRect().top : innerHeight;
+    return rect.top >= top && rect.bottom <= bottom && rect.left >= 0 && rect.right <= innerWidth;
+}
+
+function celebrateFinish(bookId, moveFocus = true) {
+    const spine = document.getElementById('shelf-book-' + bookId);
+    if (spine) {
+        const bay = spine.closest('.shelf-bay');
+        spine.classList.add('is-just-finished');
+        bay?.classList.add('has-arrival');
+        setTimeout(() => {
+            spine.classList.remove('is-just-finished');
+            bay?.classList.remove('has-arrival');
+        }, motionMs('--dur-slow', 480) * 3);
+    }
+
+    // The stamp lands where the reader is looking: the open book, or the shelf.
+    const preview = document.getElementById('shelfPreview');
+    const details = document.getElementById('detailsModal');
+    if (preview.open && activeShelf?.bookId === bookId) {
+        playFinishStamp(preview.querySelector('#shelfPreviewFront .book-cover'), 'cover');
+    } else if (details.open && detailsContext?.bookId === bookId) {
+        playFinishStamp(details.querySelector('.details-book .book-cover'), 'cover');
+    } else if (spine) {
+        playFinishStamp(spine, 'spine');
+        if (moveFocus) {
+            if (!isInViewport(spine)) {
+                spine.scrollIntoView({ block: 'center', behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+            }
+            spine.focus({ preventScroll: true });
+        }
+    }
+}
+
+function finishedToast(book) {
+    return 'Прочетено: „' + book.title + '“';
 }
 
 let afterLogClose = null;
@@ -632,6 +687,10 @@ function handleLogSubmit(event) {
     }
     if (effect.completion && effect.completion.logId === undefined) effect.completion.logId = saved.id;
     BookRepo.updateProgress(book.id, effect.page, effect.completion);
+    // `book` still holds the state before this session.
+    const finished = getBookStatus(book) !== 'finished' &&
+        getBookStatus(BookRepo.getBookById(book.id)) === 'finished';
+    if (finished) pendingFinish = { bookId: book.id, moveFocus: !oldLog };
 
     dialog.close();
     refreshAll();
@@ -639,7 +698,7 @@ function handleLogSubmit(event) {
         const opener = document.getElementById('journal-edit-' + oldLog.id) || document.querySelector('#activity h3');
         opener.focus({ preventScroll: true });
     }
-    showToast(oldLog ? 'Записът е обновен!' : 'Сесията е записана!');
+    showToast(finished ? finishedToast(book) : oldLog ? 'Записът е обновен!' : 'Сесията е записана!');
 }
 
 let detailsContext = null;
@@ -685,10 +744,17 @@ function initDetailsModal() {
         event.preventDefault();
         const value = event.target.elements.currentPage.valueAsNumber;
         if (!Number.isSafeInteger(value) || !event.target.reportValidity()) return;
+        const before = BookRepo.getBookById(detailsContext.bookId);
         BookRepo.updateProgress(detailsContext.bookId, value);
         refreshAll();
         showBookDetails('detailsProgress');
-        showToast('Напредъкът е обновен.');
+        const after = BookRepo.getBookById(detailsContext.bookId);
+        if (before && after && getBookStatus(before) !== 'finished' && getBookStatus(after) === 'finished') {
+            celebrateFinish(after.id, false);
+            showToast(finishedToast(after));
+        } else {
+            showToast('Напредъкът е обновен.');
+        }
     });
     document.getElementById('detailsContent').addEventListener('click', event => {
         if (event.target.closest('#detailsDeleteBook')) deleteBook(detailsContext.bookId);

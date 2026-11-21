@@ -63,3 +63,32 @@ function setKineticText(element, text) {
     element.setAttribute('aria-label', text);
     element.replaceChildren(fragment);
 }
+
+/* ---------- Finish stamp ---------- */
+/**
+ * Shows the "Прочетено" stamp inside `host` (which must be positioned),
+ * holds it for four --dur-slow, then lets it fade out. With reduced motion
+ * it appears at once and is removed without a fade.
+ */
+function playFinishStamp(host, variant, startDelay = 0) {
+    if (!host) return;
+    host.querySelector(':scope > .finish-stamp')?.remove();
+    const stamp = document.createElement('span');
+    stamp.className = 'finish-stamp finish-stamp--' + variant;
+    stamp.setAttribute('aria-hidden', 'true');
+    stamp.textContent = 'Прочетено';
+    if (startDelay && !reducedMotion.matches) stamp.style.animationDelay = startDelay + 'ms';
+    host.append(stamp);
+
+    setTimeout(() => {
+        if (!stamp.isConnected) return;
+        if (reducedMotion.matches) {
+            stamp.remove();
+            return;
+        }
+        stamp.classList.add('is-leaving');
+        Promise.all(stamp.getAnimations().map(animation => animation.finished))
+            .catch(() => {})
+            .finally(() => stamp.remove());
+    }, startDelay + motionMs('--dur-slow', 480) * 4);
+}
