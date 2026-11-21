@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добави книга — BookBuddy</title>
+    <script src="src/utils/appStorage.js"></script>
     <script src="src/utils/theme.js"></script>
     <link rel="stylesheet" href="styles/style.css">
 </head>
@@ -42,6 +43,10 @@
         </div>
     </nav>
 
+    <div class="demo-notice" id="demoNotice" hidden>
+        <div class="container">Демо библиотека · <a href="index.html" data-personal-library>Към личната библиотека</a></div>
+    </div>
+
     <main>
         <section class="form-page">
             <div class="container form-page__inner">
@@ -67,6 +72,13 @@
                                 <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 <input type="text" id="author" name="author" required placeholder="напр. Антоан дьо Сент-Екзюпери">
                             </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="isbn">ISBN за корица <small>(по желание)</small></label>
+                            <input type="text" id="isbn" name="isbn" placeholder="напр. 978-0-385-47257-9"
+                                   aria-describedby="isbnHelp" spellcheck="false">
+                            <small class="form-hint" id="isbnHelp">Запази ISBN, за да потърсиш корица в Open Library. Изтрий ISBN и запази книгата, за да върнеш типографската корица.</small>
                         </div>
 
                         <div class="form-row">

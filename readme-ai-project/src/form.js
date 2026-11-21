@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const charCount = document.getElementById('charCount');
     const currentPageInput = document.getElementById('currentPage');
     const totalPagesInput = document.getElementById('totalPages');
+    const isbnInput = document.getElementById('isbn');
 
     // --- Edit mode detection ---
     const params = new URLSearchParams(window.location.search);
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('author').value = editingBook.author;
             totalPagesInput.value = editingBook.totalPages;
             currentPageInput.value = editingBook.currentPage;
+            isbnInput.value = editingBook.isbn || '';
             notesTextarea.value = editingBook.notes || '';
             charCount.textContent = `${(editingBook.notes || '').length} / 300`;
 
@@ -37,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const subtitle = document.querySelector('.auth-card__subtitle');
             if (subtitle) subtitle.textContent = 'Тази книга не съществува. Ще бъдете пренасочени…';
             form.style.display = 'none';
-            setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+            setTimeout(() => { window.location.href = appPage('index.html'); }, 2000);
             return;
         }
     }
@@ -56,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     notesTextarea.addEventListener('input', function() {
         charCount.textContent = `${this.value.length} / 300`;
     });
+    isbnInput.addEventListener('input', () => isbnInput.setCustomValidity(''));
 
     // Ensure current page doesn't exceed total pages
     currentPageInput.addEventListener('input', function() {
@@ -71,12 +74,20 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
+        const isbn = Validate.normalizeISBN(isbnInput.value);
+        if (isbn === null) {
+            isbnInput.setCustomValidity('Въведи валиден ISBN-10 или ISBN-13.');
+            isbnInput.reportValidity();
+            return;
+        }
+
         const formData = {
             title: document.getElementById('title').value.trim(),
             author: document.getElementById('author').value.trim(),
             totalPages: parseInt(document.getElementById('totalPages').value),
             currentPage: parseInt(document.getElementById('currentPage').value) || 0,
-            notes: document.getElementById('notes').value.trim()
+            notes: document.getElementById('notes').value.trim(),
+            isbn
         };
 
         // Validate form data
@@ -96,6 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Redirect to main page
-        window.location.href = 'index.html';
+        window.location.href = appPage('index.html');
     });
 });

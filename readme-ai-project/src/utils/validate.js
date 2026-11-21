@@ -1,5 +1,25 @@
 // Validation utilities
 const Validate = {
+    // An empty field is optional. A null result means the ISBN is invalid.
+    normalizeISBN(value) {
+        if (!value.trim()) return '';
+        const isbn = value.replace(/[\s-]/g, '').toUpperCase();
+
+        if (/^\d{9}[\dX]$/.test(isbn)) {
+            const sum = [...isbn].reduce((total, digit, index) =>
+                total + (digit === 'X' ? 10 : Number(digit)) * (10 - index), 0);
+            return sum % 11 === 0 ? isbn : null;
+        }
+
+        if (/^97[89]\d{10}$/.test(isbn)) {
+            const sum = [...isbn].reduce((total, digit, index) =>
+                total + Number(digit) * (index % 2 === 0 ? 1 : 3), 0);
+            return sum % 10 === 0 ? isbn : null;
+        }
+
+        return null;
+    },
+
     // Validate book form data
     bookForm(formData) {
         const errors = [];

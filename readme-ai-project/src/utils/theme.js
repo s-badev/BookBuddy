@@ -10,12 +10,12 @@ var ThemeSwitcher = (function () {
 
     /** Read stored theme or default to "system" */
     function getTheme() {
-        return localStorage.getItem(STORAGE_KEY) || 'system';
+        return appStorage.getItem(STORAGE_KEY) || 'system';
     }
 
     /** Persist chosen theme */
     function setTheme(theme) {
-        localStorage.setItem(STORAGE_KEY, theme);
+        appStorage.setItem(STORAGE_KEY, theme);
         applyTheme(theme);
     }
 
@@ -86,7 +86,7 @@ var ThemeSwitcher = (function () {
 /* ---------- Apply theme immediately (before DOMContentLoaded) ---------- */
 /* This avoids a flash-of-wrong-theme on page load. */
 (function () {
-    var stored = localStorage.getItem('bookbuddy_theme') || 'system';
+    var stored = appStorage.getItem('bookbuddy_theme') || 'system';
     if (stored === 'light' || stored === 'dark') {
         document.documentElement.setAttribute('data-theme', stored);
     }

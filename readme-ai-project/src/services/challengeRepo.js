@@ -26,7 +26,7 @@ const ChallengeRepo = {
 
     // Get all challenges
     getChallenges() {
-        const raw = localStorage.getItem(this.STORAGE_KEY);
+        const raw = appStorage.getItem(this.STORAGE_KEY);
         return raw ? JSON.parse(raw) : [];
     },
 
@@ -34,12 +34,12 @@ const ChallengeRepo = {
     seedDefaultChallengesIfEmpty() {
         const existing = this.getChallenges();
         if (existing.length === 0) {
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.DEFAULTS));
+            appStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.DEFAULTS));
         }
     },
 
     // Persist challenges array
     saveChallenges(challenges) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(challenges));
+        appStorage.setItem(this.STORAGE_KEY, JSON.stringify(challenges));
     }
 };

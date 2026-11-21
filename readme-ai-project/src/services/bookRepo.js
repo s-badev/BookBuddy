@@ -4,7 +4,7 @@ const BookRepo = {
 
     // Get all books from localStorage
     getAllBooks() {
-        const books = localStorage.getItem(this.STORAGE_KEY);
+        const books = appStorage.getItem(this.STORAGE_KEY);
         return books ? JSON.parse(books) : [];
     },
 
@@ -20,18 +20,26 @@ const BookRepo = {
             notes: book.notes || '',
             createdAt: new Date().toISOString()
         };
+        if (book.isbn) newBook.isbn = book.isbn;
         books.push(newBook);
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(books));
+        appStorage.setItem(this.STORAGE_KEY, JSON.stringify(books));
         return newBook;
     },
 
     // Update book progress
-    updateProgress(bookId, currentPage) {
+    updateProgress(bookId, currentPage, completion) {
         const books = this.getAllBooks();
         const bookIndex = books.findIndex(b => b.id === bookId);
         if (bookIndex !== -1) {
-            books[bookIndex].currentPage = parseInt(currentPage);
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(books));
+            const book = books[bookIndex];
+            const page = parseInt(currentPage);
+            if (completion) {
+                book.completion = completion;
+            } else if (completion === null || page !== Number(book.currentPage)) {
+                delete book.completion;
+            }
+            book.currentPage = page;
+            appStorage.setItem(this.STORAGE_KEY, JSON.stringify(books));
             return books[bookIndex];
         }
         return null;
@@ -41,7 +49,7 @@ const BookRepo = {
     deleteBook(bookId) {
         const books = this.getAllBooks();
         const filteredBooks = books.filter(b => b.id !== bookId);
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredBooks));
+        appStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredBooks));
     },
 
     // Get a single book by id
@@ -55,6 +63,7 @@ const BookRepo = {
         const books = this.getAllBooks();
         const idx = books.findIndex(b => b.id === bookId);
         if (idx === -1) return null;
+        const previous = books[idx];
         books[idx] = {
             ...books[idx],
             title: updatedData.title,
@@ -63,7 +72,16 @@ const BookRepo = {
             currentPage: parseInt(updatedData.currentPage) || 0,
             notes: updatedData.notes || ''
         };
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(books));
+        if (updatedData.isbn === '') {
+            delete books[idx].isbn;
+        } else if (updatedData.isbn !== undefined) {
+            books[idx].isbn = updatedData.isbn;
+        }
+        if (books[idx].currentPage !== Number(previous.currentPage) ||
+            books[idx].totalPages !== Number(previous.totalPages)) {
+            delete books[idx].completion;
+        }
+        appStorage.setItem(this.STORAGE_KEY, JSON.stringify(books));
         return books[idx];
     }
 };
