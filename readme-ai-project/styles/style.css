@@ -17,6 +17,7 @@
     --c-accent-light:   rgba(91,70,138,.10);
 
     /* — Rules and dividers (3:1 against every light surface) — */
+    --c-accent-strong:  rgba(91,70,138,.20);   /* pressed background */
     --c-line:           #8880ad;
 
     /* — Foil and light details on spines and covers — */
@@ -26,6 +27,7 @@
     /* — Semantic — */
     --c-danger:         #b52632;
     --c-danger-hover:   #dc2626;
+    --c-on-danger:      #ffffff;
     --c-success:        #3db878;
 
     /* — Cool paper and ink — */
@@ -128,10 +130,13 @@
     --c-accent:         #c1a8ec;
     --c-accent-hover:   #d4c2f3;
     --c-accent-light:   rgba(193,168,236,.14);
+    --c-accent-strong:  rgba(193,168,236,.26);
     --c-line:           #8e83b8;
     --c-foil:           #c9c9de;
     --c-art:            #273446;
     --c-danger:         #ff8a91;
+    --c-danger-hover:   #ffb0b5;
+    --c-on-danger:      #2a0f12;
     --c-text:           #edf2f8;
     --c-text-secondary: #b6c3d2;
     --c-text-muted:     #b6c3d2;
@@ -174,10 +179,13 @@
         --c-accent:         #c1a8ec;
         --c-accent-hover:   #d4c2f3;
         --c-accent-light:   rgba(193,168,236,.14);
+        --c-accent-strong:  rgba(193,168,236,.26);
         --c-line:           #8e83b8;
         --c-foil:           #c9c9de;
         --c-art:            #273446;
         --c-danger:         #ff8a91;
+        --c-danger-hover:   #ffb0b5;
+        --c-on-danger:      #2a0f12;
         --c-text:           #edf2f8;
         --c-text-secondary: #b6c3d2;
         --c-text-muted:     #b6c3d2;
@@ -266,7 +274,6 @@ ul{list-style:none}
 :focus-visible{
     outline:2px solid var(--c-focus);
     outline-offset:2px;
-    border-radius:var(--r-sm);
 }
 
 /* ==================== 3. Utility / Layout ==================== */
@@ -370,11 +377,6 @@ ul{list-style:none}
     min-height:38px;
     line-height:1.3;
 }
-.theme-switch__select:hover{border-color:var(--c-text-muted)}
-.theme-switch__select:focus{
-    outline:2px solid var(--c-focus);outline-offset:0;
-    border-color:var(--c-primary);
-}
 
 /* ==================== 6. Buttons ==================== */
 .btn{
@@ -399,36 +401,24 @@ ul{list-style:none}
     background:var(--c-primary);color:var(--c-on-primary);
     box-shadow:0 2px 8px rgba(74,64,128,.25);
 }
-.btn--primary:hover{
-    box-shadow:0 4px 14px rgba(74,64,128,.35);
-    transform:translateY(-1px);filter:brightness(1.05);
-}
-.btn--primary:active{transform:translateY(0);box-shadow:var(--sh-sm)}
 
 /* Outline */
 .btn--outline{
     background:transparent;color:var(--c-text);
     border:1.5px solid var(--c-border);
 }
-.btn--outline:hover{
-    border-color:var(--c-primary);color:var(--c-primary);
-    background:var(--c-primary-light);
-}
 
 /* Ghost (text only) */
 .btn--ghost{
     background:transparent;color:var(--c-text-secondary);
 }
-.btn--ghost:hover{background:var(--c-subtle);color:var(--c-text)}
 
 /* Danger */
 .btn--danger{
-    background:var(--c-danger);color:#fff;
+    background:var(--c-danger);color:var(--c-on-danger);
     padding:.4rem .9rem;font-size:var(--fs-xs);min-height:34px;
     border-radius:var(--r-md);
 }
-.btn--danger:hover{background:var(--c-danger-hover);transform:translateY(-1px)}
-.btn--danger:active{transform:translateY(0)}
 
 /* Icon-only button */
 .btn--icon{
@@ -436,9 +426,6 @@ ul{list-style:none}
     display:inline-flex;align-items:center;justify-content:center;
     background:var(--c-subtle);color:var(--c-text-secondary);border:none;
 }
-.btn--icon:hover{background:var(--c-border);color:var(--c-text)}
-.btn--icon.btn--icon-edit:hover{background:var(--c-primary-light);color:var(--c-primary)}
-.btn--icon.btn--icon-danger:hover{background:rgba(239,68,68,.1);color:var(--c-danger)}
 
 /* ==================== 7. Pill / Badge ==================== */
 .pill{
@@ -557,18 +544,6 @@ ul{list-style:none}
     min-height:48px;
 }
 .input-icon-wrap:focus-within .input-icon{color:var(--c-primary)}
-.form-group input:hover,
-.form-group textarea:hover,
-.input-icon-wrap input:hover{
-    border-color:var(--c-text-muted);
-}
-.form-group input:focus,
-.form-group textarea:focus,
-.input-icon-wrap input:focus{
-    outline:2px solid var(--c-focus);outline-offset:0;
-    border-color:var(--c-primary);
-    box-shadow:0 0 0 4px rgba(74,64,128,.12);
-}
 .form-group input::placeholder,
 .form-group textarea::placeholder,
 .input-icon-wrap input::placeholder{color:var(--c-text-light)}
@@ -645,12 +620,6 @@ ul{list-style:none}
     background-position:right 14px center;
     padding-right:40px;
 }
-.modal-select:hover{border-color:var(--c-text-muted)}
-.modal-select:focus{
-    outline:2px solid var(--c-focus);outline-offset:0;
-    border-color:var(--c-primary);
-    box-shadow:0 0 0 4px rgba(74,64,128,.12);
-}
 
 /* Field-level error */
 .field-error{
@@ -709,7 +678,6 @@ ul{list-style:none}
 .footer__about dt{margin-top:8px;font-weight:var(--fw-semibold)}
 .footer__about a{text-decoration:underline;text-underline-offset:3px}
 .btn--ghost-danger{color:var(--c-danger)}
-.btn--ghost-danger:hover{background:rgba(239,68,68,.08);color:var(--c-danger)}
 
 /* ==================== 17. Responsive ==================== */
 
@@ -1038,9 +1006,6 @@ ul{list-style:none}
 .books-toolbar__select{padding:6px 8px;cursor:pointer}
 .editorial-rank button,.issue__index button{
     border:0;background:none;color:inherit;font:inherit;text-align:start;overflow-wrap:anywhere;
-}
-.editorial-rank button:hover,.issue__index button:hover{
-    text-decoration:underline;text-underline-offset:3px;
 }
 .book-card__status{
     display:flex;
@@ -1504,10 +1469,6 @@ ul{list-style:none}
 .shelf-spine:has(.shelf-spine__author) .shelf-spine__title{left:42%}
 .shelf-spine__author{left:72%;font:500 .65rem/1 var(--font)}
 .shelf-spine:focus-visible{outline:3px solid #e3d9ff;outline-offset:2px}
-@media(hover:hover) and (prefers-reduced-motion:no-preference){
-    .shelf-slot .shelf-spine{transition:transform var(--dur-fast) var(--ease-out)}
-    .shelf-slot .shelf-spine:is(:hover,:focus-visible){transform:translateY(-4px)}
-}
 #booksList .empty-state .btn{margin-top:10px;white-space:normal}
 
 /* ==================== Frontal book preview ==================== */
@@ -1590,7 +1551,172 @@ html:has(.shelf-preview[open]){overflow:hidden}
     .shelf-preview::backdrop{transition:none}
 }
 
-/* ==================== 19. Print ==================== */
+/* ==================== 19. Interaction states ====================
+   Every interactive element has :hover (pointer devices only), :focus-visible
+   and :active. Hover changes at least two of: background or color, transform,
+   shadow, border. Timings and easing come from the motion tokens. */
+
+/* — Shared transitions (reduced motion removes them globally) — */
+.btn,.navbar__brand,.navbar__mark,.navbar__logo-icon,.navbar__toggle,.navbar__link,
+.bottom-nav__link,.bottom-nav__link svg,.reading-card__details,.footer__credit,
+.goal-card__link,.goal-card__link svg,.journal__links a,.demo-notice a,.footer__about a,
+.activity__feed > p a,.footer__about summary,.issue__undated summary,.details-manage summary,
+.editorial-rank button,.issue__index button,
+.books-toolbar__input,.books-toolbar__select,.theme-switch__select,.modal-select,
+.form-group input,.form-group textarea,.input-icon-wrap input,.details-progress input,
+.books-toolbar__search-icon,.shelf-spine,#readingCover{
+    transition-property:background-color,color,border-color,box-shadow,transform,filter;
+    transition-duration:var(--dur-fast);
+    transition-timing-function:var(--ease-out);
+}
+.reading-card__details,.footer__credit,.goal-card__link,.journal__links a,.demo-notice a,
+.footer__about a,.activity__feed > p a,.footer__about summary,.issue__undated summary,
+.details-manage summary,.editorial-rank button,.issue__index button{
+    border-radius:var(--r-sm);
+}
+.navbar__toggle{border-radius:var(--r-md)}
+.btn--outline{border-color:var(--c-line)}
+
+/* — Hover (pointer devices) — */
+@media (hover:hover){
+    .btn--primary:hover{
+        background:var(--c-primary-hover);
+        transform:translateY(-2px);
+        box-shadow:0 8px 18px rgba(74,64,128,.38);
+    }
+    .btn--outline:hover{
+        border-color:var(--c-accent);color:var(--c-accent);
+        background:var(--c-accent-light);
+        transform:translateY(-1px);box-shadow:var(--sh-sm);
+    }
+    .btn--ghost:hover{
+        background:var(--c-accent-light);color:var(--c-accent);
+        box-shadow:inset 0 0 0 1px var(--c-line);
+    }
+    .btn--ghost-danger:hover{
+        background:color-mix(in srgb,var(--c-danger) 12%,transparent);
+        color:var(--c-danger);
+        box-shadow:inset 0 0 0 1px var(--c-danger);
+    }
+    .btn--danger:hover{
+        background:var(--c-danger-hover);
+        transform:translateY(-1px);
+        box-shadow:0 6px 14px color-mix(in srgb,var(--c-danger) 40%,transparent);
+    }
+    .btn--icon:hover{
+        background:var(--c-border);color:var(--c-text);
+        transform:translateY(-1px);box-shadow:var(--sh-sm);
+    }
+    .btn--icon.btn--icon-edit:hover{background:var(--c-accent-light);color:var(--c-accent)}
+    .btn--icon.btn--icon-danger:hover{
+        background:color-mix(in srgb,var(--c-danger) 12%,transparent);color:var(--c-danger);
+    }
+
+    .navbar__link[aria-current]:hover{color:var(--c-accent)}
+    .navbar__brand:hover{color:var(--c-accent)}
+    .navbar__brand:hover .navbar__mark{background:var(--c-primary-hover);transform:rotate(-8deg) scale(1.08)}
+    .navbar__brand:hover .navbar__logo-icon{color:var(--c-accent);transform:rotate(-8deg) scale(1.08)}
+    .navbar__toggle:hover{background:var(--c-accent-light);color:var(--c-accent)}
+    .bottom-nav__link:hover{background:var(--c-accent-light);color:var(--c-accent)}
+    .bottom-nav__link:hover svg{transform:translateY(-2px)}
+
+    .reading-card__details:hover{
+        color:var(--c-accent-hover);background:var(--c-accent-light);
+        box-shadow:0 0 0 6px var(--c-accent-light);
+    }
+    .footer__credit:hover,.goal-card__link:hover,.journal__links a:hover,.demo-notice a:hover,
+    .footer__about a:hover,.activity__feed > p a:hover{
+        color:var(--c-accent);background:var(--c-accent-light);
+        box-shadow:0 0 0 4px var(--c-accent-light);
+    }
+    .goal-card__link:hover svg{transform:translateX(3px)}
+    .footer__about summary:hover,.issue__undated summary:hover,.details-manage summary:hover{
+        color:var(--c-accent);background:var(--c-accent-light);
+        box-shadow:0 0 0 4px var(--c-accent-light);
+    }
+    .editorial-rank button:hover,.issue__index button:hover{
+        color:var(--c-accent);background:var(--c-accent-light);
+        box-shadow:0 0 0 4px var(--c-accent-light);
+        text-decoration:underline;text-underline-offset:3px;
+    }
+
+    .books-toolbar__input:hover,.books-toolbar__select:hover,.theme-switch__select:hover,
+    .modal-select:hover,.form-group input:hover,.form-group textarea:hover,
+    .input-icon-wrap input:hover,.details-progress input:hover{
+        border-color:var(--c-accent);box-shadow:0 0 0 3px var(--c-accent-light);
+    }
+    .books-toolbar__search:hover .books-toolbar__search-icon{color:var(--c-accent)}
+
+    .shelf-slot .shelf-spine:hover{
+        transform:translateY(-8px);
+        box-shadow:inset 3px 0 0 #0c10212a,inset -2px 0 0 #f3f6ff1b,3px 12px 14px #080b18d0;
+        filter:brightness(1.14);
+    }
+    #readingCover:hover{
+        transform:perspective(650px) rotateY(-4deg) rotateZ(-3deg) translateY(-6px) scale(1.03);
+        filter:drop-shadow(8px 14px 12px #10182770);
+    }
+}
+
+/* — Keyboard focus: 2px ring, 3:1 against every surface it sits on — */
+.shelf-slot .shelf-spine:focus-visible{
+    transform:translateY(-8px);
+    box-shadow:inset 3px 0 0 #0c10212a,inset -2px 0 0 #f3f6ff1b,3px 12px 14px #080b18d0;
+    filter:brightness(1.14);
+}
+#readingCover:focus-visible{
+    transform:perspective(650px) rotateY(-4deg) rotateZ(-3deg) translateY(-6px) scale(1.03);
+    filter:drop-shadow(8px 14px 12px #10182770);
+}
+.books-toolbar__input:focus,.books-toolbar__select:focus,.theme-switch__select:focus,
+.modal-select:focus,.form-group input:focus,.form-group textarea:focus,
+.input-icon-wrap input:focus,.details-progress input:focus{
+    outline:2px solid var(--c-focus);outline-offset:0;
+    border-color:var(--c-accent);box-shadow:0 0 0 4px var(--c-accent-light);
+}
+.books-toolbar__search:focus-within .books-toolbar__search-icon{color:var(--c-accent)}
+
+/* — Pressed — */
+.btn--primary:active{
+    background:var(--c-primary-hover);
+    transform:translateY(0) scale(.98);
+    box-shadow:0 1px 3px rgba(74,64,128,.4);
+}
+.btn--outline:active{
+    border-color:var(--c-accent);color:var(--c-accent);
+    background:var(--c-accent-strong);transform:scale(.98);box-shadow:none;
+}
+.btn--ghost:active{background:var(--c-accent-strong);color:var(--c-accent);transform:scale(.98)}
+.btn--ghost-danger:active{
+    background:color-mix(in srgb,var(--c-danger) 22%,transparent);
+    color:var(--c-danger);transform:scale(.98);
+}
+.btn--danger:active{background:var(--c-danger-hover);transform:scale(.98);box-shadow:none}
+.btn--icon:active{background:var(--c-accent-strong);color:var(--c-accent);transform:scale(.94);box-shadow:none}
+.btn--icon.btn--icon-edit:active{background:var(--c-accent-strong);color:var(--c-accent)}
+.btn--icon.btn--icon-danger:active{
+    background:color-mix(in srgb,var(--c-danger) 22%,transparent);color:var(--c-danger);
+}
+.navbar__link:active{color:var(--c-accent)}
+.navbar__link:active::after{transform:scaleX(1);background:var(--c-accent-hover)}
+.navbar__brand:active .navbar__mark,.navbar__brand:active .navbar__logo-icon{transform:scale(.92)}
+.navbar__toggle:active{background:var(--c-accent-strong);color:var(--c-accent);transform:scale(.94)}
+.bottom-nav__link:active{background:var(--c-accent-strong);color:var(--c-accent);transform:scale(.97)}
+.reading-card__details:active,.footer__credit:active,.goal-card__link:active,.journal__links a:active,
+.demo-notice a:active,.footer__about a:active,.activity__feed > p a:active,
+.footer__about summary:active,.issue__undated summary:active,.details-manage summary:active,
+.editorial-rank button:active,.issue__index button:active{
+    color:var(--c-accent-hover);background:var(--c-accent-strong);
+    box-shadow:0 0 0 4px var(--c-accent-strong);
+}
+.shelf-slot .shelf-spine:active{
+    transform:translateY(-3px) scale(.97);filter:brightness(1.05);
+}
+#readingCover:active{
+    transform:perspective(650px) rotateY(-8deg) rotateZ(-5deg) scale(.98);
+}
+
+/* ==================== 20. Print ==================== */
 @media print{
     .navbar,.bottom-nav,.footer,.modal-dialog,.shelf-preview,.toast{display:none}
     .shelf-bay{break-inside:avoid}
