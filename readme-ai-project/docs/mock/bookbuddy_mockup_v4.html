@@ -1,0 +1,1474 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BookBuddy · Читалня нощем</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:#d8d4e2;color:#252037;font:14px/1.5 system-ui,"Segoe UI","Noto Sans",Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default;opacity:.55}
+button,h1,h2,h3,h4,p,figure,ul,ol{margin:0}
+ul,ol{padding:0;list-style:none}
+img,svg{display:block}
+button svg,span svg,.icon{flex:none}
+.icon{width:18px;height:18px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,.spine-book:focus-visible{
+  outline:2px solid var(--focus,#624ba6);outline-offset:3px}
+
+/* Review chrome */
+.review{max-width:1400px;margin:0 auto;padding:16px 24px 10px;display:flex;gap:20px;align-items:center;justify-content:space-between}
+.review-title{font:650 18px/1.15 Georgia,"Times New Roman","Noto Serif",serif;letter-spacing:-.03em}
+.review-title span{display:block;margin-top:2px;font:550 12px/1.3 system-ui,"Segoe UI",sans-serif;letter-spacing:0;color:#5a5368}
+.switch{display:flex;gap:3px;padding:4px;background:#f4f2f8;border:1px solid #d4d0dc;border-radius:9px}
+.switch button{min-height:38px;padding:5px 12px;border:0;color:#4f4863;background:none;border-radius:6px;font-weight:650}
+.switch button[aria-pressed=true]{background:#322452;color:#fff}
+.stage{max-width:1320px;margin:0 auto 28px;width:calc(100% - 40px);container-type:inline-size;position:relative;border:1px solid #cfc9db;border-radius:14px;overflow:clip;box-shadow:0 18px 50px #1a123028;isolation:isolate;background:#fff}
+.stage.phone{width:min(390px,calc(100% - 24px));border-radius:16px}
+
+.app{
+  --paper:#fbfafd;--panel:#ffffff;--soft:#ece8f4;--line:#d8d3e3;
+  --ink:#221832;--mute:#534b63;--primary:#41316c;--on-primary:#fff;
+  --gold:#76591c;--gold-line:#ac8b4d;--focus:#624ba6;--fill:#5b468a;
+  --nav:#fbfafd;--art:#1c1730;--cloth:#3a2b5c;--cloth-2:#2d2148;
+  --foil:#b08a3a;--sheet:#f3f1f8;--page-edge:#eceaf3;
+  --well:#2a243c;--plank:#3a3348;--plank-edge:#241e32;--plank-shine:#5a5368;
+  --ribbon:#5c2a44;--lamp:226,196,131;
+  --wall:#241e34;--cornice:#3a334c;
+  --display:Georgia,"Times New Roman","Liberation Serif","Noto Serif",serif;
+  --sans:system-ui,"Segoe UI","Noto Sans",Arial,sans-serif;
+  min-height:780px;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);
+  display:flex;flex-direction:column;position:relative;
+}
+.app.dark{
+  --paper:#0f0c16;--panel:#1a1526;--soft:#241c34;--line:#3a3148;
+  --ink:#f3eff8;--mute:#b9b1c8;--primary:#dfcff8;--on-primary:#281b3e;
+  --gold:#e2c483;--gold-line:#b49658;--focus:#d8bbff;--fill:#c1a8ec;
+  --nav:#120e1a;--art:#0c0912;--cloth:#2a1e44;--cloth-2:#1d1530;
+  --foil:#e2c483;--sheet:#241c34;--page-edge:#3a3148;
+  --well:#14101f;--plank:#3e3854;--plank-edge:#1b1728;--plank-shine:#6a6480;
+  --ribbon:#8a4564;--lamp:226,196,131;
+  --wall:#12101a;--cornice:#2a2438;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  .app.system{
+    --paper:#0f0c16;--panel:#1a1526;--soft:#241c34;--line:#3a3148;
+    --ink:#f3eff8;--mute:#b9b1c8;--primary:#dfcff8;--on-primary:#281b3e;
+    --gold:#e2c483;--gold-line:#b49658;--focus:#d8bbff;--fill:#c1a8ec;
+    --nav:#120e1a;--art:#0c0912;--cloth:#2a1e44;--cloth-2:#1d1530;
+    --foil:#e2c483;--sheet:#241c34;--page-edge:#3a3148;
+    --well:#14101f;--plank:#3e3854;--plank-edge:#1b1728;--plank-shine:#6a6480;
+    --ribbon:#8a4564;--lamp:226,196,131;
+    --wall:#12101a;--cornice:#2a2438;
+    color-scheme:dark;
+  }
+}
+
+/* Nav */
+.nav{min-height:72px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 4%;border-bottom:1px solid var(--line);background:var(--nav);gap:12px;z-index:4}
+.brand{display:inline-flex;align-items:baseline;gap:12px;border:0;background:none;color:var(--ink);padding:0;text-align:left}
+.brand-mark{display:grid;place-items:center;width:28px;height:28px;border-radius:2px;background:var(--primary);color:var(--on-primary);align-self:center}
+.brand-mark .icon{width:15px;height:15px}
+.brand-name{font:700 22px/1 var(--display);letter-spacing:-.04em}
+.brand-sub{font:700 10px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.navlinks,.navactions,.actions,.filters{display:flex;gap:6px;align-items:center}
+.navactions{justify-content:flex-end;gap:8px}
+.navlink{color:var(--mute);border:0;background:none;min-height:44px;padding:0 11px;font-weight:650;position:relative;white-space:nowrap}
+.navlink.current{color:var(--ink)}
+.navlink.current:after{content:"";height:2px;position:absolute;bottom:6px;left:11px;right:11px;background:var(--gold-line)}
+.button{display:inline-flex;gap:8px;align-items:center;justify-content:center;min-height:44px;padding:8px 15px;border:1px solid var(--line);border-radius:2px;background:var(--panel);color:var(--ink);font-weight:650;white-space:nowrap}
+.button:hover{background:var(--soft)}
+.button.main{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.button.main:hover{filter:brightness(1.08)}
+.button.icononly{width:44px;padding:0}
+.button.ghost{background:transparent}
+.quiet{border:0;background:none;color:var(--ink);padding:0;min-height:44px;display:inline-flex;align-items:center;gap:8px;font-weight:700}
+.quiet:hover{text-decoration:underline;text-underline-offset:4px}
+.theme-field{display:flex;align-items:center;gap:6px}
+.theme-field label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.theme-field select{min-height:40px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:0 10px;border-radius:2px;font-weight:650}
+.bottom-nav{display:none}
+.kicker,.colophon,.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--gold)}
+.page{padding:28px 4% 36px;flex:1;position:relative}
+.page-title{font:500 56px/1.02 var(--display);letter-spacing:-.05em}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}
+.section-head p{color:var(--mute)}
+.press-foot{margin-top:auto;padding:14px 4% 16px;display:flex;justify-content:space-between;gap:12px;color:var(--mute);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border-top:1px solid var(--line)}
+
+/* Home — oversized type, kinetic title, typographic goal */
+.home-content{padding-top:22px}
+.home-kicker{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px;gap:16px}
+.kinetic{font:500 clamp(48px,7.2vw,96px)/.92 var(--display);letter-spacing:-.06em;max-width:8.2ch}
+.kinetic .word{display:inline-block;white-space:nowrap}
+.kinetic .ch{display:inline-block;opacity:0;transform:translateY(.28em);animation:letter-in .65s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i)*42ms)}
+.app.is-static .kinetic .ch, .app.is-reduced .kinetic .ch{opacity:1;transform:none;animation:none}
+@keyframes letter-in{to{opacity:1;transform:none}}
+.home-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:8px 40px;align-items:start;margin-top:4px}
+.home-copy .author{margin-top:14px;color:var(--mute);font:italic 22px/1.3 var(--display)}
+.home-copy .metric{margin:20px 0 18px;max-width:260px}
+.metric .labels{display:flex;justify-content:space-between;font-size:13px;font-weight:650;margin-bottom:7px}
+.meter{height:2px;background:var(--line);position:relative}
+.meter>span{display:block;height:100%;background:var(--fill);transform-origin:left}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px}
+.hero-stage{min-height:320px;background:var(--art);display:grid;place-items:center;position:relative;overflow:hidden}
+.hero-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(240px 200px at 50% 42%,rgba(var(--lamp),.2),transparent 70%)}
+.hero-stage:before{content:"";position:absolute;left:12%;right:12%;bottom:42px;height:20px;background:#00000055;border-radius:50%;filter:blur(8px);transform:translate(var(--sx,0),var(--sy,0))}
+.object{width:230px;height:340px;position:relative;perspective:1100px}
+.volume{width:186px;height:278px;margin:22px auto 0;position:relative;transform:rotateY(-26deg) rotateX(8deg) rotateZ(-9deg);transform-style:preserve-3d;transition:transform .18s ease-out}
+.volume .cover{width:100%;height:100%;border-radius:2px 5px 5px 2px;box-shadow:-14px 8px 0 0 var(--c-spine,var(--cloth-2)), 18px 24px 32px #08060e80}
+.spine{position:absolute;left:0;top:0;bottom:0;width:20px;background:var(--c-spine,var(--cloth-2));transform-origin:left center;transform:rotateY(90deg) translateX(-1px);box-shadow:inset -2px 0 0 #ffffff14, inset 3px 0 6px #00000033;z-index:2}
+.fore-edge{position:absolute;right:-11px;top:3px;bottom:3px;width:11px;background:repeating-linear-gradient(to right,var(--page-edge) 0 1px,#d9d5e4 1px 2px);border-radius:0 2px 2px 0}
+.bottom-edge{position:absolute;left:6px;right:-4px;bottom:-7px;height:7px;background:repeating-linear-gradient(var(--page-edge),var(--page-edge) 1px,#d4d0de 1px 2px);transform:skewX(-28deg);transform-origin:left}
+.object-shadow{position:absolute;left:20px;right:6px;bottom:24px;height:24px;background:#00000066;border-radius:50%;filter:blur(10px);transform:translate(var(--sx,0),var(--sy,0))}
+.hero-art{border:0;background:none;padding:0;color:inherit;width:100%;height:100%;display:grid;place-items:center}
+.volume .bookmark{position:absolute;top:-2px;right:36px;width:9px;z-index:5;height:calc(14px + (var(--read,0) * .55px));background:var(--ribbon);clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),50% 100%,0 calc(100% - 8px));box-shadow:1px 2px 0 #00000033;pointer-events:none}
+.volume .bookmark.is-tucked{height:10px;opacity:.55}
+.volume .bookmark.is-gold,.volume.done .bookmark{background:var(--foil)}
+
+.goal-type{padding:8px 0 4px}
+.goal-type .goal-num{font:500 clamp(72px,10vw,128px)/.8 var(--display);letter-spacing:-.07em;margin:6px 0 8px}
+.goal-type .goal-num span{font-size:.38em;color:var(--mute);letter-spacing:-.04em;margin-left:.12em}
+.goal-rule{height:2px;background:var(--line);margin:12px 0 16px;max-width:280px;position:relative}
+.goal-rule i{display:block;height:100%;background:var(--gold-line);width:0}
+.app.is-static .goal-rule i, .app.is-reduced .goal-rule i{width:var(--goal,0%) !important}
+.goal-rule i.is-on{width:var(--goal,0%);transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.goal-type p.copy{color:var(--mute);font:italic 18px/1.4 var(--display);max-width:22em}
+.goal-type .streak{margin-top:18px;display:flex;justify-content:space-between;align-items:baseline;max-width:280px;border-top:1px solid var(--line);padding-top:14px}
+.goal-type .streak em{font:600 32px/1 var(--display);font-style:normal;letter-spacing:-.04em}
+
+.home-index{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:28px;border-top:1px solid var(--ink);padding-top:18px}
+.home-index h2{font:500 28px/1.1 var(--display);letter-spacing:-.03em;margin-bottom:12px}
+.rank-item,.challenge-item{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left;color:inherit;border-left:0;border-right:0}
+.rank-item{cursor:pointer}
+.rank-num{font:500 26px/1 var(--display);color:var(--gold);letter-spacing:-.04em}
+.rank-item strong,.challenge-item strong{font:650 18px/1.25 var(--display);letter-spacing:-.02em;display:block}
+.rank-item small,.challenge-item small{color:var(--mute)}
+.challenge-item{grid-template-columns:minmax(0,1fr) auto;cursor:default}
+.challenge-progress{font:500 22px/1 var(--display);white-space:nowrap}
+
+/* Covers */
+.cover{aspect-ratio:2/3;display:flex;flex-direction:column;justify-content:space-between;position:relative;isolation:isolate;overflow:hidden;border-radius:2px 4px 4px 2px;color:var(--c-fg);background:var(--c-bg);padding:11% 11% 9% 16%;container-type:inline-size;text-align:left;box-shadow:0 8px 16px #1710242e}
+.cover:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 3px,#0000000a 3px 4px);pointer-events:none;z-index:0;mix-blend-mode:multiply;opacity:.35}
+.cover:after{content:"";position:absolute;top:0;bottom:0;left:0;width:7%;background:linear-gradient(90deg,#00000033,#0000 70%);z-index:2;pointer-events:none}
+.cover-copy{z-index:1;display:flex;flex-direction:column;align-items:flex-start;position:relative}
+.cover-author{font-size:5.4cqw;font-weight:700;text-transform:uppercase;letter-spacing:.11em;line-height:1.25;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cover-title{font:600 16.2cqw/.95 var(--display);letter-spacing:-.065em;white-space:pre-line;margin-top:7%}
+.cover-imprint{z-index:1;align-self:flex-end;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.8}
+.cover-imprint b{width:16px;height:7px;border-block:1px solid currentColor;font-size:0}
+.cover-imprint span{font-size:5.2cqw;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+.cover-art{position:absolute;inset:0;pointer-events:none;z-index:0}
+.cover-art i{position:absolute;display:block;border:1px solid currentColor;opacity:.45}
+.reading{--c-bg:var(--cloth);--c-fg:#f4eefb;--c-spine:#26183f}
+.done{--c-bg:#241a33;--c-fg:#e7c98a;--c-spine:#1a1326}
+.later{--c-bg:var(--sheet);--c-fg:#2a1f3c;--c-spine:#c9c3d6}
+.later .cover:before{opacity:.12;mix-blend-mode:normal}
+.done .cover-title,.done .cover-author,.done .cover-imprint{color:var(--foil)}
+.done .cover-art i{border-color:#e2c483;opacity:.55}
+.later .cover{box-shadow:0 6px 14px #17102418;border:1px solid #d5d0e0}
+.deep .cover-art i{border-radius:50%;width:90%;height:42%;left:28%;bottom:0;transform:rotate(-32deg)}
+.deep .cover-art i:nth-child(2){bottom:6%;left:22%}
+.deep .cover-art i:nth-child(3){bottom:12%;left:16%}
+.deep .cover-art i:nth-child(4){bottom:18%;left:10%}
+.deep .cover-art i:nth-child(5){bottom:24%;left:4%}
+.prince .cover-art i{width:58%;aspect-ratio:1;border-radius:50%;bottom:9%;left:26%;transform:rotate(-22deg)}
+.prince .cover-art i:nth-child(2){height:16%;width:80%;left:16%;bottom:22%;border-radius:0}
+.orwell .cover-title{font-size:28cqw;letter-spacing:-.08em}
+.orwell .cover-art i{left:18%;top:58%;width:64%;height:22%;border-radius:80% 10%;transform:rotate(16deg)}
+.sapiens .cover-art i{width:68%;height:20%;left:20%;bottom:8%;border-radius:100% 0 70% 15%;transform:rotate(-34deg);background:currentColor;opacity:.16;border:0}
+.think .cover-art i{width:62%;height:30%;bottom:10%;left:18%;transform:rotate(-22deg);border-radius:50%;border-width:2px}
+.atomic .cover-art i{width:9%;aspect-ratio:1;border-radius:50%;left:34%;bottom:22%;background:currentColor;border:0;opacity:.55;box-shadow:16px 14px 0 currentColor,32px -6px 0 currentColor,10px -22px 0 currentColor}
+.jobs .cover-art i{width:46%;height:36%;left:22%;bottom:10%;transform:rotate(24deg);background:currentColor;opacity:.16;border:0}
+.musk .cover-art i{width:74%;height:30%;left:14%;bottom:10%;transform:rotate(-28deg);border-radius:50%}
+.plain .cover-title{font-size:16cqw}
+.plain .cover-art i{inset:8% 9%;border-style:solid}
+.crime .cover-art i{width:70%;height:2px;left:15%;bottom:18%;border:0;background:currentColor;opacity:.45}
+.master .cover-art i{width:40%;aspect-ratio:1;border-radius:50%;left:30%;bottom:12%}
+.pride .cover-art i{width:64%;height:24%;left:18%;bottom:10%;border-radius:50% 50% 0 0}
+.dune .cover-art i{width:80%;height:16%;left:10%;bottom:10%;border:0;background:currentColor;opacity:.14;border-radius:50%}
+.war .cover-title{font-size:18cqw}
+.war .cover-art i{width:72%;height:8%;left:14%;bottom:14%;border-width:2px 0 0;border-radius:0}
+.rye .cover-art i{width:54%;height:28%;left:22%;bottom:10%;transform:rotate(16deg);border-radius:40% 10%}
+
+/* Library toolbar */
+.library-page{padding-bottom:0;display:flex;flex-direction:column;min-height:0;flex:1}
+.library-page{padding-top:16px;padding-bottom:0}
+.library-page .page-title{font-size:42px}
+.library-page .section-head{margin-bottom:6px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
+.searchbox{flex:1 1 200px;display:flex;align-items:center;gap:8px;min-height:42px;padding:0 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.searchbox input{border:0;background:none;width:100%;min-height:40px;outline:none;color:var(--ink)}
+.chip,.sort{min-height:40px;padding:0 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-weight:650;border-radius:2px}
+.chip[aria-pressed=true]{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.empty{padding:22px;border:1px solid var(--line);background:var(--panel);margin:12px 0}
+
+/* Cinematic wall */
+.wall-viewport{position:relative;flex:1;min-height:560px;overflow-x:auto;overflow-y:hidden;background:var(--wall);cursor:grab;border-top:1px solid #00000055;scrollbar-width:thin;scrollbar-color:var(--gold-line) transparent}
+.wall-viewport:active{cursor:grabbing}
+.wall-viewport.is-dragging{scroll-behavior:auto;cursor:grabbing;user-select:none}
+.wall{position:relative;min-width:100%;width:max-content;padding:10px 24px 16px;display:flex;flex-direction:column;gap:10px}
+.wall-cornice{height:14px;margin:0 0 4px;background:linear-gradient(180deg,var(--plank-shine),var(--cornice) 40%,var(--plank-edge));box-shadow:0 6px 10px #00000040;flex:none}
+.wall-row{display:grid;grid-template-columns:52px minmax(0,auto);gap:10px;align-items:end;min-height:0}
+.row-label{position:sticky;left:0;z-index:4;align-self:stretch;display:flex;align-items:end;justify-content:center;padding:0 0 22px;background:linear-gradient(90deg,var(--wall) 70%,transparent);writing-mode:vertical-rl;transform:rotate(180deg);font:700 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.row-label small{display:block;margin-top:8px;letter-spacing:.08em;color:#c8bfd6;font-weight:650;transform:rotate(180deg);writing-mode:horizontal-tb}
+.shelf-well{background:linear-gradient(180deg,#00000033,transparent 40%),var(--well);box-shadow:inset 0 12px 20px #00000033;min-width:920px;position:relative}
+.shelf-run{display:flex;align-items:flex-end;gap:3px;min-height:186px;padding:28px 16px 0;margin-bottom:-3px;position:relative;z-index:2}
+.shelf-plank{height:16px;background:linear-gradient(180deg,var(--plank-shine) 0 2px,var(--plank) 30%,var(--plank-edge));box-shadow:0 10px 16px #00000055, inset 0 1px 0 #ffffff28, inset 0 -3px 0 #00000055;position:relative;z-index:1}
+.shelf-plank:before{content:"";position:absolute;left:0;right:0;top:3px;height:1px;background:var(--gold-line);opacity:.28}
+.bookend{flex:none;width:14px;height:78px;align-self:flex-end;margin:0 6px 0 2px;background:linear-gradient(90deg,#2a2438,#3a3348 45%,#241e32);box-shadow:2px 4px 8px #00000040, inset 1px 0 0 #ffffff18;clip-path:polygon(0 10px,100% 0,100% 100%,0 100%)}
+.bookend-right{margin:0 2px 0 8px;clip-path:polygon(0 0,100% 10px,100% 100%,0 100%)}
+.shelf-plaque{flex:none;align-self:flex-end;margin:0 0 18px 28px;padding:10px 14px;border:1px solid rgba(var(--lamp),.35);color:#e2c483;font:700 10px/1.3 var(--sans);letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+.shelf-empty{color:#d6cfe0;padding:48px 20px 28px;font:italic 16px/1.4 var(--display)}
+.wall-lamp{position:sticky;left:0;top:0;width:100%;height:0;pointer-events:none;z-index:6}
+.wall-lamp i{position:absolute;left:0;top:0;width:100%;height:580px;background:radial-gradient(300px 260px at var(--lx,32%) var(--ly,34%),rgba(var(--lamp),.38),rgba(var(--lamp),.12) 38%,transparent 70%);mix-blend-mode:soft-light}
+
+/* Spines */
+.spine-book{--sw:28px;--sh:210px;--read:0;flex:0 0 var(--sw);width:var(--sw);height:var(--sh);border:0;padding:0;background:none;color:inherit;position:relative;transform-origin:bottom center;z-index:1;align-self:flex-end;transition:transform .28s ease, filter .28s ease, opacity .28s ease}
+.spine-book:hover,.spine-book:focus-visible{z-index:5;transform:translateY(-12px) rotateZ(-1.6deg)}
+.spine-book.is-open{opacity:.22;pointer-events:none;filter:grayscale(.3)}
+.spine-book.is-dimmed{opacity:.2;pointer-events:none;transform:none;filter:grayscale(.3)}
+.spine-book.is-lit .spine-face{box-shadow:inset 0 0 18px rgba(var(--lamp),.2), inset 1px 0 0 #ffffff33}
+.spine-block{display:block;width:100%;height:100%;position:relative;box-shadow:2px 8px 12px #00000070, 1px 0 0 #00000050, -1px 0 0 #ffffff18}
+.spine-face{position:absolute;inset:0;overflow:hidden;background:linear-gradient(90deg,#ffffff22,transparent 22%,transparent 76%,#00000040),repeating-linear-gradient(90deg,transparent 0 2px,#00000010 2px 3px),var(--c-bg);color:var(--c-fg);display:flex;flex-direction:column;align-items:center;padding:14px 2px 8px;gap:5px}
+.spine-book.later .spine-face{box-shadow:inset 0 0 0 1px #ffffff80}
+.spine-top{position:absolute;left:0;right:0;top:0;height:6px;z-index:2;background:repeating-linear-gradient(90deg,var(--c-spine,#1a1326) 0 3px,var(--foil) 3px 5px,var(--c-spine,#1a1326) 5px 8px)}
+.spine-book.later .spine-top{background:repeating-linear-gradient(90deg,#c9c3d6 0 3px,#5b468a 3px 5px,#c9c3d6 5px 8px)}
+.spine-pages{position:absolute;top:4px;bottom:2px;right:-3px;width:3px;background:repeating-linear-gradient(to right,var(--page-edge) 0 1px,#d4d0de 1px 2px)}
+.spine-title{writing-mode:vertical-rl;transform:rotate(180deg);font:600 var(--title-size,12px)/1.05 var(--display);letter-spacing:var(--title-track,.04em);max-height:64%;max-width:calc(var(--sw) - 3px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-top:4px}
+.spine-writer{writing-mode:vertical-rl;transform:rotate(180deg);font:700 7px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;opacity:.8;max-height:18%;max-width:calc(var(--sw) - 3px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:auto}
+.spine-stamp{display:none;margin-top:6px;width:13px;height:13px;flex:none;border-radius:50%;border:1px solid var(--foil);color:var(--foil);font:700 6px/13px var(--sans);text-align:center;background:#00000022}
+.spine-book.done .spine-stamp{display:block}
+.spine-book.is-thick .spine-face:before{content:"";position:absolute;left:0;right:0;top:22%;height:6px;pointer-events:none;z-index:2;background:linear-gradient(#00000033,#ffffff14,#00000033);box-shadow:0 34px 0 #00000022,0 68px 0 #00000022;opacity:.6}
+.spine-book .ribbon{position:absolute;left:50%;top:0;z-index:3;pointer-events:none;width:clamp(6px,calc(var(--sw) * .36),9px);height:calc(12px + (var(--read,0) * .42px));transform:translate(-50%,-62%);background:var(--ribbon);clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),50% 100%,0 calc(100% - 6px));filter:drop-shadow(0 1px 1px #00000066)}
+.spine-book.later .ribbon{height:10px;opacity:.55}
+.spine-book.done .ribbon{background:var(--foil)}
+.spine-book.just-finished .spine-stamp{animation:stamp-in .6s cubic-bezier(.2,.8,.2,1.2) both}
+.shelf-bay.has-arrival .shelf-plank,.wall-row.has-arrival .shelf-plank{animation:plank-sheen 1.1s ease}
+@keyframes stamp-in{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes plank-sheen{0%,100%{filter:none}40%{filter:brightness(1.35)}}
+.spine-book.reading.tone-1{--c-bg:#322452}.spine-book.reading.tone-2{--c-bg:#41316c}.spine-book.reading.tone-3{--c-bg:#2a1e46}
+.spine-book.done.tone-1{--c-bg:#22182e}.spine-book.done.tone-2{--c-bg:#1c1528}.spine-book.done.tone-3{--c-bg:#261c34}
+.spine-book.later.tone-1{--c-bg:#ece8f4}.spine-book.later.tone-2{--c-bg:#e4dff0}.spine-book.later.tone-3{--c-bg:#f7f6fb}
+
+/* Two-page spread */
+.spread-layer{position:absolute;inset:0;z-index:9;background:#0c0914e6;display:flex;align-items:center;justify-content:center;padding:28px 4%;}
+.spread-layer.is-entering{animation:fade-in .3s ease}
+.spread-layer.is-leaving{opacity:0;transition:opacity .22s ease}
+.spread{position:relative;width:min(980px,100%);perspective:1800px}
+.spread-book{display:grid;grid-template-columns:1fr 1fr;transform-style:preserve-3d;box-shadow:0 28px 80px #00000099;background:var(--paper);color:#221832;position:relative}
+.spread-book:after{content:"";position:absolute;top:0;bottom:0;left:50%;width:28px;margin-left:-14px;pointer-events:none;z-index:3;background:linear-gradient(90deg,transparent,#22183214 35%,#22183226 50%,#22183214 65%,transparent)}
+.leaf{background:#fbfafd;min-height:480px;padding:32px 30px 26px;position:relative}
+.leaf-left{border-right:1px solid #d8d3e3;transform-origin:right center;box-shadow:inset -10px 0 16px #22183212}
+.leaf-right{transform-origin:left center;box-shadow:inset 10px 0 16px #22183212}
+.spread-book.is-opening .leaf-left{animation:open-left .7s cubic-bezier(.2,.7,.2,1) both}
+.spread-book.is-opening .leaf-right{animation:open-right .7s cubic-bezier(.2,.7,.2,1) both}
+.app.is-static .spread-book.is-opening .leaf-left,.app.is-static .spread-book.is-opening .leaf-right,
+.app.is-reduced .spread-book.is-opening .leaf-left,.app.is-reduced .spread-book.is-opening .leaf-right{animation:none}
+@keyframes open-left{from{transform:rotateY(70deg);opacity:.6}to{transform:none;opacity:1}}
+@keyframes open-right{from{transform:rotateY(-70deg);opacity:.6}to{transform:none;opacity:1}}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.leaf-hero{display:flex;gap:20px;align-items:flex-start;margin-bottom:8px}.leaf-hero .cover{width:110px;flex:none;margin:0}
+.spread-copy .kicker{color:#76591c}
+.spread-copy h2{font:500 36px/1.05 var(--display);letter-spacing:-.045em;margin:6px 0 4px;color:#221832}
+.spread-copy .author{color:#534b63;font:italic 18px/1.35 var(--display)}
+.spread-copy .actions{flex-wrap:wrap;margin-top:16px}
+.leaf-right h3{font:500 26px/1.15 var(--display);letter-spacing:-.03em;margin-bottom:10px;color:#221832}
+.leaf-right .notes{font:italic 18px/1.5 var(--display);color:#221832;margin-bottom:22px}
+.session-list{border-top:1px solid #d8d3e3}
+.session-item{padding:12px 0;border-bottom:1px solid #d8d3e3}
+.session-item .when{font:700 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#76591c;margin-bottom:4px}
+.session-item p{font:italic 16px/1.45 var(--display);color:#3a3348}
+.inspect-hint{margin-top:16px;color:#534b63;font-size:12px}
+.spread-close{position:absolute;top:-52px;right:0;z-index:2;background:#fbfafd;color:#221832}
+.inspect-flyer{z-index:12;pointer-events:none}
+
+/* Journal — literary magazine */
+.journal{padding-top:20px}
+.issue-mast{display:flex;justify-content:space-between;align-items:end;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:28px}
+.issue-mast .page-title{font-size:clamp(48px,8vw,92px);letter-spacing:-.06em}
+.journal-layout{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:48px;align-items:start}
+.entries{border-top:1px solid var(--line)}
+.entry{display:grid;grid-template-columns:minmax(0,1fr) 160px;gap:28px;padding:28px 0;border-bottom:1px solid var(--line);align-items:start}
+.entry-title{font:500 34px/1.12 var(--display);letter-spacing:-.04em}
+.entry-meta{color:var(--mute);margin:8px 0 12px;font-size:13px}
+.entry:first-of-type .entry-title::first-letter{float:left;font:500 78px/.7 var(--display);letter-spacing:-.06em;padding:6px 10px 0 0;color:var(--primary)}
+.margin-note{font:italic 17px/1.5 var(--display);color:var(--ink);border-left:1px solid var(--gold-line);padding:2px 0 2px 14px}
+.colophon-date{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:8px}
+.entry-side{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.journal-aside .goal-type{border:1px solid var(--line);padding:18px 18px 16px;background:var(--panel)}
+.journal-aside .goal-num{font-size:72px}
+.reveal{opacity:0;transform:translateY(18px)}
+.reveal.is-in{opacity:1;transform:none;transition:opacity .65s ease, transform .65s cubic-bezier(.2,.7,.2,1)}
+.app.is-static .reveal,.app.is-reduced .reveal{opacity:1;transform:none;transition:none}
+
+/* Year issue — magazine cover */
+.issue-cover{min-height:calc(100% - 0px);display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:8px}
+.issue-cover .kicker{margin-bottom:8px}
+.chapbook-year{font:500 clamp(88px,16vw,176px)/.78 var(--display);letter-spacing:-.08em}
+.chapbook-lead{font:italic 24px/1.4 var(--display);color:var(--mute);margin:10px auto 0;max-width:22em}
+.chapbook-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:40px 0 8px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);width:min(860px,100%)}
+.stat-cell{padding:26px 12px;border-right:1px solid var(--line)}
+.stat-cell:last-child{border-right:0}
+.stat-cell b{display:block;font:500 58px/.85 var(--display);letter-spacing:-.055em}
+.stat-cell span{display:block;margin-top:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--mute)}
+.chapbook-pair{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 0 34px;border-bottom:1px solid var(--line);width:min(860px,100%)}
+.chapbook-pair div{padding:22px 12px;border-right:1px solid var(--line);text-align:left}
+.chapbook-pair div:last-child{border-right:0}
+.chapbook-pair strong{display:block;font:500 28px/1.15 var(--display);letter-spacing:-.03em;margin-top:6px}
+.finished-index{text-align:left;max-width:560px;margin:0 auto;width:100%}
+.finished-index li{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--line);font:500 20px/1.2 var(--display)}
+.finished-index small{color:var(--mute);font:12px/1.3 var(--sans)}
+
+/* Dialogs */
+dialog{width:min(92%,480px);max-height:89vh;overflow:auto;padding:0;border:1px solid var(--line);border-radius:2px;background:var(--panel);color:var(--ink);box-shadow:0 22px 60px #160e2766}
+dialog::backdrop{background:#0c0914cc}
+.dialog-shell{padding:22px 22px 20px}
+.dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:14px}
+.dialog-head h2{font:550 28px/1.1 var(--display);letter-spacing:-.035em;margin-top:4px}
+.detail-note{margin:14px 0;color:var(--mute);font:italic 16px/1.45 var(--display)}
+.field{display:grid;gap:5px;margin-bottom:12px;font-weight:650}
+.field input,.field select,.field textarea{width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:2px;background:var(--paper);color:var(--ink)}
+.field textarea{min-height:88px;resize:vertical;line-height:1.4}
+.dialog-shell .actions{justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
+.toast{position:fixed;left:50%;bottom:26px;z-index:20;transform:translateX(-50%);background:#322452;color:#fff;border-radius:2px;padding:11px 16px;max-width:calc(100% - 32px);box-shadow:0 8px 22px #1d152540}
+.toast:empty{display:none}
+
+/* Page turn */
+.page-turn-layer{position:absolute;inset:0;z-index:8;perspective:1600px;pointer-events:none;overflow:hidden}
+.page-ghost{transform-origin:left center;background:var(--paper);height:100%;overflow:hidden;box-shadow:12px 0 30px #00000033}
+.page-turn-layer.is-turning .page-ghost{transform:rotateY(-88deg);opacity:0;transition:transform .7s cubic-bezier(.2,.7,.2,1),opacity .45s ease .12s}
+.page.is-enter{animation:page-in .55s ease both}
+.app.is-static .page.is-enter,.app.is-reduced .page.is-enter{animation:none}
+@keyframes page-in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+
+/* Mobile / phone */
+@container (max-width: 760px){
+  .nav{grid-template-columns:1fr auto;padding:0 16px;min-height:64px}
+  .navlinks{display:none}
+  .brand-sub{display:none}
+  .theme-field label{display:none}
+  .bottom-nav{display:flex;position:sticky;bottom:0;background:var(--nav);border-top:1px solid var(--line);justify-content:space-around;padding:4px 4px 8px;z-index:6}
+  .rail-link{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:var(--mute);min-height:52px;padding:6px 2px;font-size:10px;font-weight:700;letter-spacing:.02em}
+  .rail-link.current{color:var(--ink)}
+  .page{padding:20px 16px 28px}
+  .home-grid,.home-index,.journal-layout,.chapbook-grid,.chapbook-pair,.spread-book{grid-template-columns:1fr}
+  .kinetic{font-size:48px}
+  .page-title,.issue-mast .page-title{font-size:40px}
+  .hero-stage{min-height:280px}
+  .goal-type .goal-num{font-size:72px}
+  .chapbook-year{font-size:96px}
+  .stat-cell{border-right:0;border-bottom:1px solid var(--line)}
+  .press-foot{padding:14px 16px 20px;flex-direction:column}
+  .navactions .button span{display:none}
+  .navactions .button.main{width:44px;padding:0}
+  .entry{grid-template-columns:1fr;gap:10px}
+  .wall-viewport{min-height:540px}
+  .wall-row{grid-template-columns:36px minmax(0,auto)}
+  .shelf-well{min-width:0}
+  .leaf{min-height:0;padding:22px 18px}
+  .leaf-left{border-right:0;border-bottom:1px solid #d8d3e3}
+  .spread-layer{align-items:stretch;padding:12px;overflow:auto}
+  .library-page,.page{padding-bottom:80px}
+}
+.stage.phone .nav{grid-template-columns:1fr auto;padding:0 14px;min-height:62px}
+.stage.phone .navlinks,.stage.phone .brand-sub,.stage.phone .theme-field label{display:none}
+.stage.phone .bottom-nav{display:flex;position:sticky;bottom:0;background:var(--nav);border-top:1px solid var(--line);justify-content:space-around;padding:4px 4px 8px;z-index:6}
+.stage.phone .rail-link{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:var(--mute);min-height:52px;padding:6px 2px;font-size:10px;font-weight:700}
+.stage.phone .rail-link.current{color:var(--ink)}
+.stage.phone .page{padding:18px 16px 24px}
+.stage.phone .home-grid,.stage.phone .home-index,.stage.phone .journal-layout,.stage.phone .chapbook-grid,.stage.phone .chapbook-pair,.stage.phone .spread-book{grid-template-columns:1fr}
+.stage.phone .kinetic{font-size:44px}
+.stage.phone .page-title,.stage.phone .issue-mast .page-title{font-size:36px}
+.stage.phone .hero-stage{min-height:250px}
+.stage.phone .goal-type .goal-num{font-size:64px}
+.stage.phone .chapbook-year{font-size:88px}
+.stage.phone .stat-cell{border-right:0;border-bottom:1px solid var(--line)}
+.stage.phone .press-foot{padding:12px 16px 18px;flex-direction:column}
+.stage.phone .navactions .button span{display:none}
+.stage.phone .navactions .button.main{width:44px;padding:0}
+.stage.phone .app{min-height:720px}
+.stage.phone .entry{grid-template-columns:1fr}
+.stage.phone .wall-viewport{min-height:520px}
+.stage.phone .wall-row{grid-template-columns:32px minmax(0,auto)}
+.stage.phone .shelf-well{min-width:0}
+.stage.phone .leaf{min-height:0;padding:20px 16px}
+.stage.phone .leaf-left{border-right:0;border-bottom:1px solid #d8d3e3}
+.stage.phone .spread-layer{align-items:stretch;padding:10px;overflow:auto}
+.stage.phone .library-page,.stage.phone .page{padding-bottom:84px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+  .volume{transform:rotateY(-16deg) rotateX(4deg) rotateZ(-4deg)}
+  .object-shadow,.hero-stage:before{filter:none}
+  .spine-book:hover,.spine-book:focus-visible{transform:translateY(-6px)}
+  .kinetic .ch,.reveal{opacity:1;transform:none}
+}
+
+</style>
+</head>
+<body>
+<header class="review">
+  <div class="review-title">BookBuddy · Читалня нощем<span>Макет v4 · кинематографична читалня</span></div>
+  <div class="switch" role="group" aria-label="Размер на макета">
+    <button type="button" data-device="desktop" aria-pressed="true">Десктоп</button>
+    <button type="button" data-device="phone" aria-pressed="false">Мобилен</button>
+  </div>
+</header>
+<div id="stage" class="stage"></div>
+<div id="toast" class="toast" role="status"></div>
+<script>
+const glyphs = {
+  book: '<path d="M12 6c-2-1.6-5-2-9-1v14c4-1 7-.6 9 1 2-1.6 5-2 9-1V5c-4-1-7-.6-9 1v14"/>',
+  shelf: '<path d="M4 5h6v14H4zM10 5h6v14h-6zM17 6.2 20 5l2.2 13.2-3 1.2z"/>',
+  home: '<path d="m3 11 9-8 9 8v10H3zM9 21v-7h6v7"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  arrow: '<path d="M5 12h14m-6-6 6 6-6 6"/>',
+  close: '<path d="m6 6 12 12M18 6 6 18"/>',
+  search: '<circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4 4"/>',
+  pen: '<path d="m14.5 5.5 4 4M4 20l1-5L16 4a2.8 2.8 0 0 1 4 4L9 19z"/>',
+  mark: '<path d="M7 3h10v18l-5-3-5 3z"/>',
+  sliders: '<path d="M4 7h16M4 17h16M10 7V4m0 6v0M14 17v3m0-6v0"/>'
+};
+const icon = name => '<svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">' + glyphs[name] + '</svg>';
+const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+const ART_MAP = {
+  'дълбока работа':'deep','deep work':'deep','малкият принц':'prince','1984':'orwell',
+  'sapiens':'sapiens','мисленето':'think','атомни навици':'atomic','стив джобс':'jobs',
+  'илон мъск':'musk','престъпление и наказание':'crime','майстора и маргарита':'master',
+  'гордост и предразсъдъци':'pride','дюн':'dune','война и мир':'war','над пропастта във ръжта':'rye',
+  'норвежка гора':'plain','хомо деус':'sapiens','джентълменът в москва':'plain','фаренхайт 451':'orwell',
+  'старецът и морето':'plain','братя карамазови':'crime','ана каренина':'war','улис':'plain',
+  'процесът':'plain','граф монте кристо':'war','медитации':'plain','чужденецът':'plain',
+  'на изток от рая':'war','сто години самота':'master','да убиеш присмехулник':'pride',
+  'пътят':'plain','хамлет':'orwell','безкрайна шега':'plain','невидими градове':'prince',
+  'идиот':'crime','среднощни деца':'plain'
+};
+function artOf(book){ return ART_MAP[(book.title || '').toLowerCase()] || 'plain'; }
+function coverTitle(book){
+  const t = book.title || '';
+  if (t.length <= 10) return t;
+  const mid = t.lastIndexOf(' ', Math.ceil(t.length/2));
+  return mid > 0 ? t.slice(0,mid) + '\n' + t.slice(mid+1) : t;
+}
+function toneOf(book){ return [...String(book.title)].reduce((s,c)=>s+c.charCodeAt(0),0) % 4; }
+function spineWidth(book){
+  const p = Number(book.totalPages) || 200;
+  const t = Math.min(1, Math.max(0, (p - 80) / (1100 - 80)));
+  return Math.round(18 + t * 40);
+}
+function spineHeight(book){
+  const p = Number(book.totalPages) || 200;
+  const n = [...String(book.title)].reduce((s,c)=>s+c.charCodeAt(0),0);
+  return 168 + (n % 20) + Math.round(Math.min(16, p / 90));
+}
+function spineTitleFit(book, w, h){
+  const t = book.title || '';
+  const avail = Math.max(36, h * 0.62);
+  const maxPx = Math.min(15, Math.max(8.5, w * 0.46));
+  const fit = avail / Math.max(t.length * 0.95, 1);
+  const size = Math.max(8, Math.min(maxPx, fit));
+  const track = t.length > 24 ? '0.02em' : t.length > 16 ? '0.03em' : '0.05em';
+  return {size, track, long: t.length > 20};
+}
+function spineAuthor(book){
+  const a = book.author || '';
+  if (a.length <= 16) return a;
+  const parts = a.split(' ').filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : a;
+}
+
+const books = [
+  {id:1, title:'Дълбока работа', author:'Кал Нюпорт', totalPages:296, currentPage:112, notes:'Практични съвети за фокусирана работа и по-малко разсейване.', createdAt:'2026-09-12T10:00:00.000Z'},
+  {id:2, title:'Малкият принц', author:'Антоан дьо Сент-Екзюпери', totalPages:96, currentPage:0, notes:'Подарък от приятел, чака ме на рафта.', createdAt:'2026-11-15T09:00:00.000Z'},
+  {id:3, title:'1984', author:'Джордж Оруел', totalPages:328, currentPage:45, notes:'Прочетени са първите глави. Началото е мрачно.', createdAt:'2026-10-02T11:00:00.000Z'},
+  {id:4, title:'Sapiens', author:'Ювал Ноа Харари', totalPages:443, currentPage:443, notes:'Поглед към човешката история, който остава.', createdAt:'2026-03-08T10:00:00.000Z'},
+  {id:5, title:'Мисленето', author:'Даниел Канеман', totalPages:512, currentPage:210, notes:'За бързото и бавното мислене.', createdAt:'2026-08-21T10:00:00.000Z'},
+  {id:6, title:'Атомни навици', author:'Джеймс Клиър', totalPages:320, currentPage:320, notes:'Малки промени, натрупани с времето.', createdAt:'2026-01-18T10:00:00.000Z'},
+  {id:7, title:'Стив Джобс', author:'Уолтър Айзъксън', totalPages:656, currentPage:78, notes:'', createdAt:'2026-10-20T10:00:00.000Z'},
+  {id:8, title:'Илон Мъск', author:'Уолтър Айзъксън', totalPages:688, currentPage:150, notes:'Вдъхновяваща книга за иновациите и упоритостта.', createdAt:'2026-09-01T10:00:00.000Z'},
+  {id:9, title:'Престъпление и наказание', author:'Фьодор Достоевски', totalPages:671, currentPage:671, notes:'Тежка и голяма книга, която се носи дълго след края.', createdAt:'2026-02-02T10:00:00.000Z'},
+  {id:10, title:'Майстора и Маргарита', author:'Михаил Булгаков', totalPages:448, currentPage:448, notes:'Любима препрочитана история.', createdAt:'2026-04-09T10:00:00.000Z'},
+  {id:11, title:'Гордост и предразсъдъци', author:'Джейн Остин', totalPages:432, currentPage:432, notes:'', createdAt:'2026-05-20T10:00:00.000Z'},
+  {id:12, title:'Дюн', author:'Франк Хърбърт', totalPages:604, currentPage:0, notes:'Чака търпеливо на рафта.', createdAt:'2026-11-01T10:00:00.000Z'},
+  {id:13, title:'Война и мир', author:'Лев Толстой', totalPages:1225, currentPage:0, notes:'Дебелината сама по себе си е обещание.', createdAt:'2026-10-12T10:00:00.000Z'},
+  {id:14, title:'Над пропастта във ръжта', author:'Джеръм Д. Селинджър', totalPages:277, currentPage:0, notes:'', createdAt:'2026-11-10T10:00:00.000Z'},
+  {id:15, title:'Норвежка гора', author:'Харуки Мураками', totalPages:386, currentPage:40, notes:'', createdAt:'2026-10-28T10:00:00.000Z'},
+  {id:16, title:'Хомо Деус', author:'Ювал Ноа Харари', totalPages:448, currentPage:60, notes:'Продължение след Sapiens.', createdAt:'2026-11-05T10:00:00.000Z'},
+  {id:17, title:'Джентълменът в Москва', author:'Амор Тоулс', totalPages:462, currentPage:120, notes:'', createdAt:'2026-09-22T10:00:00.000Z'},
+  {id:18, title:'Фаренхайт 451', author:'Рей Бредбъри', totalPages:256, currentPage:256, notes:'', createdAt:'2026-01-09T10:00:00.000Z'},
+  {id:19, title:'Старецът и морето', author:'Ърнест Хемингуей', totalPages:127, currentPage:127, notes:'Кратка и точна.', createdAt:'2026-03-01T10:00:00.000Z'},
+  {id:20, title:'Братя Карамазови', author:'Фьодор Достоевски', totalPages:824, currentPage:824, notes:'', createdAt:'2026-01-05T10:00:00.000Z'},
+  {id:21, title:'Ана Каренина', author:'Лев Толстой', totalPages:864, currentPage:864, notes:'', createdAt:'2026-02-14T10:00:00.000Z'},
+  {id:22, title:'Улис', author:'Джеймс Джойс', totalPages:730, currentPage:0, notes:'', createdAt:'2026-11-08T10:00:00.000Z'},
+  {id:23, title:'Процесът', author:'Франц Кафка', totalPages:256, currentPage:0, notes:'', createdAt:'2026-11-12T10:00:00.000Z'},
+  {id:24, title:'Граф Монте Кристо', author:'Александър Дюма', totalPages:1276, currentPage:0, notes:'', createdAt:'2026-10-30T10:00:00.000Z'},
+  {id:25, title:'Медитации', author:'Марк Аврелий', totalPages:256, currentPage:88, notes:'Бавно се чете, за да се остане.', createdAt:'2026-09-30T10:00:00.000Z'},
+  {id:26, title:'Чужденецът', author:'Албер Камю', totalPages:159, currentPage:40, notes:'', createdAt:'2026-10-08T10:00:00.000Z'},
+  {id:27, title:'На изток от рая', author:'Джон Стайнбек', totalPages:602, currentPage:100, notes:'', createdAt:'2026-08-16T10:00:00.000Z'},
+  {id:28, title:'Сто години самота', author:'Габриел Гарсия Маркес', totalPages:417, currentPage:417, notes:'Семейна сага, която се помни като сън.', createdAt:'2026-06-02T10:00:00.000Z'},
+  {id:29, title:'Да убиеш присмехулник', author:'Харпър Ли', totalPages:336, currentPage:336, notes:'', createdAt:'2026-07-01T10:00:00.000Z'},
+  {id:30, title:'Пътят', author:'Кормак Маккарти', totalPages:287, currentPage:287, notes:'Оскъден език, тежък въздух.', createdAt:'2026-08-01T10:00:00.000Z'},
+  {id:31, title:'Хамлет', author:'Уилям Шекспир', totalPages:200, currentPage:200, notes:'', createdAt:'2026-05-01T10:00:00.000Z'},
+  {id:32, title:'Безкрайна шега', author:'Дейвид Фостър Уолъс', totalPages:1079, currentPage:0, notes:'Чака зимата.', createdAt:'2026-11-03T10:00:00.000Z'},
+  {id:33, title:'Невидими градове', author:'Итало Калвино', totalPages:165, currentPage:0, notes:'', createdAt:'2026-11-11T10:00:00.000Z'},
+  {id:34, title:'Идиот', author:'Фьодор Достоевски', totalPages:656, currentPage:0, notes:'', createdAt:'2026-10-18T10:00:00.000Z'},
+  {id:35, title:'Среднощни деца', author:'Салман Рушди', totalPages:647, currentPage:0, notes:'', createdAt:'2026-10-22T10:00:00.000Z'}
+];
+
+function isoDaysAgo(n){
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+const logs = [
+  {id:'l-01', bookId:1, dateISO:isoDaysAgo(0), pages:12, note:'Правила за дълбока работа.'},
+  {id:'l-02', bookId:1, dateISO:isoDaysAgo(1), pages:12, note:''},
+  {id:'l-03', bookId:3, dateISO:isoDaysAgo(1), pages:8, note:'Началото е мрачно.'},
+  {id:'l-04', bookId:5, dateISO:isoDaysAgo(2), pages:9, note:'Система 1 и Система 2.'},
+  {id:'l-05', bookId:8, dateISO:isoDaysAgo(2), pages:7, note:''},
+  {id:'l-06', bookId:1, dateISO:isoDaysAgo(3), pages:8, note:''},
+  {id:'l-07', bookId:7, dateISO:isoDaysAgo(4), pages:6, note:'Ранните години.'},
+  {id:'l-08', bookId:3, dateISO:isoDaysAgo(5), pages:8, note:''},
+  {id:'l-09', bookId:5, dateISO:isoDaysAgo(6), pages:11, note:''},
+  {id:'l-10', bookId:1, dateISO:isoDaysAgo(7), pages:9, note:''},
+  {id:'l-11', bookId:8, dateISO:isoDaysAgo(8), pages:10, note:'Тесла фабриката.'},
+  {id:'l-12', bookId:7, dateISO:isoDaysAgo(9), pages:7, note:''},
+  {id:'l-13', bookId:3, dateISO:isoDaysAgo(10), pages:6, note:''},
+  {id:'l-14', bookId:5, dateISO:isoDaysAgo(11), pages:8, note:''},
+  {id:'l-15', bookId:1, dateISO:isoDaysAgo(12), pages:7, note:''},
+  {id:'l-16', bookId:8, dateISO:isoDaysAgo(13), pages:8, note:''},
+  {id:'l-17', bookId:6, dateISO:'2026-04-18', pages:40, note:'Последните глави.'},
+  {id:'l-18', bookId:4, dateISO:'2026-06-11', pages:35, note:'Краят на Sapiens.'},
+  {id:'l-19', bookId:4, dateISO:'2026-05-02', pages:28, note:''},
+  {id:'l-20', bookId:6, dateISO:'2026-03-22', pages:22, note:''},
+  {id:'l-21', bookId:8, dateISO:'2026-09-20', pages:18, note:''},
+  {id:'l-22', bookId:5, dateISO:'2026-08-28', pages:16, note:''},
+  {id:'l-23', bookId:9, dateISO:'2026-02-28', pages:40, note:'Краят на Расколников.'},
+  {id:'l-24', bookId:10, dateISO:'2026-04-30', pages:32, note:''},
+  {id:'l-25', bookId:11, dateISO:'2026-06-08', pages:28, note:''},
+  {id:'l-26', bookId:18, dateISO:'2026-01-25', pages:20, note:''},
+  {id:'l-27', bookId:19, dateISO:'2026-03-14', pages:18, note:''},
+  {id:'l-28', bookId:20, dateISO:'2026-02-20', pages:36, note:''},
+  {id:'l-29', bookId:21, dateISO:'2026-04-10', pages:30, note:''},
+  {id:'l-30', bookId:17, dateISO:'2026-09-25', pages:14, note:''},
+  {id:'l-31', bookId:16, dateISO:'2026-10-20', pages:10, note:''},
+  {id:'l-32', bookId:15, dateISO:'2026-10-30', pages:8, note:''},
+  {id:'l-33', bookId:28, dateISO:'2026-06-20', pages:24, note:'Последният дъжд в Макондо.'},
+  {id:'l-34', bookId:29, dateISO:'2026-07-18', pages:22, note:''},
+  {id:'l-35', bookId:30, dateISO:'2026-08-12', pages:20, note:''},
+  {id:'l-36', bookId:31, dateISO:'2026-05-22', pages:16, note:''},
+  {id:'l-37', bookId:25, dateISO:'2026-10-14', pages:9, note:''},
+  {id:'l-38', bookId:26, dateISO:'2026-10-10', pages:8, note:''},
+  {id:'l-39', bookId:27, dateISO:'2026-09-12', pages:14, note:''}
+];
+
+const settings = {weeklyGoalPages:100, minPagesForStreakDay:1, theme:'light'};
+const MONTHS = ['януари','февруари','март','април','май','юни','юли','август','септември','октомври','ноември','декември'];
+const navItems = [
+  ['home','Начало','home'],
+  ['library','Библиотека','shelf'],
+  ['journal','Дневник','clock'],
+  ['issue','Брой 2026','mark']
+];
+const SHELF_GROUPS = [
+  ['reading','Чета сега'],
+  ['done','Прочетени'],
+  ['later','Чакат ред']
+];
+
+const state = {screen:'home', device:'desktop', theme:'light', query:'', filter:'all', sort:'recent', openId:null, pendingFinish:false, finishShot:false, finishAnnounced:false, static:false};
+let opener = null;
+let toastTimer = 0;
+let syncingHash = false;
+let turning = false;
+
+function todayISO(){
+  const d=new Date();
+  return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+}
+function statusOf(book){ return book.currentPage >= book.totalPages ? 'done' : book.currentPage > 0 ? 'reading' : 'later'; }
+function statusLabel(s){ return s==='done'?'Прочетена':s==='reading'?'Чета':'За четене'; }
+function progress(book){ return book.totalPages ? Math.round(book.currentPage/book.totalPages*100) : 0; }
+function findBook(id){ return books.find(b => b.id === Number(id)); }
+function prefersReduced(){ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function isMotionless(){ return prefersReduced() || state.static; }
+function startOfWeek(date){
+  const d=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+  const day=(d.getDay()+6)%7;
+  d.setDate(d.getDate()-day);
+  return d;
+}
+function weekPages(){
+  const start=startOfWeek(new Date());
+  const iso=new Date(start.getTime()-start.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  return logs.filter(l=>l.dateISO>=iso).reduce((s,l)=>s+l.pages,0);
+}
+function pagesByDay(){
+  const map={};
+  logs.forEach(l=>{ map[l.dateISO]=(map[l.dateISO]||0)+l.pages; });
+  return map;
+}
+function currentStreak(){
+  const map=pagesByDay();
+  const min=settings.minPagesForStreakDay;
+  let n=0; const d=new Date();
+  for(let i=0;i<400;i++){
+    const iso=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    if((map[iso]||0)>=min){ n++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return n;
+}
+function longestStreak(){
+  const map=pagesByDay();
+  const days=Object.keys(map).filter(k=>map[k]>=settings.minPagesForStreakDay).sort();
+  let best=0,run=0,prev=null;
+  days.forEach(iso=>{
+    if(prev){
+      const a=new Date(prev+'T12:00:00'), b=new Date(iso+'T12:00:00');
+      const diff=Math.round((b-a)/86400000);
+      run = diff===1 ? run+1 : 1;
+    } else run=1;
+    best=Math.max(best,run); prev=iso;
+  });
+  return best;
+}
+function bookLogs(book){
+  return logs.filter(l=>l.bookId===book.id).sort((a,b)=>b.dateISO.localeCompare(a.dateISO)||String(b.id).localeCompare(String(a.id)));
+}
+
+function button(label, action, glyph, classes=''){
+  return '<button type="button" class="button '+classes+'" '+action+'>'+(glyph?icon(glyph):'')+(label?('<span>'+label+'</span>'):'')+'</button>';
+}
+function cover(book, extra=''){
+  const st=statusOf(book);
+  return '<span class="cover '+st+' '+artOf(book)+' '+extra+'" aria-hidden="true">'+
+    '<span class="cover-art"><i></i><i></i><i></i><i></i><i></i></span>'+
+    '<span class="cover-copy"><span class="cover-author">'+escape(book.author)+'</span>'+
+    '<span class="cover-title">'+escape(coverTitle(book))+'</span></span>'+
+    '<span class="cover-imprint"><b></b><span>BB</span></span></span>';
+}
+function bookmark(book){
+  const pct = progress(book);
+  const cls = 'bookmark'+(pct===0?' is-tucked':'')+(statusOf(book)==='done'?' is-gold':'');
+  return '<span class="'+cls+'" style="--read:'+pct+'" aria-hidden="true"></span>';
+}
+function bookObject(book, extra=''){
+  return '<div class="object '+extra+'" aria-hidden="true"><div class="object-shadow"></div>'+
+    '<div class="volume '+statusOf(book)+'" style="--read:'+progress(book)+'">'+
+      bookmark(book)+
+      '<span class="spine"></span><span class="fore-edge"></span><span class="bottom-edge"></span>'+
+      cover(book)+
+    '</div></div>';
+}
+function meter(percent,label){
+  return '<div class="meter" role="progressbar" aria-label="'+escape(label)+'" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+Math.min(100,percent)+'%"></span></div>';
+}
+function metric(book, showPercent=true){
+  return '<div class="metric"><div class="labels"><span>'+book.currentPage+' от '+book.totalPages+' стр.</span>'+(showPercent?'<span>'+progress(book)+'%</span>':'')+'</div>'+meter(progress(book),'Напредък по книгата')+'</div>';
+}
+function kineticTitle(text){
+  let i=0;
+  const html=String(text).split(/(\s+)/).map(token=>{
+    if(/^\s+$/.test(token)){ const s='<span class="ch space" style="--i:'+i+'" aria-hidden="true">&nbsp;</span>'; i++; return s; }
+    const letters=[...token].map(ch=>{ const s='<span class="ch" style="--i:'+i+'" aria-hidden="true">'+escape(ch)+'</span>'; i++; return s; }).join('');
+    return '<span class="word">'+letters+'</span>';
+  }).join('');
+  return '<h1 class="kinetic" tabindex="-1" aria-label="'+escape(text)+'">'+html+'</h1>';
+}
+function brand(){
+  return '<button type="button" class="brand" data-nav="home" aria-label="BookBuddy, начало"><span class="brand-mark">'+icon('book')+'</span><span class="brand-name">BookBuddy</span><span class="brand-sub">Читалня</span></button>';
+}
+function nav(mobile){
+  const cls = mobile ? 'rail-link' : 'navlink';
+  return navItems.map(([key,label,glyph]) =>
+    '<button type="button" class="'+cls+(state.screen===key?' current':'')+'" data-nav="'+key+'">'+(mobile?icon(glyph):'')+'<span>'+(mobile && key==='issue'?'Брой':label)+'</span></button>'
+  ).join('');
+}
+function themeControl(){
+  return '<div class="theme-field"><label for="themeSelect">Тема</label>'+
+    '<select id="themeSelect" aria-label="Избери тема">'+
+      '<option value="light"'+(state.theme==='light'?' selected':'')+'>Светла</option>'+
+      '<option value="dark"'+(state.theme==='dark'?' selected':'')+'>Тъмна</option>'+
+      '<option value="system"'+(state.theme==='system'?' selected':'')+'>Система</option>'+
+    '</select></div>';
+}
+function appHeader(){
+  return '<header class="nav"><div>'+brand()+'</div><nav class="navlinks" aria-label="Основна навигация">'+nav(false)+'</nav>'+
+    '<div class="navactions">'+button('Добави книга','data-add aria-label="Добави книга"','plus','main nav-plus')+
+    button('','data-settings aria-label="Настройки"','sliders','icononly ghost')+
+    themeControl()+'</div></header>';
+}
+function pressFoot(){
+  return '<footer class="press-foot"><span>BookBuddy · Читалня нощем</span><span>Ноември 2026 · София</span></footer>';
+}
+function currentBook(){
+  const reading=new Set(books.filter(b=>statusOf(b)==='reading').map(b=>b.id));
+  const recent=[...logs].sort((a,b)=>b.dateISO.localeCompare(a.dateISO)||String(b.id).localeCompare(String(a.id)));
+  for(const log of recent){
+    const book=findBook(log.bookId);
+    if(book && reading.has(book.id)) return book;
+  }
+  return books.find(b=>statusOf(b)==='reading') || books[0];
+}
+function goalBlock(compact){
+  const pages=weekPages();
+  const goal=settings.weeklyGoalPages;
+  const left=Math.max(0,goal-pages);
+  const streak=currentStreak();
+  const pct=Math.round(pages/goal*100);
+  const detail = pages>=goal ? 'Седмичната цел е изпълнена.' : 'Още '+left+' страници до целта.';
+  return '<section class="goal-type'+(compact?' is-compact':'')+'" aria-label="Седмична цел и серия">'+
+    '<p class="kicker">Седмична цел</p>'+
+    '<p class="goal-num">'+pages+'<span>/'+goal+'</span></p>'+
+    '<div class="goal-rule" role="progressbar" aria-label="Седмична цел" aria-valuenow="'+Math.min(pct,100)+'" aria-valuemin="0" aria-valuemax="100" style="--goal:'+Math.min(pct,100)+'%"><i></i></div>'+
+    '<p class="copy">'+detail+'</p>'+
+    '<div class="streak"><span class="kicker">Серия</span><em>'+streak+' дни</em></div>'+
+  '</section>';
+}
+function topBooks(){
+  return [...books].sort((a,b)=>b.currentPage-a.currentPage || a.title.localeCompare(b.title,'bg')).slice(0,5);
+}
+function challengeState(){
+  return [
+    {title:'Седмичен спринт', detail:'Прочети '+settings.weeklyGoalPages+' страници тази седмица', value:weekPages(), target:settings.weeklyGoalPages},
+    {title:'Серия 14 дни', detail:'Чети 14 поредни дни', value:currentStreak(), target:14}
+  ];
+}
+function homeIndex(){
+  const ranks=topBooks().map((b,i)=>
+    '<button type="button" class="rank-item" data-detail="'+b.id+'"><span class="rank-num">'+(i+1)+'</span><span><strong>'+escape(b.title)+'</strong><small>'+escape(b.author)+'</small></span><small>'+b.currentPage+' стр.</small></button>'
+  ).join('');
+  const ch=challengeState().map(c=>
+    '<div class="challenge-item"><span><strong>'+escape(c.title)+'</strong><small>'+escape(c.detail)+'</small></span><span class="challenge-progress">'+c.value+' / '+c.target+'</span></div>'
+  ).join('');
+  return '<div class="home-index">'+
+    '<section><h2>Предизвикателства</h2><div>'+ch+'</div></section>'+
+    '<section><h2>Топ 5</h2><div>'+ranks+'</div></section>'+
+  '</div>';
+}
+function homePage(){
+  const book=currentBook();
+  const st=statusOf(book);
+  const eyebrow = st==='done'?'Последно прочетена':'В момента четеш';
+  const actions=(st==='done'?'':button('Запиши четене','data-log="'+book.id+'"','pen','main'))+
+    '<button type="button" class="quiet" data-detail="'+book.id+'">Разгърни книгата '+icon('arrow')+'</button>';
+  const now=new Date();
+  return '<main class="page home-content">'+
+    '<div class="home-kicker"><p class="eyebrow">'+eyebrow+'</p><p class="colophon">Читалня нощем · '+MONTHS[now.getMonth()]+' '+now.getFullYear()+'</p></div>'+
+    '<div class="home-grid">'+
+      '<div class="home-copy">'+kineticTitle(book.title)+
+        '<p class="author">'+escape(book.author)+'</p>'+metric(book)+
+        '<div class="hero-actions actions">'+actions+'</div></div>'+
+      '<div class="home-object">'+
+        '<button type="button" class="hero-art" data-detail="'+book.id+'" aria-label="'+escape('Отвори „'+book.title+'“')+'">'+
+          '<div class="hero-stage">'+bookObject(book)+'</div></button>'+
+        goalBlock(false)+
+      '</div>'+
+    '</div>'+homeIndex()+
+  '</main>';
+}
+
+function matchesQuery(book){
+  const q=state.query.trim().toLocaleLowerCase('bg');
+  if(!q) return true;
+  return (book.title+' '+book.author).toLocaleLowerCase('bg').includes(q);
+}
+function matchesFilter(book){ return state.filter==='all' || state.filter===statusOf(book); }
+function sortBooks(list){
+  const copy=[...list];
+  if(state.sort==='progress') copy.sort((a,b)=>progress(b)-progress(a)||a.title.localeCompare(b.title,'bg'));
+  else if(state.sort==='title') copy.sort((a,b)=>a.title.localeCompare(b.title,'bg'));
+  else copy.sort((a,b)=>b.id-a.id);
+  return copy;
+}
+function visibleOnShelf(book){ return matchesQuery(book) && matchesFilter(book); }
+function spineLabel(book){
+  const st=statusOf(book);
+  const pct=progress(book);
+  return book.title+', '+book.author+', '+statusLabel(st)+(st==='reading'?', '+pct+' процента, '+book.currentPage+' от '+book.totalPages+' страници':'')+(st==='done'?', прочетена':'');
+}
+function spineButton(book){
+  const st=statusOf(book);
+  const pct=progress(book);
+  const w=spineWidth(book);
+  const h=spineHeight(book);
+  const open = Number(state.openId)===book.id;
+  const fit=spineTitleFit(book,w,h);
+  const thick = book.totalPages>=400 ? ' is-thick' : '';
+  const dimmed = !visibleOnShelf(book);
+  const cls=['spine-book', st, 'tone-'+toneOf(book), thick, open?'is-open':'', dimmed?'is-dimmed':'', state.finishShot && st==='done' && book.id===state.finishShot?'just-finished':''].filter(Boolean).join(' ');
+  return '<button type="button" class="'+cls+'" data-id="'+book.id+'" data-open-book="'+book.id+'" title="'+escape(book.title)+'" style="--sw:'+w+'px;--sh:'+h+'px;--read:'+pct+';--title-size:'+fit.size.toFixed(1)+'px;--title-track:'+fit.track+'" aria-label="'+escape(spineLabel(book))+'" aria-expanded="'+(open?'true':'false')+'" '+(dimmed?'tabindex="-1"':'')+'>'+
+    '<span class="ribbon" aria-hidden="true"></span>'+
+    '<span class="spine-block">'+
+      '<span class="spine-top"></span>'+
+      '<span class="spine-pages"></span>'+
+      '<span class="spine-face">'+
+        '<span class="spine-title" title="'+escape(book.title)+'">'+escape(book.title)+'</span>'+
+        (w>=22 && !fit.long?'<span class="spine-writer" title="'+escape(book.author)+'">'+escape(spineAuthor(book))+'</span>':'')+
+        '<span class="spine-stamp">BB</span>'+
+      '</span>'+
+    '</span></button>';
+}
+function wallRow(status, label, list){
+  if(state.filter!=='all' && state.filter!==status) return '';
+  const visible=list.filter(visibleOnShelf);
+  const body = list.length===0
+    ? '<p class="shelf-empty">Няма книги на този рафт.</p>'
+    : (visible.length===0
+        ? '<p class="shelf-empty">Няма книги, които да отговарят на търсенето.</p>'
+        : '<div class="shelf-run"><span class="bookend" aria-hidden="true"></span>'+sortBooks(list).map(spineButton).join('')+'<span class="bookend bookend-right" aria-hidden="true"></span><span class="shelf-plaque">Читалня · 2026</span></div>');
+  return '<section class="wall-row" data-shelf="'+status+'">'+
+    '<div class="row-label">'+escape(label)+'<small>'+visible.length+'</small></div>'+
+    '<div class="shelf-well">'+body+'<div class="shelf-plank" aria-hidden="true"></div></div>'+
+  '</section>';
+}
+function libraryResultsHTML(){
+  const grouped={reading:[], done:[], later:[]};
+  books.forEach(b=>grouped[statusOf(b)].push(b));
+  const rows=SHELF_GROUPS.map(([k,l])=>wallRow(k,l,grouped[k])).join('');
+  const any=books.some(visibleOnShelf);
+  if(!any){
+    return '<div class="empty"><strong>Няма намерени книги</strong><p>Промени търсенето или избери всички книги.</p><button class="quiet" type="button" data-reset>Изчисти филтрите</button></div>';
+  }
+  return '<div class="wall-viewport" id="wall" tabindex="0" aria-label="Рафт на библиотеката, превърти хоризонтално">'+
+    '<div class="wall-lamp" aria-hidden="true"><i></i></div>'+
+    '<div class="wall"><div class="wall-cornice" aria-hidden="true"></div>'+rows+'</div></div>';
+}
+function spreadHTML(book, opening){
+  const st=statusOf(book);
+  const note=book.notes ? '<p class="notes">'+escape(book.notes)+'</p>' : '<p class="notes">Все още няма бележки за тази книга.</p>';
+  const sessions=bookLogs(book).slice(0,8).map(log=>{
+    const line=log.note ? escape(log.note) : log.pages+' страници в тази сесия.';
+    return '<article class="session-item"><p class="when">'+escape(formatDateBG(log.dateISO))+' · '+log.pages+' стр.</p><p>'+line+'</p></article>';
+  }).join('') || '<p class="notes">Все още няма записани сесии.</p>';
+  const finishBtn = st==='reading' ? button('Завърши (демо)','data-finish="'+book.id+'"','mark','ghost') : '';
+  const logBtn = st==='done' ? '' : button('Запиши четене','data-log="'+book.id+'"','pen','main');
+  return '<div class="spread-layer'+(opening && !isMotionless()?' is-entering':'')+'" data-close-spread>'+
+    '<div class="spread" role="dialog" aria-modal="true" aria-labelledby="spread-title">'+
+      '<div class="spread-book'+(opening && !isMotionless()?' is-opening':'')+'">'+
+        '<div class="leaf leaf-left"><div class="spread-copy">'+
+          '<div class="leaf-hero">'+cover(book)+'<div>'+
+          '<p class="kicker">'+statusLabel(st)+'</p>'+
+          '<h2 id="spread-title" tabindex="-1">'+escape(book.title)+'</h2>'+
+          '<p class="author">'+escape(book.author)+'</p>'+
+          metric(book)+'</div></div>'+
+          '<div class="actions">'+logBtn+button('Редактирай','data-edit="'+book.id+'"','pen','ghost')+finishBtn+
+          '<button type="button" class="quiet" data-close-spread>Върни на рафта</button></div>'+
+        '</div></div>'+
+        '<div class="leaf leaf-right">'+
+          '<h3>Бележки</h3>'+note+
+          '<h3>Сесии</h3><div class="session-list">'+sessions+'</div>'+
+          '<p class="inspect-hint">Esc или клик извън книгата я връща на рафта.</p>'+
+        '</div>'+
+      '</div>'+
+      '<button type="button" class="button icononly spread-close" data-close-spread aria-label="Затвори">'+icon('close')+'</button>'+
+    '</div></div>';
+}
+function libraryPage(){
+  const filters=[['all','Всички'],['reading','Чета'],['later','За четене'],['done','Прочетени']];
+  const openBook=state.openId && findBook(state.openId);
+  return '<main class="page library-page">'+
+    '<div class="section-head"><div><h1 class="page-title" id="library-title" tabindex="-1">Моята библиотека</h1><p>'+books.length+' книги по стената на читалнята · превърти настрани</p></div></div>'+
+    '<div class="toolbar">'+
+      '<label class="searchbox">'+icon('search')+'<span class="sr">Търси книга</span>'+
+      '<input id="search" type="search" value="'+escape(state.query)+'" placeholder="Търси по заглавие или автор…"></label>'+
+      '<div class="filters" role="group" aria-label="Статус на четене">'+
+        filters.map(([k,l])=>'<button type="button" class="chip" data-filter="'+k+'" aria-pressed="'+(k===state.filter)+'">'+l+'</button>').join('')+
+      '</div>'+
+      '<label class="sr" for="sort">Сортирай</label>'+
+      '<select id="sort" class="sort" aria-label="Сортирай книги">'+
+        '<option value="recent"'+(state.sort==='recent'?' selected':'')+'>Последни</option>'+
+        '<option value="progress"'+(state.sort==='progress'?' selected':'')+'>Прогрес</option>'+
+        '<option value="title"'+(state.sort==='title'?' selected':'')+'>Заглавие</option>'+
+      '</select>'+
+    '</div><div id="results">'+libraryResultsHTML()+'</div>'+
+    (openBook?spreadHTML(openBook, !state.static):'')+
+  '</main>';
+}
+function refreshLibraryResults(){
+  const r=document.getElementById('results');
+  if(!r) return;
+  if(state.openId && !visibleOnShelf(findBook(state.openId)||{title:'',author:'',currentPage:0,totalPages:1})){
+    state.openId=null;
+    document.querySelector('.spread-layer')?.remove();
+    syncHash();
+  }
+  r.innerHTML=libraryResultsHTML();
+  document.querySelectorAll('[data-filter]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.filter===state.filter)));
+  bindWall();
+}
+
+function formatDateBG(iso){
+  const today=todayISO();
+  if(iso===today) return 'Днес';
+  const yest=isoDaysAgo(1);
+  if(iso===yest) return 'Вчера';
+  const [y,m,d]=iso.split('-');
+  return Number(d)+' '+MONTHS[Number(m)-1]+' '+y;
+}
+function journalPage(){
+  const ordered=[...logs].sort((a,b)=>b.dateISO.localeCompare(a.dateISO)||String(b.id).localeCompare(String(a.id)));
+  const entries=ordered.map(log=>{
+    const book=findBook(log.bookId);
+    if(!book) return '';
+    const margin=log.note ? '<p class="margin-note">'+escape(log.note)+'</p>' : '<p class="margin-note">Без бележка към сесията.</p>';
+    return '<article class="entry reveal">'+
+      '<div><h2 class="entry-title">'+escape(book.title)+'</h2>'+
+      '<p class="entry-meta">'+log.pages+' стр. в тази сесия · '+book.currentPage+' от '+book.totalPages+' общо</p></div>'+
+      '<div class="entry-side"><span class="colophon-date">'+escape(formatDateBG(log.dateISO))+'</span>'+margin+
+      button('Редактирай','data-edit-log="'+log.id+'"','pen','ghost')+'</div></article>';
+  }).join('');
+  const now=new Date();
+  return '<main class="page journal">'+
+    '<header class="issue-mast"><div><p class="kicker">Личен дневник · брой</p>'+
+    '<h1 class="page-title" tabindex="-1">Дневник</h1></div>'+
+    '<p class="colophon">'+now.getDate()+' '+MONTHS[now.getMonth()]+' '+now.getFullYear()+' · читалня нощем</p></header>'+
+    '<div class="journal-layout">'+
+      '<div><div class="entries">'+entries+'</div></div>'+
+      '<aside class="journal-aside">'+goalBlock(true)+'</aside>'+
+    '</div></main>';
+}
+function yearStats(){
+  const year='2026';
+  const yearLogs=logs.filter(l=>l.dateISO.startsWith(year));
+  const pages=yearLogs.reduce((s,l)=>s+l.pages,0);
+  const finished=books.filter(b=>statusOf(b)==='done');
+  const byAuthor={};
+  yearLogs.forEach(l=>{
+    const b=findBook(l.bookId); if(!b) return;
+    byAuthor[b.author]=(byAuthor[b.author]||0)+l.pages;
+  });
+  const fav=Object.entries(byAuthor).sort((a,b)=>b[1]-a[1])[0];
+  const byMonth={};
+  yearLogs.forEach(l=>{ const m=Number(l.dateISO.slice(5,7)); byMonth[m]=(byMonth[m]||0)+l.pages; });
+  const best=Object.entries(byMonth).sort((a,b)=>b[1]-a[1])[0];
+  return {
+    pages, finished,
+    favAuthor: fav?fav[0]:'—',
+    bestMonth: best?MONTHS[Number(best[0])-1]:'—',
+    streak: Math.max(currentStreak(), longestStreak())
+  };
+}
+function issuePage(){
+  const s=yearStats();
+  const index=s.finished.map(b=>'<li class="reveal"><span>'+escape(b.title)+'</span><small>'+escape(b.author)+' · '+b.totalPages+' стр.</small></li>').join('')
+    || '<li><span>Все още няма прочетени заглавия тази година.</span></li>';
+  const ready = isMotionless();
+  return '<main class="page">'+
+    '<article class="issue-cover">'+
+      '<p class="kicker">Годишен брой</p>'+
+      '<p class="colophon">BookBuddy · Читалня нощем</p>'+
+      '<h1 class="chapbook-year" tabindex="-1">2026</h1>'+
+      '<p class="chapbook-lead">Годината в четенето, събрана като малък каталог, а не като отчет.</p>'+
+      '<div class="chapbook-grid">'+
+        '<div class="stat-cell"><b data-count="'+s.finished.length+'">'+(ready?s.finished.length:'0')+'</b><span>прочетени книги</span></div>'+
+        '<div class="stat-cell"><b data-count="'+s.pages+'">'+(ready?s.pages.toLocaleString('bg-BG'):'0')+'</b><span>страници</span></div>'+
+        '<div class="stat-cell"><b data-count="'+s.streak+'">'+(ready?s.streak:'0')+'</b><span>дни най-дълга серия</span></div>'+
+      '</div>'+
+      '<div class="chapbook-pair">'+
+        '<div><p class="kicker">Любим автор</p><strong>'+escape(s.favAuthor)+'</strong></div>'+
+        '<div><p class="kicker">Най-силен месец</p><strong>'+escape(s.bestMonth)+'</strong></div>'+
+      '</div>'+
+      '<h2 class="page-title" style="font-size:32px;margin:8px 0 12px">Прочетени заглавия</h2>'+
+      '<ol class="finished-index">'+index+'</ol>'+
+    '</article></main>';
+}
+
+function dialogFrame(title, content, cls=''){
+  return '<div class="dialog-shell '+cls+'"><header class="dialog-head"><h2 id="dialog-title">'+escape(title)+'</h2>'+
+    '<button type="button" class="button icononly" data-close aria-label="Затвори">'+icon('close')+'</button></header>'+content+'</div>';
+}
+function showDialog(content, source){
+  const dialog=document.getElementById('dialog');
+  if(!dialog.open) opener=source;
+  dialog.innerHTML=content;
+  if(!dialog.open){
+    dialog.addEventListener('close',()=>opener?.focus(),{once:true});
+    dialog.showModal();
+  }
+  dialog.querySelector('[autofocus],input,select,textarea,button.main')?.focus();
+}
+function showLog(book, source){
+  const local=todayISO();
+  const remaining=Math.max(1, book.totalPages-book.currentPage);
+  const content='<form id="log-form" data-book="'+book.id+'">'+
+    '<p class="detail-note">'+escape(book.title)+' · '+book.currentPage+' от '+book.totalPages+' стр.</p>'+
+    '<label class="field">Прочетени страници в сесията<input name="pages" type="number" inputmode="numeric" min="1" max="'+remaining+'" placeholder="Напр. 22" autofocus required></label>'+
+    '<label class="field">Дата<input name="date" type="date" value="'+local+'" max="'+local+'" required></label>'+
+    '<label class="field">Бележка (по желание)<input name="note" maxlength="120"></label>'+
+    '<div class="actions">'+button('Отказ','data-close')+'<button class="button main" type="submit">Запиши сесията</button></div></form>';
+  showDialog(dialogFrame('Запиши четене',content),source);
+}
+function showEditLog(log, source){
+  const book=findBook(log.bookId);
+  const max=Math.max(1,(book?book.totalPages-book.currentPage:0)+log.pages);
+  const content='<form id="edit-log-form" data-log="'+log.id+'">'+
+    '<p class="detail-note">'+(book?escape(book.title):'Книга')+' · сесия от '+escape(formatDateBG(log.dateISO))+'</p>'+
+    '<label class="field">Прочетени страници в сесията<input name="pages" type="number" inputmode="numeric" min="1" max="'+max+'" value="'+log.pages+'" autofocus required></label>'+
+    '<label class="field">Дата<input name="date" type="date" value="'+log.dateISO+'" max="'+todayISO()+'" required></label>'+
+    '<label class="field">Бележка (по желание)<input name="note" maxlength="120" value="'+escape(log.note||'')+'"></label>'+
+    '<div class="actions">'+button('Отказ','data-close')+'<button class="button main" type="submit">Запази промените</button></div></form>';
+  showDialog(dialogFrame('Редактирай сесия',content),source);
+}
+function showAdd(source){
+  const content='<form id="add-form">'+
+    '<label class="field">Заглавие<input name="title" maxlength="80" autofocus required></label>'+
+    '<label class="field">Автор<input name="author" maxlength="70" required></label>'+
+    '<label class="field">Общо страници<input name="totalPages" type="number" inputmode="numeric" min="1" max="10000" required></label>'+
+    '<label class="field">Текуща страница<input name="currentPage" type="number" inputmode="numeric" min="0" value="0"></label>'+
+    '<label class="field">Бележки (по желание, до 300 символа)<textarea name="notes" maxlength="300"></textarea></label>'+
+    '<div class="actions">'+button('Отказ','data-close')+'<button class="button main" type="submit">Добави</button></div></form>';
+  showDialog(dialogFrame('Добави книга',content),source);
+}
+function showEdit(book, source){
+  const content='<form id="edit-form" data-book="'+book.id+'">'+
+    '<label class="field">Заглавие<input name="title" maxlength="80" value="'+escape(book.title)+'" autofocus required></label>'+
+    '<label class="field">Автор<input name="author" maxlength="70" value="'+escape(book.author)+'" required></label>'+
+    '<label class="field">Общо страници<input name="totalPages" type="number" inputmode="numeric" min="1" max="10000" value="'+book.totalPages+'" required></label>'+
+    '<label class="field">Текуща страница<input name="currentPage" type="number" inputmode="numeric" min="0" value="'+book.currentPage+'" required></label>'+
+    '<label class="field">Бележки (по желание, до 300 символа)<textarea name="notes" maxlength="300">'+escape(book.notes||'')+'</textarea></label>'+
+    '<div class="actions">'+button('Отказ','data-close')+'<button class="button main" type="submit">Запази</button></div></form>';
+  showDialog(dialogFrame('Редактирай книга',content),source);
+}
+function showSettings(source){
+  const content='<form id="settings-form">'+
+    '<label class="field">Седмична цел (страници)<input name="weeklyGoalPages" type="number" inputmode="numeric" min="1" value="'+settings.weeklyGoalPages+'" autofocus required></label>'+
+    '<label class="field">Минимум страници за ден от серията<input name="minPagesForStreakDay" type="number" inputmode="numeric" min="1" value="'+settings.minPagesForStreakDay+'" required></label>'+
+    '<label class="field">Тема<select name="theme">'+
+      '<option value="light"'+(state.theme==='light'?' selected':'')+'>Светла</option>'+
+      '<option value="dark"'+(state.theme==='dark'?' selected':'')+'>Тъмна</option>'+
+      '<option value="system"'+(state.theme==='system'?' selected':'')+'>Система</option>'+
+    '</select></label>'+
+    '<div class="actions">'+button('Отказ','data-close')+'<button class="button main" type="submit">Запази</button></div></form>';
+  showDialog(dialogFrame('Настройки',content),source);
+}
+function flash(message){
+  clearTimeout(toastTimer);
+  const toast=document.getElementById('toast');
+  toast.textContent=message;
+  toastTimer=setTimeout(()=>{toast.textContent='';},3200);
+}
+function appClass(){
+  return 'app'+(state.theme==='dark'?' dark':'')+(state.theme==='system'?' system':'')+(state.static?' is-static':'')+(prefersReduced()?' is-reduced':'');
+}
+
+function openBook(id, source, animate=true){
+  const book=findBook(id);
+  if(!book) return;
+  const fromLibrary=state.screen==='library' && document.getElementById('wall');
+  const first=document.querySelector('.spine-book[data-id="'+book.id+'"]');
+  const firstRect=first?.getBoundingClientRect();
+  state.openId=book.id;
+  if(state.screen!=='library'){
+    goTo('library', {skipTurn:true});
+    document.querySelector('#spread-title')?.focus();
+    return;
+  }
+  first?.setAttribute('aria-expanded','true');
+  first?.classList.add('is-open');
+  document.querySelector('.spread-layer')?.remove();
+  const page=document.querySelector('.library-page') || document.querySelector('.page');
+  page.insertAdjacentHTML('beforeend', spreadHTML(book, animate && !isMotionless()));
+  const layer=document.querySelector('.spread-layer');
+  if(animate && !isMotionless() && firstRect){
+    const left=layer.querySelector('.leaf-left');
+    const lastRect=left.getBoundingClientRect();
+    const flyer=document.createElement('div');
+    flyer.className='inspect-flyer';
+    flyer.innerHTML=bookObject(book);
+    flyer.style.cssText='position:fixed;left:'+firstRect.left+'px;top:'+firstRect.top+'px;width:'+Math.max(firstRect.width,24)+'px;height:'+firstRect.height+'px;z-index:12;pointer-events:none;transition:left .55s cubic-bezier(.2,.7,.2,1),top .55s cubic-bezier(.2,.7,.2,1),width .55s cubic-bezier(.2,.7,.2,1),height .55s cubic-bezier(.2,.7,.2,1)';
+    document.body.appendChild(flyer);
+    requestAnimationFrame(()=>{
+      flyer.style.left=lastRect.left+'px';
+      flyer.style.top=lastRect.top+'px';
+      flyer.style.width=Math.max(120, lastRect.width*0.45)+'px';
+      flyer.style.height=lastRect.height+'px';
+      setTimeout(()=>flyer.remove(), 700);
+    });
+  }
+  layer.querySelector('#spread-title')?.focus();
+  opener=source||first;
+  syncHash();
+}
+function closeSpread(animate=true){
+  const id=state.openId;
+  const layer=document.querySelector('.spread-layer');
+  state.openId=null;
+  const spine=id && document.querySelector('.spine-book[data-id="'+id+'"]');
+  const done=()=>{
+    layer?.remove();
+    spine?.classList.remove('is-open');
+    spine?.setAttribute('aria-expanded','false');
+    spine?.focus();
+    syncHash();
+  };
+  if(!layer){ done(); return; }
+  if(!animate || isMotionless()){ done(); return; }
+  layer.classList.add('is-leaving');
+  setTimeout(done, 220);
+}
+function finishBook(book, opts={}){
+  if(!book || statusOf(book)==='done') return;
+  const remaining=book.totalPages-book.currentPage;
+  if(remaining>0 && opts.addLog!==false){
+    logs.unshift({id:'l-'+Date.now(), bookId:book.id, dateISO:todayISO(), pages:remaining, note:opts.note || (opts.demo?'Демо: книгата е завършена.':'Последна сесия.')});
+    book.currentPage=book.totalPages;
+  } else {
+    book.currentPage=book.totalPages;
+  }
+  state.openId=null;
+  document.getElementById('dialog')?.close();
+  const first=document.querySelector('.spine-book[data-id="'+book.id+'"]');
+  const firstRect=first?.getBoundingClientRect();
+  const stay=state.screen==='library';
+  if(!stay) goTo('library', {skipTurn:true});
+  else {
+    document.querySelector('.spread-layer')?.remove();
+    const r=document.getElementById('results');
+    if(r){ r.innerHTML=libraryResultsHTML(); bindWall(); }
+  }
+  const last=document.querySelector('.spine-book[data-id="'+book.id+'"]');
+  const row=last?.closest('.wall-row');
+  last?.classList.add('just-finished');
+  row?.classList.add('has-arrival');
+  last?.setAttribute('aria-expanded','false');
+  if(!isMotionless() && firstRect && last && firstRect.width>0){
+    const lastRect=last.getBoundingClientRect();
+    const dx=firstRect.left-lastRect.left;
+    const dy=firstRect.top-lastRect.top;
+    last.style.zIndex='9';
+    last.style.transform='translate('+dx+'px, '+dy+'px)';
+    last.style.transition='none';
+    last.getBoundingClientRect();
+    last.style.transition='transform .95s cubic-bezier(.2,.7,.2,1)';
+    last.style.transform='translate(0,0)';
+    const clear=()=>{ last.style.transition=''; last.style.transform=''; last.style.zIndex=''; };
+    last.addEventListener('transitionend', clear, {once:true});
+    setTimeout(clear, 1100);
+  }
+  flash('„'+book.title+'“ е прочетена.');
+  const live=document.getElementById('live');
+  if(live) live.textContent='Книгата „'+book.title+'“ е отбелязана като прочетена и е преместена на рафта Прочетени.';
+  syncHash();
+}
+
+function bindHeroTilt(){
+  const art=document.querySelector('.hero-art');
+  const vol=art?.querySelector('.volume');
+  const stage=art?.querySelector('.hero-stage');
+  if(!art || !vol || isMotionless()) return;
+  const apply=(x,y)=>{
+    vol.style.transform='rotateY('+(-26+x*18)+'deg) rotateX('+(8-y*10)+'deg) rotateZ(-9deg)';
+    stage?.style.setProperty('--sx', (x*16)+'px');
+    stage?.style.setProperty('--sy', (y*10)+'px');
+  };
+  art.addEventListener('pointermove', e=>{
+    const r=art.getBoundingClientRect();
+    apply((e.clientX-r.left)/r.width-0.5, (e.clientY-r.top)/r.height-0.5);
+  });
+  art.addEventListener('pointerleave', ()=>{ vol.style.transform=''; stage?.style.setProperty('--sx','0px'); stage?.style.setProperty('--sy','0px'); });
+}
+function bindWall(){
+  const wall=document.getElementById('wall');
+  if(!wall) return;
+  const lamp=wall.querySelector('.wall-lamp i') || wall.querySelector('.wall-lamp');
+  const setLamp=(lx,ly)=>{
+    const target=wall.querySelector('.wall-lamp i') || wall;
+    target.style.setProperty('--lx', lx);
+    target.style.setProperty('--ly', ly);
+  };
+  setLamp(state.static?'32%':'28%', state.static?'36%':'32%');
+  wall.addEventListener('wheel', e=>{
+    if(Math.abs(e.deltaY)>=Math.abs(e.deltaX)){
+      e.preventDefault();
+      wall.scrollLeft += e.deltaY;
+    }
+  }, {passive:false});
+  let dragging=false, startX=0, startLeft=0;
+  wall.addEventListener('pointerdown', e=>{
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    if(e.target.closest('button,input,select,a')) return;
+    dragging=true; startX=e.clientX; startLeft=wall.scrollLeft;
+    wall.classList.add('is-dragging');
+    wall.setPointerCapture?.(e.pointerId);
+  });
+  wall.addEventListener('pointermove', e=>{
+    if(dragging){ wall.scrollLeft = startLeft - (e.clientX-startX); }
+    if(isMotionless()) return;
+    const r=wall.getBoundingClientRect();
+    setLamp(((e.clientX-r.left)/r.width*100).toFixed(2)+'%', ((e.clientY-r.top)/r.height*100).toFixed(2)+'%');
+  });
+  const endDrag=()=>{ dragging=false; wall.classList.remove('is-dragging'); };
+  wall.addEventListener('pointerup', endDrag);
+  wall.addEventListener('pointercancel', endDrag);
+  wall.addEventListener('pointerleave', ()=>{ if(!state.static) setLamp('28%','32%'); });
+}
+function bindReveals(){
+  const nodes=[...document.querySelectorAll('.reveal')];
+  if(!nodes.length) return;
+  if(isMotionless()){ nodes.forEach(n=>n.classList.add('is-in')); return; }
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('is-in'); io.unobserve(en.target); } });
+  }, {threshold:0.16, rootMargin:'0px 0px -8% 0px'});
+  nodes.forEach(n=>io.observe(n));
+}
+function bindCountUp(){
+  const cells=[...document.querySelectorAll('[data-count]')];
+  if(!cells.length) return;
+  const run=()=>{
+    cells.forEach(el=>{
+      const target=Number(el.dataset.count);
+      if(isMotionless()){ el.textContent = target.toLocaleString('bg-BG'); return; }
+      const start=performance.now();
+      const dur=1100;
+      const tick=now=>{
+        const t=Math.min(1,(now-start)/dur);
+        const eased=1-Math.pow(1-t,3);
+        el.textContent=Math.round(target*eased).toLocaleString('bg-BG');
+        if(t<1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  };
+  run();
+}
+function bindGoalRule(){
+  document.querySelectorAll('.goal-rule i').forEach(i=>{
+    if(isMotionless()) return;
+    requestAnimationFrame(()=>i.classList.add('is-on'));
+  });
+}
+
+function parseHash(){
+  const params=new URLSearchParams(location.search);
+  if(params.has('static') || params.get('shot')==='1') state.static=true;
+  const raw=decodeURIComponent((location.hash||'').replace(/^#/,'')).toLowerCase();
+  if(!raw) return;
+  raw.split(/[-_/,+\s]+/).filter(Boolean).forEach(bit=>{
+    if(bit==='activity' || bit==='дневник' || bit==='diary') state.screen='journal';
+    else if(bit==='issue' || bit==='broy' || bit==='брой' || bit==='year') state.screen='issue';
+    else if(bit==='library' || bit==='библиотека' || bit==='home' || bit==='начало' || bit==='journal') state.screen = bit==='библиотека'?'library':bit==='начало'?'home':bit==='journal'?'journal':bit;
+    else if(bit==='open'){ state.screen='library'; state.openId = state.openId || (currentBook()&&currentBook().id); }
+    else if(bit==='finish'){ state.screen='library'; state.pendingFinish=true; }
+    else if(bit==='final' || bit==='static') state.static=true;
+    else if(bit==='dark') { state.theme='dark'; settings.theme='dark'; }
+    else if(bit==='light') { state.theme='light'; settings.theme='light'; }
+    else if(bit==='system') { state.theme='system'; settings.theme='system'; }
+    else if(bit==='mobile' || bit==='phone') state.device='phone';
+    else if(bit==='desktop') state.device='desktop';
+  });
+}
+function syncHash(){
+  const parts=[state.screen];
+  if(state.openId) parts.push('open');
+  if(state.finishShot) parts.push('finish');
+  if(state.static) parts.push('final');
+  if(state.theme==='dark') parts.push('dark');
+  if(state.theme==='system') parts.push('system');
+  if(state.device==='phone') parts.push('mobile');
+  const next='#'+parts.join('-');
+  if(location.hash!==next){
+    syncingHash=true;
+    history.replaceState(null,'',next);
+    syncingHash=false;
+  }
+}
+function applyPendingFinishData(){
+  if(!state.pendingFinish) return;
+  const book=books.find(b=>b.id===3);
+  state.pendingFinish=false;
+  if(!book) return;
+  if(statusOf(book)!=='done'){
+    const remaining=book.totalPages-book.currentPage;
+    if(remaining>0){
+      logs.unshift({id:'l-'+Date.now(), bookId:book.id, dateISO:todayISO(), pages:remaining, note:'Демо: книгата е завършена.'});
+      book.currentPage=book.totalPages;
+    }
+  }
+  state.finishShot=book.id;
+}
+function afterRender(){
+  bindHeroTilt();
+  bindWall();
+  bindReveals();
+  bindCountUp();
+  bindGoalRule();
+  if(state.finishShot){
+    const el=document.querySelector('.spine-book[data-id="'+state.finishShot+'"]');
+    el?.classList.add('just-finished');
+    el?.closest('.wall-row')?.classList.add('has-arrival');
+    const book=findBook(state.finishShot);
+    if(book && !state.finishAnnounced){
+      state.finishAnnounced=true;
+      flash('„'+book.title+'“ е прочетена.');
+    }
+  }
+}
+function screenHTML(){
+  return state.screen==='library'?libraryPage():state.screen==='journal'?journalPage():state.screen==='issue'?issuePage():homePage();
+}
+function paint(){
+  const stage=document.getElementById('stage');
+  stage.classList.toggle('phone', state.device==='phone');
+  stage.innerHTML='<div class="'+appClass()+'">'+appHeader()+screenHTML()+
+    '<nav class="bottom-nav" aria-label="Мобилна навигация">'+nav(true)+'</nav>'+
+    pressFoot()+'<dialog id="dialog" aria-labelledby="dialog-title"></dialog><div id="live" class="sr" aria-live="polite"></div></div>';
+  document.querySelectorAll('[data-device]').forEach(btn=>btn.setAttribute('aria-pressed', String(btn.dataset.device===state.device)));
+  syncHash();
+  afterRender();
+}
+function render(){ paint(); }
+
+function goTo(screen, opts={}){
+  if(screen===state.screen && !opts.force){
+    document.querySelector('.page-title, h1')?.focus({preventScroll:true});
+    return;
+  }
+  const reduce=isMotionless() || opts.skipTurn;
+  const app=document.querySelector('.app');
+  const page=app?.querySelector('main.page');
+  if(!reduce && app && page && !turning){
+    turning=true;
+    const ghost=page.cloneNode(true);
+    ghost.classList.add('page-ghost');
+    ghost.setAttribute('aria-hidden','true');
+    const layer=document.createElement('div');
+    layer.className='page-turn-layer';
+    layer.appendChild(ghost);
+    state.openId=null;
+    state.screen=screen;
+    paint();
+    const nextApp=document.querySelector('.app');
+    nextApp.appendChild(layer);
+    nextApp.querySelector('main.page')?.classList.add('is-enter');
+    requestAnimationFrame(()=>layer.classList.add('is-turning'));
+    setTimeout(()=>{ layer.remove(); turning=false; }, 720);
+    document.querySelector('.page-title, h1, .kinetic')?.focus({preventScroll:true});
+    return;
+  }
+  state.openId = (screen==='library' && opts.keepOpen) ? state.openId : null;
+  state.screen=screen;
+  paint();
+  document.querySelector('.page-title, h1, .kinetic')?.focus({preventScroll:true});
+}
+
+document.addEventListener('click', event=>{
+  const closeHit=event.target.closest('[data-close-spread]');
+  if(closeHit && !event.target.closest('.spread button, .spread a, .spread input, .spread select, .spread textarea, .leaf')){
+    const onLayer=closeHit.classList.contains('spread-layer');
+    if(!onLayer || event.target===closeHit){ closeSpread(); return; }
+  }
+  if(closeHit && (closeHit.classList.contains('spread-close') || closeHit.hasAttribute('data-close-spread') && !closeHit.classList.contains('spread-layer'))){
+    if(!closeHit.classList.contains('spread-layer')){ closeSpread(); return; }
+  }
+  const btn=event.target.closest('button');
+  if(!btn) return;
+  const data=btn.dataset;
+  if(data.device){ state.device=data.device; paint(); }
+  else if(data.nav){ goTo(data.nav); }
+  else if(data.filter){ state.filter=data.filter; if(state.screen==='library') refreshLibraryResults(); else paint(); }
+  else if('reset' in data){ state.query=''; state.filter='all'; if(state.screen==='library'){ const s=document.getElementById('search'); if(s) s.value=''; refreshLibraryResults(); } else paint(); document.getElementById('search')?.focus(); }
+  else if(data.openBook){ openBook(data.openBook, btn, true); }
+  else if(data.detail){ openBook(data.detail, btn, state.screen==='library'); }
+  else if(data.log){ showLog(findBook(data.log), btn); }
+  else if(data.editLog){ const log=logs.find(l=>String(l.id)===String(data.editLog)); if(log) showEditLog(log,btn); }
+  else if(data.edit){ const book=findBook(data.edit); if(book) showEdit(book,btn); }
+  else if(data.finish){ const book=findBook(data.finish); if(book) finishBook(book,{demo:true}); }
+  else if('add' in data){ showAdd(btn); }
+  else if('settings' in data){ showSettings(btn); }
+  else if('close' in data){ document.getElementById('dialog')?.close(); }
+});
+document.addEventListener('keydown', event=>{
+  if(event.key!=='Escape') return;
+  const dialog=document.getElementById('dialog');
+  if(dialog?.open) return;
+  if(state.openId){ event.preventDefault(); closeSpread(); }
+});
+document.addEventListener('input', event=>{
+  if(event.target.id==='search'){ state.query=event.target.value; if(state.screen==='library') refreshLibraryResults(); }
+  if(event.target.id==='sort'){ state.sort=event.target.value; if(state.screen==='library') refreshLibraryResults(); }
+  if(event.target.id==='themeSelect'){ state.theme=event.target.value; settings.theme=state.theme; paint(); }
+});
+document.addEventListener('submit', event=>{
+  event.preventDefault();
+  const form=event.target;
+  const data=new FormData(form);
+  if(form.id==='log-form'){
+    const book=findBook(form.dataset.book);
+    const pages=Number(data.get('pages'));
+    if(!book || pages<1){ flash('Въведи страниците от сесията.'); return; }
+    const remaining=book.totalPages-book.currentPage;
+    const add=Math.min(pages, remaining);
+    const completes=add>=remaining && remaining>0;
+    book.currentPage=Math.min(book.totalPages, book.currentPage+add);
+    logs.unshift({id:'l-'+Date.now(), bookId:book.id, dateISO:data.get('date')||todayISO(), pages:add, note:(data.get('note')||'').slice(0,120)});
+    document.getElementById('dialog').close();
+    if(completes) finishBook(book,{addLog:false});
+    else { paint(); flash('Сесията е записана.'); }
+  } else if(form.id==='edit-log-form'){
+    const log=logs.find(l=>String(l.id)===String(form.dataset.log));
+    const book=log && findBook(log.bookId);
+    if(!log||!book){ flash('Сесията не е намерена.'); return; }
+    const pages=Number(data.get('pages'));
+    const delta=pages-log.pages;
+    book.currentPage=Math.max(0, Math.min(book.totalPages, book.currentPage+delta));
+    log.pages=pages; log.dateISO=data.get('date')||log.dateISO; log.note=(data.get('note')||'').slice(0,120);
+    const justDone = delta>0 && book.currentPage>=book.totalPages;
+    document.getElementById('dialog').close();
+    if(justDone) finishBook(book,{addLog:false});
+    else { paint(); flash('Сесията е обновена.'); }
+  } else if(form.id==='add-form'){
+    const title=(data.get('title')||'').trim();
+    const author=(data.get('author')||'').trim();
+    const totalPages=Number(data.get('totalPages'));
+    let currentPage=Number(data.get('currentPage')||0);
+    if(!title||!author||!(totalPages>=1)){ flash('Въведи заглавие, автор и страници.'); return; }
+    if(currentPage<0) currentPage=0;
+    if(currentPage>totalPages) currentPage=totalPages;
+    books.unshift({id:Date.now(), title, author, totalPages, currentPage, notes:(data.get('notes')||'').trim().slice(0,300), createdAt:new Date().toISOString()});
+    state.filter='all'; state.query=''; state.openId=null;
+    document.getElementById('dialog').close();
+    goTo('library', {force:true, skipTurn:true});
+    flash('Книгата е добавена в библиотеката.');
+  } else if(form.id==='edit-form'){
+    const book=findBook(form.dataset.book);
+    if(!book){ flash('Книгата не е намерена.'); return; }
+    const title=(data.get('title')||'').trim();
+    const author=(data.get('author')||'').trim();
+    const totalPages=Number(data.get('totalPages'));
+    let currentPage=Number(data.get('currentPage')||0);
+    if(!title||!author||!(totalPages>=1)){ flash('Въведи заглавие, автор и страници.'); return; }
+    if(currentPage<0) currentPage=0;
+    if(currentPage>totalPages) currentPage=totalPages;
+    book.title=title; book.author=author; book.totalPages=totalPages; book.currentPage=currentPage;
+    book.notes=(data.get('notes')||'').trim().slice(0,300);
+    document.getElementById('dialog').close(); paint(); flash('Книгата е обновена.');
+  } else if(form.id==='settings-form'){
+    settings.weeklyGoalPages=Math.max(1, parseInt(data.get('weeklyGoalPages'),10)||100);
+    settings.minPagesForStreakDay=Math.max(1, parseInt(data.get('minPagesForStreakDay'),10)||1);
+    state.theme=data.get('theme')||state.theme;
+    settings.theme=state.theme;
+    document.getElementById('dialog').close(); paint(); flash('Настройките са запазени.');
+  }
+});
+window.addEventListener('hashchange', ()=>{ if(syncingHash) return; parseHash(); applyPendingFinishData(); paint(); });
+
+window.__errors=[];
+window.addEventListener('error', e => window.__errors.push(String(e.message||e)));
+window.addEventListener('unhandledrejection', e => window.__errors.push(String(e.reason||e)));
+parseHash();
+applyPendingFinishData();
+paint();
+document.documentElement.setAttribute('data-js-errors', JSON.stringify(window.__errors));
+
+</script>
+</body>
+</html>
