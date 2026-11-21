@@ -203,10 +203,6 @@
 
 /* ---- Dark component-level overrides (shared selector) ---- */
 /* We use a helper: both selectors produce the same result. */
-[data-theme="dark"] .blob--1,
-[data-theme="dark"] .blob--2{opacity:.15}
-[data-theme="dark"] .blob--3{background:#1e1630;opacity:.18}
-
 [data-theme="dark"] .pill--finished{background:rgba(61,184,120,.15);color:#6ee7a0}
 [data-theme="dark"] .pill--wishlist{background:rgba(182,195,210,.14);color:#c4cfdd}
 
@@ -216,10 +212,6 @@
 
 /* Same overrides via system preference */
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme]) .blob--1,
-    :root:not([data-theme]) .blob--2{opacity:.15}
-    :root:not([data-theme]) .blob--3{background:#1e1630;opacity:.18}
-
     :root:not([data-theme]) .pill--finished{background:rgba(61,184,120,.15);color:#6ee7a0}
     :root:not([data-theme]) .pill--wishlist{background:rgba(182,195,210,.14);color:#c4cfdd}
 
@@ -291,45 +283,6 @@ ul{list-style:none}
 }
 
 .required{color:var(--c-danger);font-weight:var(--fw-bold)}
-
-/* ==================== 4. Background Blobs ==================== */
-.bg-blobs{
-    position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
-    
-    /* Subtle circular ring backgrounds (behind blur blobs) */
-    background-repeat:no-repeat;
-    background-image:
-        /* Big indigo ring top-right */
-        radial-gradient(circle at 88% 12%,
-            transparent 0,
-            transparent 320px,
-            rgba(74,64,128,0.10) 320px,
-            rgba(74,64,128,0.10) 323px,
-            transparent 323px,
-            transparent 100%
-        ),
-        /* Medium violet ring mid-right */
-        radial-gradient(circle at 92% 55%,
-            transparent 0,
-            transparent 220px,
-            rgba(124,58,237,0.07) 220px,
-            rgba(124,58,237,0.07) 222px,
-            transparent 222px,
-            transparent 100%
-        ),
-        /* Soft gold filled circle bottom-left */
-        radial-gradient(circle at 10% 82%,
-            rgba(191,155,90,0.08) 0,
-            rgba(191,155,90,0.04) 220px,
-            transparent 420px
-        );
-}
-.blob{
-    position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;
-}
-.blob--1{width:420px;height:420px;background:rgba(74,64,128,.12);top:-60px;right:-100px}
-.blob--2{width:350px;height:350px;background:rgba(191,155,90,.08);bottom:10%;left:-80px}
-.blob--3{width:280px;height:280px;background:rgba(120,90,60,.06);top:55%;right:5%}
 
 /* ==================== 5. Navbar ==================== */
 .navbar{
@@ -1628,6 +1581,6 @@ html:has(.shelf-preview[open]){overflow:hidden}
 
 /* ==================== 19. Print ==================== */
 @media print{
-    .navbar,.bg-blobs,.bottom-nav,.footer,.modal-dialog,.shelf-preview,.toast{display:none}
+    .navbar,.bottom-nav,.footer,.modal-dialog,.shelf-preview,.toast{display:none}
     .shelf-bay{break-inside:avoid}
 }
