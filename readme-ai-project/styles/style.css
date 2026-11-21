@@ -1622,7 +1622,7 @@ html:has(.shelf-preview[open]){overflow:hidden}
 .kinetic__word{display:inline-block;white-space:nowrap}
 .kinetic__ch{
     display:inline-block;
-    animation:letter-in var(--dur-slow) var(--ease-out) both;
+    animation:letter-in var(--dur-slow) var(--ease-out) backwards;
     animation-delay:calc(var(--i) * var(--dur-fast) / 4);
 }
 @keyframes letter-in{from{opacity:0;transform:translateY(.28em)}}
