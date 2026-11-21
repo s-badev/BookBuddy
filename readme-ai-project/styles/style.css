@@ -24,6 +24,9 @@
     --c-foil:           #9a9ab8;
     --c-on-foil:        #1a1e2c;
 
+    /* — Shade in the gutter of an open book — */
+    --c-gutter-shade:   rgba(30,27,46,.16);
+
     /* — Semantic — */
     --c-danger:         #b52632;
     --c-danger-hover:   #dc2626;
@@ -133,6 +136,7 @@
     --c-accent-strong:  rgba(193,168,236,.26);
     --c-line:           #8e83b8;
     --c-foil:           #c9c9de;
+    --c-gutter-shade:   rgba(0,0,0,.45);
     --c-art:            #273446;
     --c-danger:         #ff8a91;
     --c-danger-hover:   #ffb0b5;
@@ -182,6 +186,7 @@
         --c-accent-strong:  rgba(193,168,236,.26);
         --c-line:           #8e83b8;
         --c-foil:           #c9c9de;
+        --c-gutter-shade:   rgba(0,0,0,.45);
         --c-art:            #273446;
         --c-danger:         #ff8a91;
         --c-danger-hover:   #ffb0b5;
@@ -1471,69 +1476,115 @@ ul{list-style:none}
 .shelf-spine:focus-visible{outline:3px solid #e3d9ff;outline-offset:2px}
 #booksList .empty-state .btn{margin-top:10px;white-space:normal}
 
-/* ==================== Frontal book preview ==================== */
+/* ==================== Book spread (shelf preview) ==================== */
 html{scrollbar-gutter:stable}
 html:has(.shelf-preview[open]){overflow:hidden}
 .shelf-preview{
     position:fixed;
     inset:0;
-    margin:auto;
-    width:min(calc(100% - 32px),690px);
+    width:min(calc(100% - 32px),920px);
     height:fit-content;
     max-width:none;
     max-height:none;
+    margin:auto;
     padding:0;
     overflow:visible;
     border:0;
-    border-radius:12px;
     background:transparent;
     color:var(--c-text);
 }
-.shelf-preview::backdrop{
-    background:#080e20b8;
-    opacity:1;
-    transition:opacity var(--dur-base) var(--ease-in-out);
-}
-.shelf-preview--moving::backdrop{opacity:.26}
-.shelf-preview__panel{
+.shelf-preview::backdrop{background:#080e20b8}
+.spread__book{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    max-height:calc(100dvh - 32px);
     overflow:auto;
-    max-height:calc(100dvh - 42px);
-    padding:60px clamp(14px,4vw,34px) clamp(16px,4vw,32px);
-    border:1px solid var(--c-border);
-    border-radius:12px;
-    background:var(--c-surface);
+    perspective:1800px;
+    border-radius:6px;
     box-shadow:var(--sh-xl);
 }
+.spread__leaf{
+    min-width:0;
+    padding:clamp(20px,3vw,34px);
+    background:var(--c-surface);
+    backface-visibility:hidden;
+}
+.spread__leaf--left{
+    border-radius:6px 0 0 6px;
+    border-inline-end:1px solid var(--c-line);
+    transform-origin:right center;
+    box-shadow:inset -14px 0 18px -14px var(--c-gutter-shade);
+}
+.spread__leaf--right{
+    padding-top:64px;
+    border-radius:0 6px 6px 0;
+    transform-origin:left center;
+    box-shadow:inset 14px 0 18px -14px var(--c-gutter-shade);
+}
+.spread__hero{
+    display:grid;
+    grid-template-columns:minmax(0,150px) minmax(0,1fr);
+    gap:clamp(14px,2.5vw,24px);
+    align-items:start;
+}
+.shelf-preview__front{width:100%;aspect-ratio:2/3}
+.shelf-preview__front .book-cover{height:100%}
+.shelf-preview__info{display:grid;gap:4px;min-width:0;overflow-wrap:anywhere}
+.shelf-preview__info h2{
+    font:500 clamp(1.5rem,3vw,2.3rem)/1.04 var(--font-editorial);
+    letter-spacing:-.035em;
+}
+.shelf-preview__author{
+    font:italic 1.1rem/1.25 var(--font-editorial);
+    color:var(--c-text-secondary);
+}
+.shelf-preview__pages{margin-top:6px;font-size:var(--fs-sm);font-weight:var(--fw-semibold)}
+.shelf-preview__actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.shelf-preview__actions .btn{min-height:44px;padding-inline:12px;white-space:normal}
+.spread__leaf--right h3{
+    margin-bottom:8px;
+    font:500 1.45rem/1.15 var(--font-editorial);
+    letter-spacing:-.02em;
+}
+.spread__notes{
+    margin-bottom:20px;
+    font:italic 1.05rem/1.5 var(--font-editorial);
+    overflow-wrap:anywhere;
+    white-space:pre-wrap;
+}
+.spread__sessions{border-top:1px solid var(--c-line)}
+.spread__sessions li{padding:10px 0;border-bottom:1px solid var(--c-border)}
+.spread__session-when{font-size:var(--fs-xs);font-weight:var(--fw-semibold);color:var(--c-text-secondary)}
+.spread__session-note{font:italic .98rem/1.45 var(--font-editorial);overflow-wrap:anywhere}
+.spread__session-more{color:var(--c-text-secondary);font-size:var(--fs-sm)}
 .shelf-preview__close{
     position:absolute;
-    top:10px;
-    right:13px;
+    top:12px;
+    right:12px;
+    z-index:2;
     min-height:40px;
     padding-inline:12px;
     background:var(--c-surface);
 }
-.shelf-preview__contents{
-    display:grid;
-    grid-template-columns:minmax(0,190px) minmax(0,1fr);
-    align-items:center;
-    gap:clamp(14px,4vw,34px);
-}
-.shelf-preview__front{width:100%;aspect-ratio:2/3}
-.shelf-preview__front .book-cover,.shelf-flight--front .book-cover{height:100%}
-.shelf-preview__info{min-width:0;overflow-wrap:anywhere}
-.shelf-preview__info h2{
-    font:500 clamp(1.65rem,4.2vw,2.6rem)/1.04 var(--font-editorial);
-    letter-spacing:-.035em;
-}
-.shelf-preview__author{
-    margin-block:5px 10px;
-    font:italic 1.14rem/1.25 var(--font-editorial);
-    color:var(--c-text-secondary);
-}
-.shelf-preview__pages{margin-block:8px 5px;font-size:var(--fs-sm);font-weight:var(--fw-semibold)}
-.shelf-preview__actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
-.shelf-preview__actions .btn{min-height:44px;padding-inline:12px;white-space:normal}
-.shelf-flight{position:fixed;z-index:3;pointer-events:none}
+
+/* Opening: both leaves swing out from the gutter; closing folds them back. */
+.shelf-preview.is-opening::backdrop,
+.shelf-preview.is-opening .spread__book{animation:spread-fade var(--dur-base) var(--ease-out) both}
+.shelf-preview.is-opening .spread__leaf--left{animation:leaf-open-left calc(var(--dur-slow) * 1.5) var(--ease-out) both}
+.shelf-preview.is-opening .spread__leaf--right{animation:leaf-open-right calc(var(--dur-slow) * 1.5) var(--ease-out) both}
+.shelf-preview.is-opening .shelf-preview__close{animation:spread-fade var(--dur-base) var(--ease-out) var(--dur-base) both}
+.shelf-preview.is-closing::backdrop,
+.shelf-preview.is-closing .spread__book,
+.shelf-preview.is-closing .shelf-preview__close{animation:spread-fade-out var(--dur-base) var(--ease-in) both}
+.shelf-preview.is-closing .spread__leaf--left{animation:leaf-close-left var(--dur-base) var(--ease-in) both}
+.shelf-preview.is-closing .spread__leaf--right{animation:leaf-close-right var(--dur-base) var(--ease-in) both}
+@keyframes spread-fade{from{opacity:0}}
+@keyframes spread-fade-out{to{opacity:0}}
+@keyframes leaf-open-left{from{opacity:.6;transform:rotateY(-70deg)}}
+@keyframes leaf-open-right{from{opacity:.6;transform:rotateY(70deg)}}
+@keyframes leaf-close-left{to{opacity:0;transform:rotateY(-50deg)}}
+@keyframes leaf-close-right{to{opacity:0;transform:rotateY(50deg)}}
+@keyframes leaf-rise{from{opacity:0;transform:translateY(16px)}}
 .details-manage summary{cursor:pointer}
 .details-progress{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-block:10px 3px}
 .details-progress input{
@@ -1543,12 +1594,21 @@ html:has(.shelf-preview[open]){overflow:hidden}
 @media(max-width:620px){
     .shelf-label{padding-inline:11px}
     .shelf-row{padding-inline:11px}
-    .shelf-preview__contents{grid-template-columns:minmax(0,1fr)}
-    .shelf-preview__front{justify-self:center;width:min(45%,130px)}
-    .shelf-preview__panel{padding-top:55px}
-}
-@media(prefers-reduced-motion:reduce){
-    .shelf-preview::backdrop{transition:none}
+    .spread__book{grid-template-columns:minmax(0,1fr)}
+    .spread__leaf--left{
+        padding-top:62px;
+        border-radius:6px 6px 0 0;
+        border-inline-end:0;
+        border-bottom:1px solid var(--c-line);
+        box-shadow:none;
+    }
+    .spread__leaf--right{padding-top:20px;border-radius:0 0 6px 6px;box-shadow:none}
+    .spread__hero{grid-template-columns:minmax(0,110px) minmax(0,1fr)}
+    /* Stacked leaves rise instead of swinging. */
+    .shelf-preview.is-opening .spread__leaf--left{animation-name:leaf-rise}
+    .shelf-preview.is-opening .spread__leaf--right{animation-name:leaf-rise;animation-delay:var(--dur-fast)}
+    .shelf-preview.is-closing .spread__leaf--left,
+    .shelf-preview.is-closing .spread__leaf--right{animation-name:spread-fade-out}
 }
 
 /* ==================== 18b. Motion components ====================

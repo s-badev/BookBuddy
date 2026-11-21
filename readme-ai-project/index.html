@@ -227,22 +227,30 @@
     </footer>
 
     <dialog class="shelf-preview" id="shelfPreview" aria-labelledby="shelfPreviewTitle">
-        <div class="shelf-preview__panel">
-            <div class="shelf-preview__contents">
-                <div class="shelf-preview__front" id="shelfPreviewFront"></div>
-                <div class="shelf-preview__info">
-                    <h2 id="shelfPreviewTitle"></h2>
-                    <p class="shelf-preview__author" id="shelfPreviewAuthor"></p>
-                    <p id="shelfPreviewStatus"></p>
-                    <p class="shelf-preview__pages" id="shelfPreviewPages"></p>
-                    <progress class="reading-meter" value="0" max="100"
-                              aria-label="Напредък в книгата" id="shelfPreviewMeter"></progress>
-                    <div class="shelf-preview__actions">
-                        <button type="button" id="shelfPreviewLog" class="btn btn--primary">Запиши четене</button>
-                        <button type="button" id="shelfPreviewDetails" class="btn btn--outline">За книгата</button>
+        <div class="spread__book">
+            <section class="spread__leaf spread__leaf--left">
+                <div class="spread__hero">
+                    <div class="shelf-preview__front" id="shelfPreviewFront"></div>
+                    <div class="shelf-preview__info">
+                        <p id="shelfPreviewStatus"></p>
+                        <h2 id="shelfPreviewTitle"></h2>
+                        <p class="shelf-preview__author" id="shelfPreviewAuthor"></p>
+                        <p class="shelf-preview__pages" id="shelfPreviewPages"></p>
+                        <progress class="reading-meter" value="0" max="100"
+                                  aria-label="Напредък в книгата" id="shelfPreviewMeter"></progress>
                     </div>
                 </div>
-            </div>
+                <div class="shelf-preview__actions">
+                    <button type="button" id="shelfPreviewLog" class="btn btn--primary">Запиши четене</button>
+                    <button type="button" id="shelfPreviewDetails" class="btn btn--outline">За книгата</button>
+                </div>
+            </section>
+            <section class="spread__leaf spread__leaf--right" aria-labelledby="shelfPreviewNotesTitle">
+                <h3 id="shelfPreviewNotesTitle">Бележки</h3>
+                <p class="spread__notes" id="shelfPreviewNotes"></p>
+                <h3 id="shelfPreviewSessionsTitle">Сесии</h3>
+                <ul class="spread__sessions" id="shelfPreviewSessions" aria-labelledby="shelfPreviewSessionsTitle"></ul>
+            </section>
         </div>
         <button type="button" id="shelfPreviewClose" class="btn btn--outline shelf-preview__close" autofocus>Затвори</button>
     </dialog>

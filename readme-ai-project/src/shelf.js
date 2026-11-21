@@ -3,8 +3,7 @@ const shelfGroups = [
     ['finished', 'Прочетени'],
     ['wishlist', 'За четене']
 ];
-// motionToken, motionMs and reducedMotion come from src/motion.js.
-const shelfReducedMotion = reducedMotion;
+// reducedMotion and the motion token helpers come from src/motion.js.
 let activeShelf = null;
 
 function shelfMarkup(books) {
@@ -37,15 +36,20 @@ function shelfMarkup(books) {
     }).join('')}</div>`;
 }
 
+/* ---------- Two-page spread ---------- */
+// The preview opens as a book: the left leaf holds the cover and progress,
+// the right leaf the notes and sessions. Both leaves swing open from the
+// gutter; with reduced motion the spread is simply shown.
+
+const SPREAD_SESSION_LIMIT = 6;
+
 function initBookshelf() {
     const dialog = document.getElementById('shelfPreview');
-    const firstAction = document.getElementById('shelfPreviewLog');
-    const closeButton = document.getElementById('shelfPreviewClose');
     document.getElementById('booksList').addEventListener('click', event => {
         const spine = event.target.closest('[data-shelf-book]');
         if (spine && !activeShelf) showShelfPreview(Number(spine.dataset.shelfBook), spine);
     });
-    closeButton.addEventListener('click', closeShelfPreview);
+    document.getElementById('shelfPreviewClose').addEventListener('click', closeShelfPreview);
     dialog.addEventListener('cancel', event => {
         event.preventDefault();
         closeShelfPreview();
@@ -56,27 +60,63 @@ function initBookshelf() {
     dialog.addEventListener('close', () => {
         if (activeShelf && !dialog.open) finishShelfPreview(activeShelf);
     });
-    dialog.addEventListener('keydown', event => {
-        if (event.key !== 'Tab') return;
-        const boundary = event.shiftKey ? firstAction : closeButton;
-        if (activeShelf?.motion || document.activeElement === boundary) {
-            event.preventDefault();
-            const target = activeShelf?.motion || event.shiftKey ? closeButton : firstAction;
-            target.focus();
-        }
-    });
-    firstAction.addEventListener('click', () => useShelfAction('log'));
+    dialog.addEventListener('keydown', event => trapShelfFocus(event, dialog));
+    document.getElementById('shelfPreviewLog').addEventListener('click', () => useShelfAction('log'));
     document.getElementById('shelfPreviewDetails').addEventListener('click', () => useShelfAction('details'));
-    window.addEventListener('resize', () => {
-        if (activeShelf && (activeShelf.width !== innerWidth || activeShelf.height !== innerHeight)) {
-            finishShelfPreview(activeShelf);
-        }
-    });
-    shelfReducedMotion.addEventListener('change', () => {
-        if (!shelfReducedMotion.matches || !activeShelf?.motion) return;
+    reducedMotion.addEventListener('change', () => {
+        if (!reducedMotion.matches || !activeShelf) return;
         if (activeShelf.closing) finishShelfPreview(activeShelf);
-        else settleShelfPreview(activeShelf);
+        else dialog.classList.remove('is-opening');
     });
+}
+
+// Keeps Tab and Shift+Tab inside the open spread.
+function trapShelfFocus(event, dialog) {
+    if (event.key !== 'Tab') return;
+    const focusable = [...dialog.querySelectorAll('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+        .filter(element => !element.disabled && element.getClientRects().length);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const current = document.activeElement;
+    if (!dialog.contains(current)) {
+        event.preventDefault();
+        first.focus();
+    } else if (event.shiftKey && current === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && current === last) {
+        event.preventDefault();
+        first.focus();
+    }
+}
+
+function fillShelfSpread(book) {
+    const percent = calculateProgress(book.currentPage, book.totalPages);
+    const status = getBookStatus(book);
+    document.getElementById('shelfPreviewTitle').textContent = book.title;
+    document.getElementById('shelfPreviewAuthor').textContent = book.author;
+    const statusLabel = document.getElementById('shelfPreviewStatus');
+    statusLabel.className = 'book-card__status book-card__status--' + status;
+    statusLabel.textContent = bookStatusLabel(status);
+    document.getElementById('shelfPreviewPages').textContent = book.currentPage + ' / ' + book.totalPages + ' стр. · ' + percent + '%';
+    document.getElementById('shelfPreviewMeter').value = percent;
+    document.getElementById('shelfPreviewFront').innerHTML = createCover(book, 'eager');
+
+    const note = (book.notes || '').trim();
+    document.getElementById('shelfPreviewNotes').textContent = note || 'Няма добавена бележка.';
+
+    const logs = getJournalLogs([book]);
+    const shown = logs.slice(0, SPREAD_SESSION_LIMIT);
+    const more = logs.length - shown.length;
+    document.getElementById('shelfPreviewSessions').innerHTML = shown.length
+        ? shown.map(log => `
+            <li>
+                <p class="spread__session-when">${sessionDateMarkup(log)} · ${Number(log.pages)} стр.</p>
+                ${log.note ? `<p class="spread__session-note">${escapeHtml(log.note)}</p>` : ''}
+            </li>`).join('') +
+          (more > 0 ? `<li class="spread__session-more">И още ${more} в „За книгата“.</li>` : '')
+        : '<li class="spread__session-more">Все още няма записани сесии.</li>';
 }
 
 function showShelfPreview(bookId, source, focusId) {
@@ -85,39 +125,50 @@ function showShelfPreview(bookId, source, focusId) {
 
     const dialog = document.getElementById('shelfPreview');
     const row = source?.closest('[data-shelf-row]');
-    const front = document.getElementById('shelfPreviewFront');
-    const percent = calculateProgress(book.currentPage, book.totalPages);
-    const status = getBookStatus(book);
     const state = {
-        bookId, source, dialog, front,
+        bookId, source, dialog,
         row: row?.dataset.shelfRow,
         index: row ? Array.from(row.querySelectorAll('[data-shelf-book]')).indexOf(source) : 0,
         slot: source?.parentElement,
-        slotRect: source?.parentElement.getBoundingClientRect(),
-        width: innerWidth,
-        height: innerHeight,
-        closing: false,
-        motion: null
+        closing: false
     };
-    const origin = !focusId && !shelfReducedMotion.matches ? measureShelfSpine(source) : null;
     activeShelf = state;
+    fillShelfSpread(book);
 
-    document.getElementById('shelfPreviewTitle').textContent = book.title;
-    document.getElementById('shelfPreviewAuthor').textContent = book.author;
-    const statusLabel = document.getElementById('shelfPreviewStatus');
-    statusLabel.className = 'book-card__status book-card__status--' + status;
-    statusLabel.textContent = bookStatusLabel(status);
-    document.getElementById('shelfPreviewPages').textContent = book.currentPage + ' / ' + book.totalPages + ' стр. · ' + percent + '%';
-    document.getElementById('shelfPreviewMeter').value = percent;
-    front.innerHTML = createCover(book, 'eager');
-    state.cover = front.firstElementChild;
+    // Reopening after "Запиши четене" or "За книгата" shows the spread at once.
+    const animate = !focusId && !reducedMotion.matches;
+    dialog.classList.remove('is-closing');
+    dialog.classList.toggle('is-opening', animate);
+    dialog.querySelector('.spread__book').scrollTop = 0;
     dialog.showModal();
-    state.slotRect = state.slot?.getBoundingClientRect();
     state.slot?.classList.add('shelf-slot--vacant');
-    if (origin) animateShelfBook(state, origin);
     if (focusId) document.getElementById(focusId).focus({ preventScroll: true });
+    if (animate) {
+        whenSpreadSettles(dialog).then(() => {
+            if (activeShelf === state && !state.closing) dialog.classList.remove('is-opening');
+        });
+    }
 }
 
+function whenSpreadSettles(dialog) {
+    const animations = dialog.getAnimations({ subtree: true });
+    return Promise.all(animations.map(animation => animation.finished)).catch(() => {});
+}
+
+function closeShelfPreview() {
+    const state = activeShelf;
+    if (!state || state.closing) return;
+    state.closing = true;
+    if (reducedMotion.matches) {
+        finishShelfPreview(state);
+        return;
+    }
+    state.dialog.classList.remove('is-opening');
+    state.dialog.classList.add('is-closing');
+    whenSpreadSettles(state.dialog).then(() => finishShelfPreview(state));
+}
+
+// A spine counts as reachable when enough of it is visible inside its row and the viewport.
 function measureShelfSpine(source) {
     if (!source?.isConnected) return null;
     const rect = source.getBoundingClientRect();
@@ -125,108 +176,9 @@ function measureShelfSpine(source) {
     const header = document.querySelector('.navbar').getBoundingClientRect().bottom;
     const nav = document.querySelector('.bottom-nav');
     const bottom = nav.offsetHeight ? nav.getBoundingClientRect().top : innerHeight;
-    const clip = [
-        Math.max(0, Math.max(header, row.top) - rect.top),
-        Math.max(0, rect.right - Math.min(innerWidth, row.right)),
-        Math.max(0, rect.bottom - Math.min(bottom, row.bottom)),
-        Math.max(0, Math.max(0, row.left) - rect.left)
-    ];
-    return rect.width - clip[1] - clip[3] >= 12 && rect.height - clip[0] - clip[2] >= 24 ? { rect, clip } : null;
-}
-
-function animateShelfBook(state, origin, reverse = false) {
-    const destination = state.front.getBoundingClientRect();
-    const { rect, clip } = origin;
-    const dx = destination.left + destination.width / 2 - (rect.left + rect.width / 2);
-    const dy = destination.top + destination.height / 2 - (rect.top + rect.height / 2);
-    const scaleY = rect.height / destination.height;
-    const lift = 18;
-    const front = document.createElement('div');
-    front.className = 'shelf-flight shelf-flight--front';
-    front.append(state.cover);
-
-    const spine = document.createElement('div');
-    spine.className = state.source.className + ' shelf-flight shelf-flight--spine';
-    spine.innerHTML = state.source.innerHTML;
-    if (clip.some(value => value > 0)) {
-        spine.style.clipPath = 'inset(' + clip.map(value => value + 'px').join(' ') + ')';
-    }
-    for (const [element, bounds] of [[spine, rect], [front, destination]]) {
-        element.setAttribute('aria-hidden', 'true');
-        Object.assign(element.style, {
-            left: bounds.left + 'px', top: bounds.top + 'px',
-            width: bounds.width + 'px', height: bounds.height + 'px'
-        });
-        state.dialog.append(element);
-    }
-
-    state.dialog.classList.add('shelf-preview--moving');
-    const options = { duration: motionMs('--dur-slow', 480), direction: reverse ? 'reverse' : 'normal', fill: 'both' };
-    const easeOut = motionToken('--ease-out') || 'ease-out';
-    const easeIn = motionToken('--ease-in') || 'ease-in';
-    const offset = (x, y) => `translate3d(${x}px,${y}px,0)`;
-    const animations = [
-        spine.animate([
-            { transform: 'none', opacity: 1, easing: easeOut },
-            { transform: offset(0, -lift) + ' scale(1.10)', opacity: 1, offset: .27, easing: easeIn },
-            { transform: offset(dx * .48, dy * .48 - lift) + ' perspective(500px) rotateY(72deg)', opacity: 0, offset: .60 },
-            { transform: offset(dx, dy), opacity: 0 }
-        ], options),
-        front.animate([
-            { transform: offset(-dx, -dy) + ` scaleY(${scaleY})`, opacity: 0 },
-            { transform: offset(-dx, -dy - lift) + ` scaleY(${scaleY * 1.10})`, opacity: 0, offset: .27, easing: easeOut },
-            { transform: offset(0, 0) + ' scaleY(1)', opacity: 1, offset: .78 },
-            { transform: 'none', opacity: 1 }
-        ], options),
-        state.cover.animate([
-            { transform: 'perspective(700px) rotateY(-90deg)' },
-            { transform: 'perspective(700px) rotateY(-90deg)', offset: .27, easing: easeOut },
-            { transform: 'perspective(700px) rotateY(0deg)', offset: .92 },
-            { transform: 'none' }
-        ], options),
-        state.dialog.querySelector('.shelf-preview__panel').animate([
-            { opacity: 0 }, { opacity: 0, offset: .36 }, { opacity: 1 }
-        ], options)
-    ];
-
-    const motion = { animations, spine, front };
-    state.motion = motion;
-    Promise.all(animations.map(animation => animation.finished)).then(() => {
-        if (activeShelf !== state || state.motion !== motion) return;
-        if (state.closing) finishShelfPreview(state);
-        else settleShelfPreview(state);
-    }, () => { /* An interrupted preview has already cleaned up its animation. */ });
-}
-
-function settleShelfPreview(state) {
-    const motion = state.motion;
-    if (!motion) return;
-    state.motion = null;
-    state.front.append(state.cover);
-    motion.animations.forEach(animation => animation.cancel());
-    motion.spine.remove();
-    motion.front.remove();
-    state.dialog.classList.remove('shelf-preview--moving');
-}
-
-function closeShelfPreview() {
-    const state = activeShelf;
-    if (!state || state.closing) return;
-    state.closing = true;
-    const slot = state.slot?.getBoundingClientRect();
-    const original = state.slotRect;
-    const sameSlot = original && slot && Math.abs(original.left - slot.left) < 2 &&
-        Math.abs(original.top - slot.top) < 2 && original.width === slot.width && original.height === slot.height;
-    const origin = !shelfReducedMotion.matches && sameSlot ? measureShelfSpine(state.source) : null;
-    if (!origin) {
-        finishShelfPreview(state);
-    } else if (!state.motion) {
-        animateShelfBook(state, origin, true);
-    } else if (state.motion.animations[0].currentTime > 24) {
-        state.motion.animations.forEach(animation => animation.reverse());
-    } else {
-        finishShelfPreview(state);
-    }
+    const visibleWidth = Math.min(rect.right, row.right, innerWidth) - Math.max(rect.left, row.left, 0);
+    const visibleHeight = Math.min(rect.bottom, row.bottom, bottom) - Math.max(rect.top, row.top, header);
+    return visibleWidth >= 12 && visibleHeight >= 24 ? rect : null;
 }
 
 function restoreShelfFocus(state) {
@@ -244,9 +196,9 @@ function restoreShelfFocus(state) {
 function finishShelfPreview(state, nextAction) {
     if (activeShelf !== state) return;
     activeShelf = null;
-    settleShelfPreview(state);
+    state.dialog.classList.remove('is-opening', 'is-closing');
     state.slot?.classList.remove('shelf-slot--vacant');
-    state.front.replaceChildren();
+    document.getElementById('shelfPreviewFront').replaceChildren();
     if (state.dialog.open) state.dialog.close();
     if (nextAction) nextAction();
     else restoreShelfFocus(state);
