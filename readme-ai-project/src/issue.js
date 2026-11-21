@@ -94,9 +94,9 @@ function renderIssue(books, logs, minPages) {
 
     document.getElementById('issueContent').innerHTML = `
         <dl class="issue__figures">
-            <div><dt>Страници от сесии</dt><dd id="issuePages">${issueNumberFormat.format(pages)}</dd></div>
-            <div><dt>Завършени книги</dt><dd id="issueFinished">${finished.length}</dd></div>
-            <div><dt>Дни в най-дългата поредица</dt><dd id="issueStreak">${streak}</dd></div>
+            <div><dt>Страници от сесии</dt><dd id="issuePages"></dd></div>
+            <div><dt>Завършени книги</dt><dd id="issueFinished"></dd></div>
+            <div><dt>Дни в най-дългата поредица</dt><dd id="issueStreak"></dd></div>
         </dl>
         <dl class="issue__highlights">
             <div><dt>Най-четен автор</dt><dd id="issueAuthor">${author ? escapeHtml(author) : 'Няма данни'}</dd></div>
@@ -106,4 +106,7 @@ function renderIssue(books, logs, minPages) {
         <h3>Указател на завършените книги</h3>
         ${bookIndex}
         ${undatedIndex}`;
+    setCountUp(document.getElementById('issuePages'), pages, n => issueNumberFormat.format(n));
+    setCountUp(document.getElementById('issueFinished'), finished.length);
+    setCountUp(document.getElementById('issueStreak'), streak);
 }

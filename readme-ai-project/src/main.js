@@ -253,11 +253,11 @@ function updateStats(books = BookRepo.getAllBooks()) {
     
     // Total Books
     const totalBooks = books.length;
-    document.getElementById('statBooks').textContent = totalBooks;
+    setCountUp(document.getElementById('statBooks'), totalBooks);
     
     // Total Pages Read — derived ONLY from books (single source of truth)
     const totalPagesRead = books.reduce((sum, book) => sum + (Number(book.currentPage) || 0), 0);
-    document.getElementById('statPagesRead').textContent = totalPagesRead.toLocaleString();
+    setCountUp(document.getElementById('statPagesRead'), totalPagesRead, n => n.toLocaleString());
     
     // Average Progress
     let avgProgress = 0;
@@ -267,7 +267,7 @@ function updateStats(books = BookRepo.getAllBooks()) {
         }, 0);
         avgProgress = Math.round(totalProgress / totalBooks);
     }
-    document.getElementById('statAvgProgress').textContent = `${avgProgress}%`;
+    setCountUp(document.getElementById('statAvgProgress'), avgProgress, n => n + '%');
 
     const logs = getJournalLogs(books).filter(log => isDateISO(log.dateISO));
     const settings = SettingsRepo.getSettings();
@@ -276,7 +276,7 @@ function updateStats(books = BookRepo.getAllBooks()) {
     const streak = calculateStreak(logs, settings.minPagesForStreakDay);
     renderFeaturedBook(books, logs);
     renderGoal(weekPages, settings.weeklyGoalPages);
-    document.getElementById('streakValue').textContent = streak;
+    setCountUp(document.getElementById('streakValue'), streak);
     renderTopBooks(books);
     renderChallenges(weekPages, streak);
     renderIssue(books, logs, settings.minPagesForStreakDay);
@@ -353,7 +353,7 @@ function renderGoal(weekPages, target) {
     meter.max = target;
     meter.value = Math.min(weekPages, target);
     meter.setAttribute('aria-valuetext', weekPages + ' от ' + target + ' страници');
-    document.getElementById('goalPages').textContent = weekPages;
+    setCountUp(document.getElementById('goalPages'), weekPages);
     document.getElementById('goalTarget').textContent = '/ ' + target + ' стр.';
     const remaining = target - weekPages;
     document.getElementById('goalDetail').textContent = remaining > 0

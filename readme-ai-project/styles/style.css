@@ -1621,6 +1621,10 @@ html:has(.shelf-preview[open]){overflow:hidden}
 .shelf-bay.has-arrival .shelf-plank::after{animation:plank-flash calc(var(--dur-slow) * 2) var(--ease-out)}
 @keyframes plank-flash{40%{opacity:.45}}
 
+/* — Count-up numbers: digits keep the final width while they run — */
+.count{display:inline-block}
+.stats__grid dd,.issue__figures dd,.goal-card__value{font-variant-numeric:tabular-nums}
+
 /* ==================== 19. Interaction states ====================
    Every interactive element has :hover (pointer devices only), :focus-visible
    and :active. Hover changes at least two of: background or color, transform,
