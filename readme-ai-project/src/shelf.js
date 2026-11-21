@@ -4,6 +4,14 @@ const shelfGroups = [
     ['wishlist', 'За четене']
 ];
 const shelfReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+// Durations and easings come from the CSS motion tokens in styles/style.css.
+function motionToken(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function motionMs(name, fallback) {
+    return parseFloat(motionToken(name)) || fallback;
+}
 let activeShelf = null;
 
 function shelfMarkup(books) {
@@ -160,24 +168,26 @@ function animateShelfBook(state, origin, reverse = false) {
     }
 
     state.dialog.classList.add('shelf-preview--moving');
-    const options = { duration: 510, direction: reverse ? 'reverse' : 'normal', fill: 'both' };
+    const options = { duration: motionMs('--dur-slow', 480), direction: reverse ? 'reverse' : 'normal', fill: 'both' };
+    const easeOut = motionToken('--ease-out') || 'ease-out';
+    const easeIn = motionToken('--ease-in') || 'ease-in';
     const offset = (x, y) => `translate3d(${x}px,${y}px,0)`;
     const animations = [
         spine.animate([
-            { transform: 'none', opacity: 1, easing: 'ease-out' },
-            { transform: offset(0, -lift) + ' scale(1.10)', opacity: 1, offset: .27, easing: 'ease-in' },
+            { transform: 'none', opacity: 1, easing: easeOut },
+            { transform: offset(0, -lift) + ' scale(1.10)', opacity: 1, offset: .27, easing: easeIn },
             { transform: offset(dx * .48, dy * .48 - lift) + ' perspective(500px) rotateY(72deg)', opacity: 0, offset: .60 },
             { transform: offset(dx, dy), opacity: 0 }
         ], options),
         front.animate([
             { transform: offset(-dx, -dy) + ` scaleY(${scaleY})`, opacity: 0 },
-            { transform: offset(-dx, -dy - lift) + ` scaleY(${scaleY * 1.10})`, opacity: 0, offset: .27, easing: 'cubic-bezier(.2,.72,.26,1)' },
+            { transform: offset(-dx, -dy - lift) + ` scaleY(${scaleY * 1.10})`, opacity: 0, offset: .27, easing: easeOut },
             { transform: offset(0, 0) + ' scaleY(1)', opacity: 1, offset: .78 },
             { transform: 'none', opacity: 1 }
         ], options),
         state.cover.animate([
             { transform: 'perspective(700px) rotateY(-90deg)' },
-            { transform: 'perspective(700px) rotateY(-90deg)', offset: .27, easing: 'cubic-bezier(.18,.72,.25,1)' },
+            { transform: 'perspective(700px) rotateY(-90deg)', offset: .27, easing: easeOut },
             { transform: 'perspective(700px) rotateY(0deg)', offset: .92 },
             { transform: 'none' }
         ], options),
