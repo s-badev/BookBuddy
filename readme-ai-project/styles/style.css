@@ -137,6 +137,7 @@
     --c-line:           #8e83b8;
     --c-foil:           #c9c9de;
     --c-gutter-shade:   rgba(0,0,0,.45);
+    --c-lamp:           196,204,255;   /* cool reading lamp, rgb triplet */
     --c-art:            #273446;
     --c-danger:         #ff8a91;
     --c-danger-hover:   #ffb0b5;
@@ -187,6 +188,7 @@
         --c-line:           #8e83b8;
         --c-foil:           #c9c9de;
         --c-gutter-shade:   rgba(0,0,0,.45);
+        --c-lamp:           196,204,255;
         --c-art:            #273446;
         --c-danger:         #ff8a91;
         --c-danger-hover:   #ffb0b5;
@@ -1680,6 +1682,24 @@ html:has(.shelf-preview[open]){overflow:hidden}
 }
 .shelf-bay.has-arrival .shelf-plank::after{animation:plank-flash calc(var(--dur-slow) * 2) var(--ease-out)}
 @keyframes plank-flash{40%{opacity:.45}}
+
+/* — Cool lamp over the shelf (dark theme only): light, not decoration — */
+.bookshelf{position:relative;isolation:isolate}
+.bookshelf::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:3;
+    border-radius:inherit;
+    background:radial-gradient(ellipse 55% 70% at 28% 0%, rgba(var(--c-lamp),.16), transparent 70%);
+    mix-blend-mode:screen;
+    opacity:0;
+    pointer-events:none;
+}
+[data-theme="dark"] .bookshelf::before{opacity:1}
+@media (prefers-color-scheme:dark){
+    :root:not([data-theme]) .bookshelf::before{opacity:1}
+}
 
 /* — Count-up numbers: digits keep the final width while they run — */
 .count{display:inline-block}
