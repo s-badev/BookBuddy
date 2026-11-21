@@ -228,7 +228,7 @@ function renderFeaturedBook(books, logs) {
     openButton.hidden = books.length === 0;
     openButton.dataset.bookId = featured?.id ?? '';
     document.getElementById('firstBookLink').hidden = books.length > 0;
-    document.getElementById('readingTitle').textContent = featured?.title ?? 'Твоето четене';
+    setKineticText(document.getElementById('readingTitle'), featured?.title ?? 'Твоето четене');
     author.textContent = featured?.author ?? '';
     author.hidden = !featured;
     document.getElementById('readingEyebrow').hidden = !featured;

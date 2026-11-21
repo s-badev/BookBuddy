@@ -3,15 +3,8 @@ const shelfGroups = [
     ['finished', 'Прочетени'],
     ['wishlist', 'За четене']
 ];
-const shelfReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-
-// Durations and easings come from the CSS motion tokens in styles/style.css.
-function motionToken(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-function motionMs(name, fallback) {
-    return parseFloat(motionToken(name)) || fallback;
-}
+// motionToken, motionMs and reducedMotion come from src/motion.js.
+const shelfReducedMotion = reducedMotion;
 let activeShelf = null;
 
 function shelfMarkup(books) {

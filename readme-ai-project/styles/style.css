@@ -1551,6 +1551,20 @@ html:has(.shelf-preview[open]){overflow:hidden}
     .shelf-preview::backdrop{transition:none}
 }
 
+/* ==================== 18b. Motion components ====================
+   Built on the motion tokens. Every effect animates only transform and
+   opacity; with reduced motion the global rule removes the animation and
+   the element simply shows its final state. */
+
+/* — Kinetic title: letters rise in one after another — */
+.kinetic__word{display:inline-block;white-space:nowrap}
+.kinetic__ch{
+    display:inline-block;
+    animation:letter-in var(--dur-slow) var(--ease-out) both;
+    animation-delay:calc(var(--i) * var(--dur-fast) / 4);
+}
+@keyframes letter-in{from{opacity:0;transform:translateY(.28em)}}
+
 /* ==================== 19. Interaction states ====================
    Every interactive element has :hover (pointer devices only), :focus-visible
    and :active. Hover changes at least two of: background or color, transform,
