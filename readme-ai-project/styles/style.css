@@ -1,6 +1,6 @@
 /* ==========================================================================
    BookBuddy — Design System & Global Styles
-   Cool paper surfaces, serif display type, indigo and gold accents.
+   Cool paper surfaces, serif display type, indigo and violet accents.
    ========================================================================== */
 
 /* ==================== 1. Design Tokens (CSS Variables) ==================== */
@@ -11,9 +11,17 @@
     --c-primary-light:  rgba(74,64,128,.08);
     --c-primary-dark:   #2e2860;
 
-    --c-accent:         #bf9b5a;
-    --c-accent-hover:   #a07830;
-    --c-accent-light:   rgba(191,155,90,.10);
+    /* — Accent and labels (cool violet only) — */
+    --c-accent:         #5b468a;
+    --c-accent-hover:   #4a3875;
+    --c-accent-light:   rgba(91,70,138,.10);
+
+    /* — Rules and dividers (3:1 against every light surface) — */
+    --c-line:           #8880ad;
+
+    /* — Foil and light details on spines and covers — */
+    --c-foil:           #9a9ab8;
+    --c-on-foil:        #1a1e2c;
 
     /* — Semantic — */
     --c-danger:         #b52632;
@@ -35,7 +43,6 @@
 
     --c-on-primary: #fff;
     --c-focus: #614a98;
-    --c-gold-text: #785b20;
     --c-art: #e6edf6;
     --font-editorial: Georgia, 'Times New Roman', serif;
 
@@ -110,9 +117,14 @@
 /* Explicit dark via data-theme attribute */
 [data-theme="dark"] {
     --c-primary:        #e0cff6;
+    --c-primary-hover:  #f0e6fc;
     --c-on-primary:     #2e1d46;
     --c-focus:          #dfc3ff;
-    --c-gold-text:      #e0c383;
+    --c-accent:         #c1a8ec;
+    --c-accent-hover:   #d4c2f3;
+    --c-accent-light:   rgba(193,168,236,.14);
+    --c-line:           #8e83b8;
+    --c-foil:           #c9c9de;
     --c-art:            #273446;
     --c-danger:         #ff8a91;
     --c-text:           #edf2f8;
@@ -127,7 +139,6 @@
     --c-border-light:   #344255;
 
     --c-primary-light:  rgba(74,64,128,.18);
-    --c-accent-light:   rgba(191,155,90,.14);
 
     --header-bg:      #192230;
     --header-border:  #425169;
@@ -152,9 +163,14 @@
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) {
         --c-primary:        #e0cff6;
+        --c-primary-hover:  #f0e6fc;
         --c-on-primary:     #2e1d46;
         --c-focus:          #dfc3ff;
-        --c-gold-text:      #e0c383;
+        --c-accent:         #c1a8ec;
+        --c-accent-hover:   #d4c2f3;
+        --c-accent-light:   rgba(193,168,236,.14);
+        --c-line:           #8e83b8;
+        --c-foil:           #c9c9de;
         --c-art:            #273446;
         --c-danger:         #ff8a91;
         --c-text:           #edf2f8;
@@ -169,7 +185,6 @@
         --c-border-light:   #344255;
 
         --c-primary-light:  rgba(74,64,128,.18);
-        --c-accent-light:   rgba(191,155,90,.14);
 
         --header-bg:      #192230;
         --header-border:  #425169;
@@ -192,9 +207,8 @@
 [data-theme="dark"] .blob--2{opacity:.15}
 [data-theme="dark"] .blob--3{background:#1e1630;opacity:.18}
 
-[data-theme="dark"] .pill--reading{background:rgba(74,64,128,.18);color:#b0a4d4}
 [data-theme="dark"] .pill--finished{background:rgba(61,184,120,.15);color:#6ee7a0}
-[data-theme="dark"] .pill--wishlist{background:rgba(191,155,90,.15);color:#e0c080}
+[data-theme="dark"] .pill--wishlist{background:rgba(182,195,210,.14);color:#c4cfdd}
 
 
 
@@ -206,9 +220,8 @@
     :root:not([data-theme]) .blob--2{opacity:.15}
     :root:not([data-theme]) .blob--3{background:#1e1630;opacity:.18}
 
-    :root:not([data-theme]) .pill--reading{background:rgba(74,64,128,.18);color:#b0a4d4}
     :root:not([data-theme]) .pill--finished{background:rgba(61,184,120,.15);color:#6ee7a0}
-    :root:not([data-theme]) .pill--wishlist{background:rgba(191,155,90,.15);color:#e0c080}
+    :root:not([data-theme]) .pill--wishlist{background:rgba(182,195,210,.14);color:#c4cfdd}
 
 
 
@@ -477,9 +490,9 @@ ul{list-style:none}
 .pill--primary{
     background:var(--c-primary-light);color:var(--c-primary-dark);
 }
-.pill--reading{background:rgba(74,64,128,.08);color:#4a4080}
-.pill--finished{background:#e8f5ec;color:#2a9a60}
-.pill--wishlist{background:rgba(191,155,90,.10);color:#a07830}
+.pill--reading{background:var(--c-accent-light);color:var(--c-accent)}
+.pill--finished{background:#e8f5ec;color:#1f7a4a}
+.pill--wishlist{background:rgba(83,97,115,.10);color:#3f4d60}
 
 /* ==================== 14. Empty State ==================== */
 .empty-state{
@@ -878,7 +891,7 @@ ul{list-style:none}
     display:flex;
     align-items:center;
     gap:8px;
-    color:var(--c-gold-text);
+    color:var(--c-accent);
     font-size:var(--fs-xs);
     font-weight:var(--fw-bold);
     letter-spacing:.12em;
@@ -888,7 +901,7 @@ ul{list-style:none}
     content:"";
     flex:none;
     width:16px;
-    border-top:1px solid var(--c-accent);
+    border-top:1px solid var(--c-line);
 }
 .reading-card h1{
     margin-block:6px;
@@ -992,7 +1005,7 @@ ul{list-style:none}
     background:var(--c-subtle);
     color:var(--c-primary);
 }
-.reading-meter--gold{color:var(--c-gold-text)}
+.reading-meter--accent{color:var(--c-accent)}
 .reading-meter::-webkit-progress-bar{background:var(--c-subtle)}
 .reading-meter::-webkit-progress-value{background:currentColor;border-radius:var(--r-full)}
 .reading-meter::-moz-progress-bar{background:currentColor;border-radius:var(--r-full)}
@@ -1083,7 +1096,7 @@ ul{list-style:none}
     background:currentColor;
 }
 .book-card__status--reading{color:var(--c-primary)}
-.book-card__status--finished{color:var(--c-gold-text)}
+.book-card__status--finished{color:var(--c-accent)}
 .book-cover{
     position:relative;
     isolation:isolate;
@@ -1157,10 +1170,10 @@ ul{list-style:none}
     place-items:center;
     inline-size:clamp(.85rem, 13cqw, 1.3rem);
     aspect-ratio:1;
-    border:1px solid #d9b66e;
+    border:1px solid var(--c-foil);
     border-radius:50%;
-    background:#e7c783;
-    color:#292316;
+    background:var(--c-foil);
+    color:var(--c-on-foil);
     font-weight:var(--fw-bold);
     letter-spacing:0;
 }
@@ -1211,7 +1224,7 @@ ul{list-style:none}
     position:absolute;
     inset-inline-start:-1.35rem;
     font-size:var(--fs-xs);
-    color:var(--c-gold-text);
+    color:var(--c-accent);
 }
 .editorial-rank button{font-family:var(--font-editorial)}
 
@@ -1220,7 +1233,7 @@ ul{list-style:none}
 .journal__links{display:flex;flex-wrap:wrap;gap:4px 16px}
 .journal__links a{padding-block:10px;font-size:var(--fs-sm);font-weight:var(--fw-semibold);color:var(--c-primary)}
 .journal section{padding-block:18px}
-.activity__feed{border-top:1px solid var(--c-accent)}
+.activity__feed{border-top:1px solid var(--c-line)}
 .activity__feed > p{padding-block:10px}
 .activity__feed > p a{text-decoration:underline;text-underline-offset:3px}
 .journal-entry{
@@ -1237,13 +1250,13 @@ ul{list-style:none}
     font-weight:var(--fw-bold);
     font-variant-numeric:tabular-nums;
     letter-spacing:.08em;
-    color:var(--c-gold-text);
+    color:var(--c-accent);
 }
 .journal-entry h4{font:500 clamp(1.25rem,2.3vw,1.7rem)/1.15 var(--font-editorial);margin-block:2px 3px}
 .journal-entry__body p{font-size:var(--fs-sm);color:var(--c-text-secondary)}
 .journal-entry__note{
     padding-inline-start:12px;
-    border-inline-start:1px solid var(--c-accent);
+    border-inline-start:1px solid var(--c-line);
     font:italic 1.03rem/1.45 var(--font-editorial);
 }
 .journal-entry__note--drop::first-letter{
@@ -1286,10 +1299,10 @@ ul{list-style:none}
     align-items:end;
     flex-wrap:wrap;
     gap:6px 16px;
-    border-bottom:1px solid var(--c-accent);
+    border-bottom:1px solid var(--c-line);
     padding-bottom:12px;
 }
-.issue__imprint{color:var(--c-gold-text);font-size:var(--fs-xs);font-weight:var(--fw-semibold);letter-spacing:.08em}
+.issue__imprint{color:var(--c-accent);font-size:var(--fs-xs);font-weight:var(--fw-semibold);letter-spacing:.08em}
 .issue__title{
     color:var(--c-primary);
     font:500 clamp(2.6rem,6vw,4.9rem)/1 var(--font-editorial);
@@ -1508,9 +1521,9 @@ ul{list-style:none}
     inset:auto auto 8px 50%;
     width:12px;
     height:12px;
-    border:1px solid #e5c789;
+    border:1px solid var(--c-foil);
     border-radius:50%;
-    background:#e5c789;
+    background:var(--c-foil);
     box-shadow:inset 0 0 0 2px #313a50;
     transform:translateX(-50%);
 }
@@ -1526,7 +1539,7 @@ ul{list-style:none}
 .shelf-spine__title{font:600 1rem/1.05 var(--font-editorial)}
 .shelf-spine:has(.shelf-spine__author) .shelf-spine__title{left:42%}
 .shelf-spine__author{left:72%;font:500 .65rem/1 var(--font)}
-.shelf-spine:focus-visible{outline:3px solid #fff2d3;outline-offset:2px}
+.shelf-spine:focus-visible{outline:3px solid #e3d9ff;outline-offset:2px}
 @media(hover:hover) and (prefers-reduced-motion:no-preference){
     .shelf-slot .shelf-spine{transition:transform .15s ease}
     .shelf-slot .shelf-spine:is(:hover,:focus-visible){transform:translateY(-4px)}

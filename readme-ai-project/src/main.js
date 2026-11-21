@@ -428,7 +428,7 @@ function renderChallenges(weekPages, streak) {
         return `
             <article class="editorial-challenge">
                 <div class="editorial-challenge__heading"><h3>${escapeHtml(title)}</h3><span>${metric}</span></div>
-                <progress class="reading-meter${completed ? ' reading-meter--gold' : ''}" max="${target}"
+                <progress class="reading-meter${completed ? ' reading-meter--accent' : ''}" max="${target}"
                     value="${Math.min(current, target)}" aria-label="${escapeHtml(title)}" aria-valuetext="${metric}"></progress>
                 <p>${completed ? 'Постигнато' : escapeHtml(challenge.description)}</p>
             </article>`;
