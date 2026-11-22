@@ -561,12 +561,6 @@ ul{list-style:none}
     margin-top:var(--sp-3);
 }
 
-/* ==================== 15a. Stats Header ==================== */
-.stats__header{
-    display:flex;align-items:center;justify-content:space-between;
-    gap:var(--sp-4);margin-bottom:var(--sp-6);flex-wrap:wrap;
-}
-
 /* ==================== Dialogs ==================== */
 .modal-dialog{
     position:fixed;
@@ -959,17 +953,7 @@ ul{list-style:none}
 }
 .goal-card__value small{color:var(--c-text-secondary);font-size:1rem;letter-spacing:0}
 .goal-card__detail{margin-top:9px;color:var(--c-text-secondary);font-size:var(--fs-xs)}
-.goal-card__link{
-    align-self:start;
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    min-height:44px;
-    margin-top:5px;
-    font-size:var(--fs-sm);
-    font-weight:var(--fw-semibold);
-}
-.goal-card__link:hover,.journal__links a:hover{text-decoration:underline;text-underline-offset:3px}
+.journal__links a:hover{text-decoration:underline;text-underline-offset:3px}
 
 /* ==================== Library ==================== */
 .books{padding-block:24px 36px}
@@ -1128,18 +1112,18 @@ ul{list-style:none}
 .editorial-lists section{border-top:1px solid var(--c-border);padding-top:14px}
 .editorial-lists .section-title,.journal section .section-title{font-size:1.75rem}
 .editorial-challenge{padding:10px 0;border-bottom:1px solid var(--c-border)}
-.editorial-challenge__heading,.editorial-rank li,.issue__index li{
+.editorial-rank li,.issue__index li{
     display:flex;
     justify-content:space-between;
     align-items:baseline;
     gap:8px;
 }
 .editorial-challenge h3{font:600 1.1rem/1.2 var(--font-editorial);overflow-wrap:anywhere}
-.editorial-challenge p,.editorial-challenge__heading span,.editorial-rank span{
+.editorial-challenge p,.editorial-rank span{
     font-size:var(--fs-xs);
     color:var(--c-text-secondary);
 }
-.editorial-challenge__heading span,.editorial-rank span{flex:none}
+.editorial-rank span{flex:none}
 .editorial-challenge .reading-meter{margin-block:5px;height:4px}
 .editorial-rank{list-style:decimal inside;padding-inline-start:1.35rem;counter-reset:book-rank}
 .editorial-rank li{
@@ -1183,17 +1167,10 @@ ul{list-style:none}
     color:var(--c-accent);
 }
 .journal-entry h4{font:500 clamp(1.25rem,2.3vw,1.7rem)/1.15 var(--font-editorial);margin-block:2px 3px}
-.journal-entry__body p{font-size:var(--fs-sm);color:var(--c-text-secondary)}
 .journal-entry__note{
     padding-inline-start:12px;
     border-inline-start:1px solid var(--c-line);
     font:italic 1.03rem/1.45 var(--font-editorial);
-}
-.journal-entry__note--drop::first-letter{
-    float:left;
-    margin:3px 5px 0 0;
-    color:var(--c-primary);
-    font:500 2.45em/.82 var(--font-editorial);
 }
 .journal-entry__actions{grid-column:3;display:flex;flex-wrap:wrap;gap:2px}
 .journal-entry__actions .btn{min-height:42px;padding-inline:8px}
@@ -1211,7 +1188,6 @@ ul{list-style:none}
 }
 .stats__grid dt,.issue dt{color:var(--c-text-secondary);font-size:var(--fs-xs)}
 .stats__grid dd,.issue__figures dd{font:500 clamp(1.5rem,4.5vw,2.3rem)/1.05 var(--font-editorial);color:var(--c-primary)}
-.stats__header{margin-bottom:6px}
 .issue{padding-block:30px 44px}
 .issue__book{
     max-width:840px;
@@ -1358,7 +1334,7 @@ ul{list-style:none}
     .goal-card__value{margin:0;font-size:1.05rem}
     .goal-card__value small{font-size:var(--fs-xs)}
     .goal-card .reading-meter{grid-column:1/-1;height:4px}
-    .goal-card__detail,.goal-card__link{display:none}
+    .goal-card__detail{display:none}
     .books{padding-block:16px 26px}
     .books-toolbar{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:10px;gap:6px}
     .books-toolbar__search{grid-column:1/-1}
@@ -1722,7 +1698,7 @@ html:has(.shelf-preview[open]){overflow:hidden}
 /* — Shared transitions (reduced motion removes them globally) — */
 .btn,.navbar__brand,.navbar__mark,.navbar__toggle,.navbar__link,
 .bottom-nav__link,.bottom-nav__link svg,.reading-card__details,.footer__credit,
-.goal-card__link,.goal-card__link svg,.journal__links a,.demo-notice a,.footer__about a,
+.journal__links a,.demo-notice a,.footer__about a,
 .activity__feed > p a,.footer__about summary,.issue__undated summary,.details-manage summary,
 .editorial-rank button,.issue__index button,
 .books-toolbar__input,.books-toolbar__select,.theme-switch__select,.modal-select,
@@ -1732,7 +1708,7 @@ html:has(.shelf-preview[open]){overflow:hidden}
     transition-duration:var(--dur-fast);
     transition-timing-function:var(--ease-out);
 }
-.reading-card__details,.footer__credit,.goal-card__link,.journal__links a,.demo-notice a,
+.reading-card__details,.footer__credit,.journal__links a,.demo-notice a,
 .footer__about a,.activity__feed > p a,.footer__about summary,.issue__undated summary,
 .details-manage summary,.editorial-rank button,.issue__index button{
     border-radius:var(--r-sm);
@@ -1777,12 +1753,11 @@ html:has(.shelf-preview[open]){overflow:hidden}
         color:var(--c-accent-hover);background:var(--c-accent-light);
         box-shadow:0 0 0 6px var(--c-accent-light);
     }
-    .footer__credit:hover,.goal-card__link:hover,.journal__links a:hover,.demo-notice a:hover,
+    .footer__credit:hover,.journal__links a:hover,.demo-notice a:hover,
     .footer__about a:hover,.activity__feed > p a:hover{
         color:var(--c-accent);background:var(--c-accent-light);
         box-shadow:0 0 0 4px var(--c-accent-light);
     }
-    .goal-card__link:hover svg{transform:translateX(3px)}
     .footer__about summary:hover,.issue__undated summary:hover,.details-manage summary:hover{
         color:var(--c-accent);background:var(--c-accent-light);
         box-shadow:0 0 0 4px var(--c-accent-light);
@@ -1850,7 +1825,7 @@ html:has(.shelf-preview[open]){overflow:hidden}
 .navbar__brand:active .navbar__mark{transform:scale(.92)}
 .navbar__toggle:active{background:var(--c-accent-strong);color:var(--c-accent);transform:scale(.94)}
 .bottom-nav__link:active{background:var(--c-accent-strong);color:var(--c-accent);transform:scale(.97)}
-.reading-card__details:active,.footer__credit:active,.goal-card__link:active,.journal__links a:active,
+.reading-card__details:active,.footer__credit:active,.journal__links a:active,
 .demo-notice a:active,.footer__about a:active,.activity__feed > p a:active,
 .footer__about summary:active,.issue__undated summary:active,.details-manage summary:active,
 .editorial-rank button:active,.issue__index button:active{
