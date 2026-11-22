@@ -2824,17 +2824,20 @@ html:has(.shelf-preview[open]){overflow:hidden}
     display:flex;
     flex-direction:column;
     align-items:center;
-    max-width:128px;
+    gap:4px;
+    max-width:132px;
 }
 .goal-ring-center .kicker{
     font-size:9.5px;
     letter-spacing:.12em;
 }
 .goal-ring-streak{
-    font:500 64px/.84 var(--font-editorial);
-    letter-spacing:-.06em;
+    font:500 50px/1 var(--font-editorial);
+    font-variant-numeric:lining-nums tabular-nums;
+    letter-spacing:-.05em;
     color:var(--c-text);
-    margin:4px 0 2px;
+    margin:0;
+    padding-bottom:6px;
 }
 .goal-ring-unit{
     font:italic 14px/1.2 var(--font-editorial);
