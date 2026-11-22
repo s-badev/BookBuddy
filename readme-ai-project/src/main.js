@@ -308,11 +308,13 @@ function renderFeaturedBook(books, logs) {
 
     if (colophon) colophon.textContent = 'Читалня нощем · ' + monthYear;
     if (pressFootDate) pressFootDate.textContent = monthYear + ' · София';
+    home?.classList.toggle('is-empty-state', !featured);
 
     const status = featured ? getBookStatus(featured) : '';
     eyebrow.hidden = false;
     eyebrow.textContent = !featured
-? '' : status === 'finished'
+        ? 'Първа страница'
+        : status === 'finished'
             ? 'Последно прочетена'
             : status === 'wishlist'
                 ? 'Следваща на рафта'
