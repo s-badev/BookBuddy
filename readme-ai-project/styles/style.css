@@ -223,8 +223,6 @@
 
 /* ---- Dark component-level overrides (shared selector) ---- */
 /* We use a helper: both selectors produce the same result. */
-[data-theme="dark"] .pill--finished{background:rgba(61,184,120,.15);color:#6ee7a0}
-[data-theme="dark"] .pill--wishlist{background:rgba(182,195,210,.14);color:#c4cfdd}
 
 
 
@@ -232,8 +230,6 @@
 
 /* Same overrides via system preference */
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme]) .pill--finished{background:rgba(61,184,120,.15);color:#6ee7a0}
-    :root:not([data-theme]) .pill--wishlist{background:rgba(182,195,210,.14);color:#c4cfdd}
 
 
 
@@ -326,9 +322,6 @@ ul{list-style:none}
     color:var(--c-text);white-space:nowrap;
     flex-shrink:0;
 }
-.navbar__logo-icon{
-    color:var(--c-primary);
-}
 .navbar__links{
     display:flex;gap:var(--sp-6);margin-left:auto;
 }
@@ -398,7 +391,6 @@ ul{list-style:none}
     line-height:1.4;
     position:relative;
 }
-.btn--pill{border-radius:var(--r-full)}
 .btn--lg{padding:.75rem 1.75rem;font-size:var(--fs-base);min-height:48px}
 .btn--full{width:100%}
 .btn--sm{padding:.4rem .9rem;font-size:var(--fs-xs);min-height:34px}
@@ -420,37 +412,12 @@ ul{list-style:none}
     background:transparent;color:var(--c-text-secondary);
 }
 
-/* Danger */
-.btn--danger{
-    background:var(--c-danger);color:var(--c-on-danger);
-    padding:.4rem .9rem;font-size:var(--fs-xs);min-height:34px;
-    border-radius:var(--r-md);
-}
-
 /* Icon-only button */
 .btn--icon{
     width:36px;height:36px;padding:0;border-radius:var(--r-md);
     display:inline-flex;align-items:center;justify-content:center;
     background:var(--c-subtle);color:var(--c-text-secondary);border:none;
 }
-
-/* ==================== 7. Pill / Badge ==================== */
-.pill{
-    display:inline-flex;align-items:center;gap:var(--sp-2);
-    font-size:var(--fs-xs);font-weight:var(--fw-semibold);
-    padding:.35rem .85rem;
-    border-radius:var(--r-full);
-    line-height:1.3;
-}
-.pill--accent{
-    background:var(--c-accent-light);color:var(--c-accent-hover);
-}
-.pill--primary{
-    background:var(--c-primary-light);color:var(--c-primary-dark);
-}
-.pill--reading{background:var(--c-accent-light);color:var(--c-accent)}
-.pill--finished{background:#e8f5ec;color:#1f7a4a}
-.pill--wishlist{background:rgba(83,97,115,.10);color:#3f4d60}
 
 /* ==================== 14. Empty State ==================== */
 .empty-state{
@@ -459,16 +426,9 @@ ul{list-style:none}
     background:var(--c-surface);border-radius:var(--r-2xl);
     border:2px dashed var(--c-border);
 }
-.empty-state__icon{
-    font-size:3rem;margin-bottom:var(--sp-4);display:block;
-}
 .empty-state__title{
     font-size:var(--fs-xl);font-weight:var(--fw-semibold);
     color:var(--c-text-secondary);margin-bottom:var(--sp-2);
-}
-.empty-state__text{
-    font-size:var(--fs-base);color:var(--c-text-muted);
-    margin-bottom:var(--sp-6);max-width:360px;margin-inline:auto;
 }
 
 /* ==================== 15. Form / Auth Card ==================== */
@@ -1725,7 +1685,7 @@ html:has(.shelf-preview[open]){overflow:hidden}
    shadow, border. Timings and easing come from the motion tokens. */
 
 /* — Shared transitions (reduced motion removes them globally) — */
-.btn,.navbar__brand,.navbar__mark,.navbar__logo-icon,.navbar__toggle,.navbar__link,
+.btn,.navbar__brand,.navbar__mark,.navbar__toggle,.navbar__link,
 .bottom-nav__link,.bottom-nav__link svg,.reading-card__details,.footer__credit,
 .goal-card__link,.goal-card__link svg,.journal__links a,.demo-notice a,.footer__about a,
 .activity__feed > p a,.footer__about summary,.issue__undated summary,.details-manage summary,
@@ -1766,24 +1726,14 @@ html:has(.shelf-preview[open]){overflow:hidden}
         color:var(--c-danger);
         box-shadow:inset 0 0 0 1px var(--c-danger);
     }
-    .btn--danger:hover{
-        background:var(--c-danger-hover);
-        transform:translateY(-1px);
-        box-shadow:0 6px 14px color-mix(in srgb,var(--c-danger) 40%,transparent);
-    }
     .btn--icon:hover{
         background:var(--c-border);color:var(--c-text);
         transform:translateY(-1px);box-shadow:var(--sh-sm);
-    }
-    .btn--icon.btn--icon-edit:hover{background:var(--c-accent-light);color:var(--c-accent)}
-    .btn--icon.btn--icon-danger:hover{
-        background:color-mix(in srgb,var(--c-danger) 12%,transparent);color:var(--c-danger);
     }
 
     .navbar__link[aria-current]:hover{color:var(--c-accent)}
     .navbar__brand:hover{color:var(--c-accent)}
     .navbar__brand:hover .navbar__mark{background:var(--c-primary-hover);transform:rotate(-8deg) scale(1.08)}
-    .navbar__brand:hover .navbar__logo-icon{color:var(--c-accent);transform:rotate(-8deg) scale(1.08)}
     .navbar__toggle:hover{background:var(--c-accent-light);color:var(--c-accent)}
     .bottom-nav__link:hover{background:var(--c-accent-light);color:var(--c-accent)}
     .bottom-nav__link:hover svg{transform:translateY(-2px)}
@@ -1859,15 +1809,10 @@ html:has(.shelf-preview[open]){overflow:hidden}
     background:color-mix(in srgb,var(--c-danger) 22%,transparent);
     color:var(--c-danger);transform:scale(.98);
 }
-.btn--danger:active{background:var(--c-danger-hover);transform:scale(.98);box-shadow:none}
 .btn--icon:active{background:var(--c-accent-strong);color:var(--c-accent);transform:scale(.94);box-shadow:none}
-.btn--icon.btn--icon-edit:active{background:var(--c-accent-strong);color:var(--c-accent)}
-.btn--icon.btn--icon-danger:active{
-    background:color-mix(in srgb,var(--c-danger) 22%,transparent);color:var(--c-danger);
-}
 .navbar__link:active{color:var(--c-accent)}
 .navbar__link:active::after{transform:scaleX(1);background:var(--c-accent-hover)}
-.navbar__brand:active .navbar__mark,.navbar__brand:active .navbar__logo-icon{transform:scale(.92)}
+.navbar__brand:active .navbar__mark{transform:scale(.92)}
 .navbar__toggle:active{background:var(--c-accent-strong);color:var(--c-accent);transform:scale(.94)}
 .bottom-nav__link:active{background:var(--c-accent-strong);color:var(--c-accent);transform:scale(.97)}
 .reading-card__details:active,.footer__credit:active,.goal-card__link:active,.journal__links a:active,
