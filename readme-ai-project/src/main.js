@@ -924,7 +924,7 @@ function seedDemoData() {
             notes: 'Практични съвети за фокусирана работа и по-малко разсейване.' },
         { id: 9000007, title: 'Малкият принц', author: 'Антоан дьо Сент-Екзюпери', totalPages: 96, currentPage: 0, notes: '' },
         { id: 9000006, title: 'Атомни навици', author: 'Джеймс Клиър', totalPages: 320, currentPage: 320,
-            notes: 'Малки промени, натрупани с времето.', completion: { logId: 'demo-finished', dateISO: daysAgo(0) } },
+            notes: 'Малки промени, натрупани с времето.', completion: { logId: 'demo-finished', dateISO: daysAgo(20) } },
         { id: 9000005, title: 'Zen Speaks', author: 'Tsai Chih Chung', totalPages: 160, currentPage: 42,
             notes: '', isbn: '9780385472579' },
         { id: 9000004, title: 'Мисленето', author: 'Даниел Канеман', totalPages: 512, currentPage: 210, notes: '' },
@@ -933,16 +933,32 @@ function seedDemoData() {
             completion: { logId: 'demo-prior', dateISO: priorDate } },
         { id: 9000001, title: 'Невероятно дългото пътешествие през забравените библиотеки',
             author: 'Елена Николова', totalPages: 240, currentPage: 0, notes: '' },
-        { id: 8999999, title: 'Престъпление и наказание', author: 'Фьодор Достоевски', totalPages: 560, currentPage: 117, notes: '' },
+        { id: 8999999, title: 'Престъпление и наказание', author: 'Фьодор Достоевски', totalPages: 671, currentPage: 671, notes: '' },
         { id: 8999998, title: 'Гордост и предразсъдъци', author: 'Джейн Остин', totalPages: 416, currentPage: 162, notes: '' },
-        { id: 8999997, title: 'Името на розата', author: 'Умберто Еко', totalPages: 512, currentPage: 69, notes: '' }
+        { id: 8999997, title: 'Името на розата', author: 'Умберто Еко', totalPages: 512, currentPage: 69, notes: '' },
+        { id: 8999996, title: 'Ана Каренина', author: 'Лев Толстой', totalPages: 864, currentPage: 864, notes: '' },
+        { id: 8999995, title: 'Братя Карамазови', author: 'Фьодор Достоевски', totalPages: 824, currentPage: 824, notes: '' },
+        { id: 8999994, title: 'Майстора и Маргарита', author: 'Михаил Булгаков', totalPages: 448, currentPage: 448, notes: '' }
     ].map(book => ({ ...book, createdAt: today.toISOString() }));
     const logs = [
-        { id: 'demo-today', bookId: '9000008', dateISO: daysAgo(0), pages: 22,
+        { id: 'demo-today', bookId: '9000008', dateISO: daysAgo(0), pages: 12,
             note: 'Оставих телефона в другата стая и прочетох цялата глава на спокойствие. Утре ще опитам отново.' },
-        { id: 'demo-finished', bookId: '9000006', dateISO: daysAgo(0), pages: 20, note: 'Последните страници.' },
-        { id: 'demo-yesterday', bookId: '9000005', dateISO: daysAgo(1), pages: 18, note: '' },
-        { id: 'demo-earlier', bookId: '9000004', dateISO: daysAgo(2), pages: 20, note: 'Система 1 и Система 2.' },
+        { id: 'demo-d1a', bookId: '9000008', dateISO: daysAgo(1), pages: 12, note: '' },
+        { id: 'demo-d1b', bookId: '9000005', dateISO: daysAgo(1), pages: 8, note: '' },
+        { id: 'demo-d2a', bookId: '9000004', dateISO: daysAgo(2), pages: 9, note: 'Система 1 и Система 2.' },
+        { id: 'demo-d2b', bookId: '8999998', dateISO: daysAgo(2), pages: 7, note: '' },
+        { id: 'demo-d3', bookId: '9000008', dateISO: daysAgo(3), pages: 8, note: '' },
+        { id: 'demo-d4', bookId: '8999997', dateISO: daysAgo(4), pages: 6, note: '' },
+        { id: 'demo-d5', bookId: '9000005', dateISO: daysAgo(5), pages: 8, note: '' },
+        { id: 'demo-d6', bookId: '9000004', dateISO: daysAgo(6), pages: 11, note: '' },
+        { id: 'demo-d7', bookId: '9000008', dateISO: daysAgo(7), pages: 9, note: '' },
+        { id: 'demo-d8', bookId: '8999998', dateISO: daysAgo(8), pages: 10, note: '' },
+        { id: 'demo-d9', bookId: '8999997', dateISO: daysAgo(9), pages: 7, note: '' },
+        { id: 'demo-d10', bookId: '9000005', dateISO: daysAgo(10), pages: 6, note: '' },
+        { id: 'demo-d11', bookId: '9000004', dateISO: daysAgo(11), pages: 8, note: '' },
+        { id: 'demo-d12', bookId: '9000008', dateISO: daysAgo(12), pages: 7, note: '' },
+        { id: 'demo-d13', bookId: '8999998', dateISO: daysAgo(13), pages: 8, note: '' },
+        { id: 'demo-finished', bookId: '9000006', dateISO: daysAgo(20), pages: 20, note: 'Последните страници.' },
         { id: 'demo-prior', bookId: '9000002', dateISO: priorDate, pages: 24, note: 'Последната сесия за годината.' }
     ].map((log, index) => ({ ...log, createdAt: now - index }));
 
