@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initBooksToolbar();
     initBookshelf();
     initCoverImages();
+    initHeroTilt();
     initIssue();
     initDemoButtons();
     refreshAll();
@@ -161,21 +162,94 @@ function initCoverImages() {
     }, true);
 }
 
-function createCover(book, loading = 'lazy') {
+const COVER_ART_MAP = {
+    'дълбока работа': 'deep', 'deep work': 'deep', 'малкият принц': 'prince', '1984': 'orwell',
+    'sapiens': 'sapiens', 'мисленето': 'think', 'атомни навици': 'atomic', 'стив джобс': 'jobs',
+    'илон мъск': 'musk', 'престъпление и наказание': 'crime', 'майстора и маргарита': 'master',
+    'гордост и предразсъдъци': 'pride', 'дюн': 'dune', 'война и мир': 'war', 'над пропастта във ръжта': 'rye',
+    'норвежка гора': 'plain', 'хомо деус': 'sapiens', 'джентълменът в москва': 'plain', 'фаренхайт 451': 'orwell',
+    'старецът и морето': 'plain', 'братя карамазови': 'crime', 'ана каренина': 'war', 'улис': 'plain',
+    'процесът': 'plain', 'граф монте кристо': 'war', 'медитации': 'plain', 'чужденецът': 'plain',
+    'на изток от рая': 'war', 'сто години самота': 'master', 'да убиеш присмехулник': 'pride',
+    'пътят': 'plain', 'хамлет': 'orwell', 'безкрайна шега': 'plain', 'невидими градове': 'prince',
+    'идиот': 'crime', 'среднощни деца': 'plain'
+};
+
+const BG_MONTHS = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
+
+function coverArtOf(book) {
+    return COVER_ART_MAP[String(book?.title || '').trim().toLowerCase()] || 'plain';
+}
+
+function formatCoverTitle(book) {
+    const title = String(book?.title || '');
+    if (title.length <= 10) return title;
+    const mid = title.lastIndexOf(' ', Math.ceil(title.length / 2));
+    return mid > 0 ? title.slice(0, mid) + '\n' + title.slice(mid + 1) : title;
+}
+
+function createCover(book, loading = 'lazy', allowImage = true) {
     const status = getBookStatus(book);
-    const isbn = Validate.normalizeISBN(book.isbn ?? '');
+    const art = coverArtOf(book);
+    const isbn = allowImage ? Validate.normalizeISBN(book.isbn ?? '') : '';
     const image = isbn ? `
             <img class="book-cover__image" alt="" loading="${loading}" referrerpolicy="no-referrer"
                  src="https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false">` : '';
     return `
-        <span class="book-cover book-cover--${status}" aria-hidden="true">
+        <span class="book-cover book-cover--${status} cover-art--${art}" aria-hidden="true">
+            <span class="cover-art"><i></i><i></i><i></i><i></i><i></i></span>
             <span class="book-cover__copy">
                 <span class="book-cover__author">${escapeHtml(book.author)}</span>
-                <span class="book-cover__title">${escapeHtml(book.title)}</span>
+                <span class="book-cover__title">${escapeHtml(formatCoverTitle(book))}</span>
             </span>
-            <span class="book-cover__imprint">BookBuddy</span>
+            <span class="book-cover__imprint"><b></b><span>BB</span></span>
             ${image}
         </span>`;
+}
+
+function createHeroBook(book) {
+    const status = getBookStatus(book);
+    const percent = calculateProgress(book.currentPage, book.totalPages);
+    const bookmarkClass = 'bookmark' + (percent === 0 ? ' is-tucked' : '') + (status === 'finished' ? ' is-foil' : '');
+    return `
+        <span class="hero-stage">
+            <span class="object" aria-hidden="true">
+                <span class="object-shadow"></span>
+                <span class="volume volume--${status}" style="--read:${percent}">
+                    <span class="${bookmarkClass}" style="--read:${percent}"></span>
+                    <span class="spine"></span>
+                    <span class="fore-edge"></span>
+                    <span class="bottom-edge"></span>
+                    ${createCover(book, 'eager', false)}
+                </span>
+            </span>
+        </span>`;
+}
+
+function initHeroTilt() {
+    const host = document.querySelector('.reading-card__art');
+    if (!host) return;
+    host.addEventListener('pointermove', event => {
+        if (reducedMotion.matches) return;
+        const art = event.target.closest('.hero-art');
+        const vol = art?.querySelector('.volume');
+        const stage = art?.querySelector('.hero-stage');
+        if (!art || !vol) return;
+        const rect = art.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+        vol.style.transform = `rotateY(${(-26 + x * 18).toFixed(2)}deg) rotateX(${(8 - y * 10).toFixed(2)}deg) rotateZ(-9deg)`;
+        stage?.style.setProperty('--sx', (x * 16).toFixed(1) + 'px');
+        stage?.style.setProperty('--sy', (y * 10).toFixed(1) + 'px');
+    });
+    host.addEventListener('pointerleave', () => {
+        host.querySelectorAll('.volume').forEach(vol => { vol.style.transform = ''; });
+        host.querySelectorAll('.hero-stage').forEach(stage => {
+            stage.style.setProperty('--sx', '0px');
+            stage.style.setProperty('--sy', '0px');
+        });
+    });
 }
 
 function bookStatusLabel(status) {
@@ -219,32 +293,56 @@ function renderFeaturedBook(books, logs) {
         }
         return selected;
     }, null);
-    const featured = latest ? booksById.get(String(latest.bookId)) : inProgress[0];
+    const featured = latest ? booksById.get(String(latest.bookId)) : (inProgress[0] || books[0]);
     const openButton = document.getElementById('logReadingBtn');
     const cover = document.getElementById('readingCover');
+    const placeholder = document.getElementById('readingPlaceholder');
     const details = document.getElementById('featuredDetailsBtn');
     const author = document.getElementById('readingAuthor');
+    const eyebrow = document.getElementById('readingEyebrow');
+    const colophon = document.getElementById('readingColophon');
+    const pressFootDate = document.getElementById('pressFootDate');
+    const home = document.getElementById('home');
+    const now = new Date();
+    const monthYear = BG_MONTHS[now.getMonth()] + '\u00A0' + now.getFullYear();
 
-    openButton.hidden = books.length === 0;
+    if (colophon) colophon.textContent = 'Читалня нощем · ' + monthYear;
+    if (pressFootDate) pressFootDate.textContent = monthYear + ' · София';
+
+    const status = featured ? getBookStatus(featured) : '';
+    eyebrow.hidden = false;
+    eyebrow.textContent = !featured
+? '' : status === 'finished'
+            ? 'Последно прочетена'
+            : status === 'wishlist'
+                ? 'Следваща на рафта'
+                : 'В момента четеш';
+
+    openButton.hidden = !featured || status === 'finished';
     openButton.dataset.bookId = featured?.id ?? '';
     document.getElementById('firstBookLink').hidden = books.length > 0;
     setKineticText(document.getElementById('readingTitle'), featured?.title ?? 'Твоето четене');
-    author.textContent = featured?.author ?? '';
-    author.hidden = !featured;
-    document.getElementById('readingEyebrow').hidden = !featured;
-    document.getElementById('readingProgress').hidden = !featured;
-    document.getElementById('readingPlaceholder').hidden = Boolean(featured);
+    author.textContent = featured
+        ? featured.author
+        : 'Рафтът очаква първия том — добави книга, за да отвориш читалнята.';
+    author.hidden = false;
+    document.getElementById('readingProgress').hidden = false;
+    placeholder.hidden = Boolean(featured);
     cover.hidden = !featured;
     details.hidden = !featured;
     cover.dataset.detailsBook = details.dataset.detailsBook = featured?.id ?? '';
-    cover.setAttribute('aria-label', featured ? 'За книгата ' + featured.title : 'За книгата');
-    cover.innerHTML = featured ? createCover(featured, 'eager') : '';
+    cover.setAttribute('aria-label', featured ? 'Отвори „' + featured.title + '“' : 'За книгата');
+    cover.innerHTML = featured ? createHeroBook(featured) : '';
 
     if (featured) {
         const percent = calculateProgress(featured.currentPage, featured.totalPages);
-        document.getElementById('readingPages').textContent = featured.currentPage + ' / ' + featured.totalPages + ' стр.';
+        document.getElementById('readingPages').textContent = featured.currentPage + ' от ' + featured.totalPages + ' стр.';
         document.getElementById('readingPercent').textContent = percent + '%';
         document.getElementById('readingMeter').value = percent;
+    } else {
+        document.getElementById('readingPages').textContent = '0 от 0 стр.';
+        document.getElementById('readingPercent').textContent = '0%';
+        document.getElementById('readingMeter').value = 0;
     }
 }
 
@@ -277,6 +375,7 @@ function updateStats(books = BookRepo.getAllBooks()) {
     renderFeaturedBook(books, logs);
     renderGoal(weekPages, settings.weeklyGoalPages);
     setCountUp(document.getElementById('streakValue'), streak);
+    setCountUp(document.getElementById('homeStreakValue'), streak);
     renderTopBooks(books);
     renderChallenges(weekPages, streak);
     renderIssue(books, logs, settings.minPagesForStreakDay);
@@ -354,11 +453,11 @@ function renderGoal(weekPages, target) {
     meter.value = Math.min(weekPages, target);
     meter.setAttribute('aria-valuetext', weekPages + ' от ' + target + ' страници');
     setCountUp(document.getElementById('goalPages'), weekPages);
-    document.getElementById('goalTarget').textContent = '/ ' + target + ' стр.';
-    const remaining = target - weekPages;
+    document.getElementById('goalTarget').textContent = '/' + target;
+    const remaining = Math.max(0, target - weekPages);
     document.getElementById('goalDetail').textContent = remaining > 0
-        ? 'Остават ' + remaining + ' стр. до целта.'
-        : 'Целта за тази седмица е постигната.';
+        ? 'Още ' + remaining + ' страници до целта.'
+        : 'Седмичната цел е изпълнена.';
 }
 
 /* ========== Top 5 Most-Read Books (by total progress) ========== */
@@ -366,7 +465,7 @@ function renderGoal(weekPages, target) {
 /**
  * Returns top N books by actual read pages (currentPage).
  * "Прочетена" books are normalised so readPages = totalPages.
- * [{bookId, title, readPages, totalPages}]
+ * [{bookId, title, author, readPages, totalPages}]
  */
 function getTopBooks(books, limit) {
     limit = limit || 5;
@@ -384,6 +483,7 @@ function getTopBooks(books, limit) {
         return {
             bookId: String(b.id),
             title: b.title,
+            author: b.author || '',
             readPages: read,
             totalPages: total
         };
@@ -400,11 +500,14 @@ function getTopBooks(books, limit) {
 
 function renderTopBooks(books) {
     const top = getTopBooks(books, 5);
-    document.getElementById('topBooksThisWeek').innerHTML = top.length ? top.map(item => `
+    document.getElementById('topBooksThisWeek').innerHTML = top.length ? top.map((item, index) => `
         <li>
-            <button type="button" id="rank-book-${item.bookId}" data-details-book="${item.bookId}" aria-haspopup="dialog">${escapeHtml(item.title)}</button>
-            <span>${item.readPages} / ${item.totalPages} стр.</span>
-        </li>`).join('') : '<li>Все още няма добавени книги.</li>';
+            <button type="button" class="rank-item" id="rank-book-${item.bookId}" data-details-book="${item.bookId}" aria-haspopup="dialog">
+                <span class="rank-num">${index + 1}</span>
+                <span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.author)}</small></span>
+                <small>${item.readPages} стр.</small>
+            </button>
+        </li>`).join('') : '<li class="rank-empty">Все още няма добавени книги.</li>';
 }
 
 function renderChallenges(weekPages, streak) {
@@ -418,19 +521,16 @@ function renderChallenges(weekPages, streak) {
         const current = weekly ? weekPages : byStreak ? streak : 0;
         const target = Math.max(Number(challenge.target) || 0, 1);
         const completed = current >= target;
-        const title = challenge.id === 'streak_14' && challenge.title === 'Читателски streak'
-            ? 'Читателска поредица' : challenge.title;
+        const title = challenge.id === 'streak_14'
+            ? 'Серия 14 дни' : challenge.title;
         if ((weekly || completed) && challenge.active === completed) {
             challenge.active = !completed;
             changed = true;
         }
-        const metric = current + ' / ' + target + (weekly ? ' стр.' : byStreak ? ' дни' : '');
         return `
-            <article class="editorial-challenge">
-                <div class="editorial-challenge__heading"><h3>${escapeHtml(title)}</h3><span>${metric}</span></div>
-                <progress class="reading-meter${completed ? ' reading-meter--accent' : ''}" max="${target}"
-                    value="${Math.min(current, target)}" aria-label="${escapeHtml(title)}" aria-valuetext="${metric}"></progress>
-                <p>${completed ? 'Постигнато' : escapeHtml(challenge.description)}</p>
+            <article class="challenge-item editorial-challenge">
+                <span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(challenge.description)}</small></span>
+                <span class="challenge-progress">${current} / ${target}</span>
             </article>`;
     }).join('');
     if (changed) ChallengeRepo.saveChallenges(challenges);
