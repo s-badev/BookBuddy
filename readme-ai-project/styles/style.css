@@ -2584,6 +2584,686 @@ html:has(.shelf-preview[open]){overflow:hidden}
     .object-shadow,.hero-stage::before{filter:none}
 }
 
+
+/* ==================== V4 Journal & Statistics Observatory ==================== */
+.journal{
+    border-top:1px solid var(--c-border);
+    padding-top:32px;
+    padding-bottom:36px;
+}
+.journal__mast{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px 24px;
+    border-bottom:2px solid var(--c-text);
+    padding-bottom:16px;
+    margin-bottom:28px;
+}
+.journal__title.section-title{
+    font:500 clamp(44px,7.5vw,88px)/.96 var(--font-editorial);
+    letter-spacing:-.06em;
+    margin:4px 0 0;
+}
+.journal__mast-meta{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:8px;
+}
+.journal__links{
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px 16px;
+}
+.journal__links a{
+    padding-block:4px;
+    font-size:13px;
+    font-weight:650;
+    color:var(--c-primary);
+}
+.journal section{
+    padding-block:0;
+}
+
+.journal-part-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:12px 20px;
+    margin-bottom:14px;
+}
+.journal-part-title{
+    font:500 clamp(22px,2.5vw,28px)/1.12 var(--font-editorial);
+    letter-spacing:-.03em;
+    color:var(--c-text);
+    margin-top:3px;
+}
+
+/* Part I & II: Observatory top spread (Annual Map + Streak Ring) */
+.journal-observatory{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 292px;
+    gap:36px;
+    align-items:start;
+    padding-bottom:32px;
+    border-bottom:1px solid var(--c-text);
+}
+.journal-map-col{
+    min-width:0;
+}
+.journal-map-col .stats__grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0;
+    border-block:0;
+    border-top:1px solid var(--c-border);
+    border-bottom:1px solid var(--c-border);
+}
+.journal-map-col .stats__grid > div{
+    padding:6px 14px;
+    border-right:1px solid var(--c-border);
+    gap:2px;
+}
+.journal-map-col .stats__grid > div:first-child{padding-left:0}
+.journal-map-col .stats__grid > div:last-child{border-right:0;padding-right:0}
+.journal-map-col .stats__grid dt{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--c-text-secondary);
+}
+.journal-map-col .stats__grid dd{
+    font:500 24px/1.05 var(--font-editorial);
+    color:var(--c-text);
+    letter-spacing:-.04em;
+}
+
+/* Nocturnal stage for the Annual Calendar Map */
+.year-map-stage{
+    position:relative;
+    isolation:isolate;
+    background:var(--c-art);
+    color:var(--c-cloth-ink);
+    padding:18px 20px 16px;
+    border-radius:2px;
+    overflow:hidden;
+}
+.year-map-stage::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:radial-gradient(360px 220px at 22% 20%,rgba(var(--c-lamp),.18),transparent 70%);
+}
+.year-map__top,
+.year-map__footer{
+    position:relative;
+    z-index:1;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px 16px;
+}
+.year-map__top{
+    margin-bottom:10px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--c-cloth);
+}
+.year-map__eyebrow{
+    font:700 10px/1.4 var(--font);
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--c-foil);
+}
+.year-map__summary,
+.year-map__avg{
+    font:italic 13px/1.35 var(--font-editorial);
+    color:var(--c-foil);
+}
+.year-map__scroll{
+    position:relative;
+    z-index:1;
+    overflow-x:auto;
+    padding-bottom:4px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--c-line) transparent;
+}
+.year-map__svg{
+    width:100%;
+    min-width:660px;
+    height:auto;
+    display:block;
+}
+.year-map__month,
+.year-map__dow{
+    fill:var(--c-foil);
+    font:700 9px/1 var(--font);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+.year-map__week{
+    transform-origin:center bottom;
+    animation:map-wave-in var(--dur-slow) var(--ease-out) backwards;
+    animation-delay:calc(var(--w, 0) * var(--dur-fast) / 12);
+}
+@keyframes map-wave-in{
+    from{opacity:0;transform:translateY(8px) scaleY(.85)}
+    to{opacity:1;transform:none}
+}
+.day-cell--0{fill:var(--c-line);opacity:.45}
+.day-cell--1{fill:var(--c-cloth);stroke:var(--c-line);stroke-width:.8}
+.day-cell--2{fill:var(--c-accent);stroke:var(--c-foil);stroke-width:.6}
+.day-cell--3{fill:var(--c-accent);stroke:var(--c-cloth-ink);stroke-width:.9}
+.day-cell--4{fill:var(--c-foil);stroke:var(--c-cloth-ink);stroke-width:1}
+.day-cell__mark{fill:var(--c-cloth-ink)}
+.day-cell__diamond{fill:var(--c-on-foil)}
+
+.year-map__footer{
+    margin-top:10px;
+    padding-top:8px;
+    border-top:1px solid var(--c-cloth);
+}
+.year-map__legend{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px 14px;
+}
+.year-map__legend-item{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:11px;
+    font-weight:600;
+    color:var(--c-cloth-ink);
+}
+
+/* Part II: Daily & Weekly Goal Ring with Streak in Center */
+.journal-ring-col{
+    border-left:1px solid var(--c-border);
+    padding-left:28px;
+}
+.journal-ring-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:8px;
+    margin-bottom:10px;
+}
+.journal-ring-head .btn{
+    border-radius:2px;
+    min-height:36px;
+    padding:4px 10px;
+}
+.goal-ring-figure{
+    position:relative;
+    width:224px;
+    height:224px;
+    margin:4px auto 12px;
+    display:grid;
+    place-items:center;
+}
+.goal-ring-svg-wrap{
+    position:absolute;
+    inset:0;
+}
+.goal-ring__svg{
+    width:100%;
+    height:100%;
+    display:block;
+}
+.goal-ring__tick{
+    stroke:var(--c-line);
+    stroke-width:1.5;
+}
+.goal-ring__track{
+    fill:none;
+    stroke:var(--c-border);
+    stroke-width:6;
+}
+.goal-ring__inner-track{
+    fill:none;
+    stroke:var(--c-border);
+    stroke-width:2;
+    stroke-dasharray:3 4;
+}
+.goal-ring__arc{
+    fill:none;
+    stroke:var(--c-primary);
+    stroke-width:6.5;
+    animation:ring-draw calc(var(--dur-slow) * 2) var(--ease-out) both;
+}
+.goal-ring__inner-arc{
+    fill:none;
+    stroke:var(--c-accent);
+    stroke-width:3.2;
+    animation:inner-ring-draw calc(var(--dur-slow) * 2) var(--ease-out) both;
+}
+.goal-ring__tip{
+    fill:var(--c-accent);
+    stroke:var(--c-surface);
+    stroke-width:1.5;
+}
+@keyframes ring-draw{
+    from{stroke-dashoffset:var(--ring-c, 528);opacity:.4}
+    to{stroke-dashoffset:var(--ring-offset, 0);opacity:1}
+}
+@keyframes inner-ring-draw{
+    from{stroke-dashoffset:var(--inner-c, 427);opacity:.4}
+    to{stroke-dashoffset:var(--inner-offset, 0);opacity:1}
+}
+.goal-ring-center{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    max-width:128px;
+}
+.goal-ring-center .kicker{
+    font-size:9.5px;
+    letter-spacing:.12em;
+}
+.goal-ring-streak{
+    font:500 64px/.84 var(--font-editorial);
+    letter-spacing:-.06em;
+    color:var(--c-text);
+    margin:4px 0 2px;
+}
+.goal-ring-unit{
+    font:italic 14px/1.2 var(--font-editorial);
+    color:var(--c-text-secondary);
+}
+.goal-ring-ledger{
+    border-top:1px solid var(--c-border);
+}
+.goal-ring-ledger__row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:8px;
+    padding:7px 0;
+    border-bottom:1px solid var(--c-border);
+    font-size:12.5px;
+}
+.goal-ring-ledger__key{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:var(--c-text-secondary);
+}
+.goal-ring-ledger__row strong{
+    font:650 13px/1.2 var(--font-editorial);
+    color:var(--c-text);
+    white-space:nowrap;
+}
+.goal-ring-swatch{
+    display:inline-block;
+    width:12px;
+    height:3px;
+}
+.goal-ring-swatch--outer{
+    background:var(--c-primary);
+}
+.goal-ring-swatch--inner{
+    border-top:2px dashed var(--c-accent);
+    height:0;
+}
+
+/* Part III: Monthly Horizon Curve & Most-Read Authors Constellation */
+.journal-analytics{
+    display:grid;
+    grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);
+    gap:44px;
+    padding-block:28px;
+    border-bottom:1px solid var(--c-text);
+    align-items:start;
+}
+.journal-callouts{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 18px;
+}
+.journal-callout{
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+}
+.journal-callout strong{
+    font:600 16px/1.2 var(--font-editorial);
+    color:var(--c-text);
+    letter-spacing:-.02em;
+}
+.horizon-chart-wrap,
+.authors-chart-wrap{
+    border-top:1px solid var(--c-border);
+    padding-top:12px;
+}
+.horizon-svg,
+.authors-svg{
+    width:100%;
+    height:auto;
+    display:block;
+}
+.horizon-grid{
+    stroke:var(--c-border);
+    stroke-width:1;
+    stroke-dasharray:2 4;
+}
+.horizon-axis{
+    stroke:var(--c-line);
+    stroke-width:1.2;
+}
+.horizon-scale{
+    fill:var(--c-text-secondary);
+    font:600 9.5px/1 var(--font);
+}
+.horizon-area{
+    fill:var(--c-accent-light);
+    transform-origin:center 132px;
+    animation:horizon-rise var(--dur-slow) var(--ease-out) both;
+}
+.horizon-ridge{
+    fill:none;
+    stroke:var(--c-accent);
+    stroke-width:2.2;
+    transform-origin:center 132px;
+    animation:horizon-rise var(--dur-slow) var(--ease-out) both;
+}
+@keyframes horizon-rise{
+    from{opacity:0;transform:scaleY(.15)}
+    to{opacity:1;transform:none}
+}
+.horizon-node{
+    animation:node-pop var(--dur-slow) var(--ease-out) backwards;
+    animation-delay:calc(var(--m, 0) * var(--dur-fast) / 4);
+}
+@keyframes node-pop{
+    from{opacity:0;transform:translateY(6px)}
+    to{opacity:1;transform:none}
+}
+.horizon-node__stem{
+    stroke:var(--c-border);
+    stroke-width:1;
+}
+.horizon-node__dot{
+    fill:var(--c-surface);
+    stroke:var(--c-line);
+    stroke-width:1.5;
+}
+.horizon-node__dot.is-active{
+    fill:var(--c-accent);
+    stroke:var(--c-surface);
+    stroke-width:1.5;
+}
+.horizon-node__dot.is-peak{
+    fill:var(--c-primary);
+    stroke:var(--c-surface);
+    stroke-width:2;
+}
+.horizon-node__beacon{
+    fill:none;
+    stroke:var(--c-primary);
+    stroke-width:1.3;
+    stroke-dasharray:2 2;
+}
+.horizon-node__val{
+    fill:var(--c-text-secondary);
+    font:600 9.5px/1 var(--font);
+}
+.horizon-node__val--peak{
+    fill:var(--c-text);
+    font:700 11px/1 var(--font-editorial);
+}
+.horizon-node__month{
+    fill:var(--c-text-secondary);
+    font:700 9.5px/1 var(--font);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+}
+.horizon-node__month.is-peak{
+    fill:var(--c-text);
+}
+.session-pulse{
+    animation:node-pop var(--dur-base) var(--ease-out) backwards;
+    animation-delay:calc(var(--s, 0) * var(--dur-fast) / 6);
+}
+.session-pulse__stem{
+    stroke:var(--c-line);
+    stroke-width:1.5;
+}
+.session-pulse__stem.is-peak{
+    stroke:var(--c-primary);
+    stroke-width:2.2;
+}
+.session-pulse__tip{
+    fill:var(--c-accent);
+}
+.session-pulse__tip.is-peak{
+    fill:var(--c-primary);
+}
+.horizon-caption{
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px solid var(--c-border);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:6px 16px;
+    font:italic 12.5px/1.35 var(--font-editorial);
+    color:var(--c-text-secondary);
+}
+
+/* Authors Constellation SVG */
+.author-row{
+    animation:author-slide var(--dur-slow) var(--ease-out) backwards;
+    animation-delay:calc(var(--a, 0) * var(--dur-fast) / 3);
+}
+@keyframes author-slide{
+    from{opacity:0;transform:translateX(-10px)}
+    to{opacity:1;transform:none}
+}
+.author-row__rank{
+    fill:var(--c-accent);
+    font:500 18px/1 var(--font-editorial);
+}
+.author-row__name{
+    fill:var(--c-text);
+    font:600 14.5px/1.2 var(--font-editorial);
+}
+.author-row__meta{
+    fill:var(--c-text-secondary);
+    font:600 11px/1 var(--font);
+}
+.author-row__track{
+    stroke:var(--c-border);
+    stroke-width:1;
+    stroke-dasharray:2 3;
+}
+.author-row__fill{
+    stroke:var(--c-accent);
+    stroke-width:2;
+}
+.author-row__fill.is-top{
+    stroke:var(--c-primary);
+    stroke-width:2.6;
+}
+.author-row__diamond{
+    fill:var(--c-accent);
+}
+.author-row__diamond.is-top{
+    fill:var(--c-primary);
+}
+.author-row__core{
+    fill:var(--c-surface);
+}
+.author-row__node{
+    fill:var(--c-surface);
+    stroke:var(--c-accent);
+    stroke-width:2;
+}
+.authors-chart-empty{
+    padding:20px 0;
+    font:italic 16px/1.45 var(--font-editorial);
+    color:var(--c-text-secondary);
+}
+
+/* Part IV: Chronological Literary Entries (#activity) */
+.activity{
+    padding-top:26px!important;
+}
+.activity__header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:10px 20px;
+    margin-bottom:14px;
+}
+.activity__summary{
+    font:italic 15px/1.35 var(--font-editorial);
+    color:var(--c-text-secondary);
+}
+.activity__feed{
+    border-top:1px solid var(--c-line);
+}
+.journal-entry{
+    display:grid;
+    grid-template-columns:minmax(0,1.05fr) minmax(0,1.15fr) auto;
+    align-items:start;
+    gap:12px 28px;
+    padding:22px 0;
+    border-bottom:1px solid var(--c-border);
+}
+.journal-entry__title{
+    font:500 clamp(24px,2.8vw,34px)/1.12 var(--font-editorial);
+    letter-spacing:-.04em;
+    color:var(--c-text);
+    margin:0;
+}
+.journal-entry--lead .journal-entry__title::first-letter{
+    float:left;
+    font:500 68px/.72 var(--font-editorial);
+    letter-spacing:-.06em;
+    padding:4px 10px 0 0;
+    color:var(--c-primary);
+}
+.journal-entry__meta{
+    margin-top:8px;
+    font-size:13px;
+    color:var(--c-text-secondary);
+}
+.journal-entry__meta strong{
+    color:var(--c-text);
+}
+.journal-entry__margin{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+.journal-date{
+    font:700 10px/1.2 var(--font);
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--c-accent);
+}
+.journal-entry__note{
+    padding-inline-start:14px;
+    border-inline-start:1px solid var(--c-line);
+    font:italic 17px/1.5 var(--font-editorial);
+    color:var(--c-text);
+}
+.journal-entry__note--quiet{
+    color:var(--c-text-secondary);
+}
+.journal-entry__actions{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+}
+.journal-entry__actions .btn{
+    min-height:38px;
+    padding:6px 11px;
+    border-radius:2px;
+    font-size:13px;
+}
+
+/* Scroll reveal for chronological entries */
+.journal-entry.reveal{
+    animation:entry-rise var(--dur-slow) var(--ease-out) backwards;
+    animation-delay:calc(var(--entry-i, 0) * var(--dur-fast) / 3);
+}
+@keyframes entry-rise{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:none}
+}
+
+@media (max-width:960px){
+    .journal-observatory,
+    .journal-analytics{
+        grid-template-columns:minmax(0,1fr);
+        gap:28px;
+    }
+    .journal-ring-col{
+        border-left:0;
+        border-top:1px solid var(--c-border);
+        padding-left:0;
+        padding-top:22px;
+    }
+}
+
+@media (max-width:725px){
+    .journal__mast{
+        align-items:flex-start;
+    }
+    .journal__mast-meta{
+        align-items:flex-start;
+    }
+    .journal__title.section-title{
+        font-size:40px;
+    }
+    .journal-map-col .stats__grid{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        width:100%;
+    }
+    .journal-map-col .stats__grid > div{
+        padding:8px 10px;
+        border-bottom:1px solid var(--c-border);
+    }
+    .journal-map-col .stats__grid > div:nth-child(2n){
+        border-right:0;
+    }
+    .year-map-stage{
+        padding:14px 12px;
+    }
+    .journal-entry{
+        grid-template-columns:minmax(0,1fr);
+        gap:10px;
+        padding:18px 0;
+    }
+    .journal-empty-scene{
+        grid-template-columns:minmax(0,1fr);
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1!important;transform:none!important}
+    .year-map__week,.horizon-area,.horizon-ridge,.horizon-node,.session-pulse,.author-row,
+    .goal-ring__arc,.goal-ring__inner-arc{
+        animation:none!important;
+        transform:none!important;
+        opacity:1!important;
+    }
+}
+
 /* ==================== 20. Print ==================== */
 @media print{
     .navbar,.bottom-nav,.footer,.modal-dialog,.shelf-preview,.toast{display:none}

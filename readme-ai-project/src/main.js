@@ -380,6 +380,7 @@ function updateStats(books = BookRepo.getAllBooks()) {
     setCountUp(document.getElementById('homeStreakValue'), streak);
     renderTopBooks(books);
     renderChallenges(weekPages, streak);
+    renderJournalAnalytics(books, logs, settings, weekPages, streak);
     renderIssue(books, logs, settings.minPagesForStreakDay);
 }
 
@@ -945,33 +946,55 @@ function sessionDateMarkup(log) {
 
 function renderActivityFeed() {
     const container = document.getElementById('activityFeed');
+    const summary = document.getElementById('activitySummary');
     const books = BookRepo.getAllBooks();
     const byId = new Map(books.map(book => [String(book.id), book]));
     const logs = getJournalLogs(books);
-    const dropCap = logs.find(log => (log.note || '').trim().length >= 45 &&
-        /^\p{L}/u.test(log.note.trim()));
 
-    container.innerHTML = logs.length ? logs.map(log => {
+    if (summary) {
+        const totalSessionPages = logs.reduce((s, l) => s + (Number(l.pages) || 0), 0);
+        summary.textContent = logs.length
+            ? logs.length + (logs.length === 1 ? ' записана сесия · ' : ' записани сесии · ') + totalSessionPages + ' стр. в хрониката'
+            : 'Все още няма записани сесии';
+    }
+
+    if (!logs.length) {
+        container.innerHTML = '<p>Все още няма записани сесии. <a href="#home">Към четенето</a></p>';
+        return;
+    }
+
+    container.innerHTML = logs.map((log, index) => {
         const book = byId.get(String(log.bookId));
         const id = escapeHtml(log.id);
         const date = formatDateBG(log.dateISO);
         const label = escapeHtml(book.title + (date ? ' · ' + date : ''));
+        const noteText = (log.note || '').trim();
+        const noteMarkup = noteText
+            ? `<p class="journal-entry__note">${escapeHtml(noteText)}</p>`
+            : `<p class="journal-entry__note journal-entry__note--quiet">Без бележка към сесията.</p>`;
         return `
-            <article class="journal-entry" data-log-id="${id}">
-                <div class="journal-entry__body">
-                    ${sessionDateMarkup(log)}
-                    <h4>${escapeHtml(book.title)}</h4>
-                    <p><strong>${Number(log.pages)} стр. в сесията</strong> <span>· ${book.currentPage} / ${book.totalPages} стр. общо</span></p>
+            <article class="journal-entry reveal is-in${index === 0 ? ' journal-entry--lead' : ''}" style="--entry-i:${Math.min(index, 12)}" data-log-id="${id}">
+                <div class="journal-entry__main">
+                    <h4 class="journal-entry__title">${escapeHtml(book.title)}</h4>
+                    <p class="journal-entry__meta"><strong>${Number(log.pages)} стр. в тази сесия</strong> <span>· ${book.currentPage} от ${book.totalPages} стр. общо · ${escapeHtml(book.author)}</span></p>
                 </div>
-                ${log.note ? `<p class="journal-entry__note${log === dropCap ? ' journal-entry__note--drop' : ''}">${escapeHtml(log.note.trim())}</p>` : ''}
+                <div class="journal-entry__margin">
+                    ${sessionDateMarkup(log)}
+                    ${noteMarkup}
+                </div>
                 <div class="journal-entry__actions">
                     <button type="button" class="btn btn--ghost" id="journal-edit-${id}" data-edit-session="${id}"
-                            aria-label="Редактирай сесията ${label}">Редактирай</button>
+                            aria-label="Редактирай сесията ${label}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5 4 4M4 20l1-5L16 4a2.8 2.8 0 0 1 4 4L9 19z"/></svg>
+                        <span>Редактирай</span>
+                    </button>
                     <button type="button" class="btn btn--ghost btn--ghost-danger" data-delete-session="${id}"
                             aria-label="Изтрий сесията ${label}">Изтрий</button>
                 </div>
             </article>`;
-    }).join('') : '<p>Все още няма записани сесии. <a href="#home">Към четенето</a></p>';
+    }).join('');
+
+    bindJournalReveals();
 }
 
 function deleteReadingSession(id) {
@@ -1128,4 +1151,398 @@ function initDemoButtons() {
             clearAllData();
         }
     });
+}
+
+
+function renderJournalAnalytics(books, logs, settings, weekPages, streak) {
+    const now = new Date();
+    const currentYear = String(now.getFullYear());
+    const todayISO = getDayISO(now);
+    const colophon = document.getElementById('journalColophon');
+    if (colophon) {
+        colophon.textContent = now.getDate() + ' ' + BG_MONTHS[now.getMonth()] + '\u00A0' + currentYear + ' · читалня нощем';
+    }
+
+    const cal = JournalStats.buildYearCalendarMap(logs, currentYear);
+    const metrics = JournalStats.calculateDailyReadingMetrics(logs, { year: currentYear, todayISO });
+    const longestStreak = Math.max(streak, JournalStats.calculateLongestStreak(logs, settings.minPagesForStreakDay, currentYear));
+    const monthly = JournalStats.calculateMonthlyBreakdown(logs, currentYear);
+    const strongestMonth = JournalStats.findStrongestMonth(logs, currentYear);
+    const authors = JournalStats.calculateAuthorBreakdown(logs, books, currentYear);
+    const topAuthor = authors[0] || null;
+
+    setCountUp(document.getElementById('statActiveDays'), cal.activeDays);
+
+    renderAnnualCalendarMap(cal, metrics, monthly);
+    renderGoalAndStreakRing(weekPages, settings.weeklyGoalPages, metrics.todayPages, streak, longestStreak);
+    renderMonthlyHorizonChart(monthly, strongestMonth, metrics, logs, currentYear);
+    renderAuthorsConstellationChart(authors, topAuthor, metrics);
+}
+
+function renderAnnualCalendarMap(cal, metrics, monthly) {
+    const host = document.getElementById('journalYearMap');
+    if (!host) return;
+
+    const cellStep = 13.4;
+    const leftPad = 36;
+    const topPad = 24;
+    const svgWidth = Math.ceil(leftPad + cal.weeksCount * cellStep + 14);
+    const svgHeight = 132;
+
+    const weeks = new Map();
+    for (const day of cal.days) {
+        if (!weeks.has(day.weekIndex)) weeks.set(day.weekIndex, []);
+        weeks.get(day.weekIndex).push(day);
+    }
+
+    const monthLabelsSvg = cal.monthStarts.map(m => {
+        const x = (leftPad + m.weekIndex * cellStep).toFixed(1);
+        return `<text x="${x}" y="14" class="year-map__month">${escapeHtml(m.label)}</text>`;
+    }).join('');
+
+    const dowLabels = [[0, 'Пн'], [2, 'Ср'], [4, 'Пт'], [6, 'Нд']].map(([dow, label]) => {
+        const y = (topPad + dow * 14 + 8).toFixed(1);
+        return `<text x="6" y="${y}" class="year-map__dow">${label}</text>`;
+    }).join('');
+
+    const weeksSvg = [...weeks.entries()].map(([weekIndex, days]) => {
+        const cells = days.map(day => {
+            const cx = leftPad + weekIndex * cellStep + 5.5;
+            const cy = topPad + day.dow * 14 + 5.5;
+            const title = `<title>${formatDateBG(day.dateISO)}: ${day.pages} стр. (ниво ${day.level})</title>`;
+            if (day.level === 0) {
+                return `<g class="day-node day-node--0">${title}<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="1.5" class="day-cell day-cell--0"/></g>`;
+            }
+            const sizes = [0, 6.2, 8.2, 10.2, 11.2];
+            const sz = sizes[day.level];
+            const x = (cx - sz / 2).toFixed(1);
+            const y = (cy - sz / 2).toFixed(1);
+            const mark = day.level === 3
+                ? `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="1.6" class="day-cell__mark"/>`
+                : day.level === 4
+                    ? `<polygon points="${cx.toFixed(1)},${(cy - 3.1).toFixed(1)} ${(cx + 3.1).toFixed(1)},${cy.toFixed(1)} ${cx.toFixed(1)},${(cy + 3.1).toFixed(1)} ${(cx - 3.1).toFixed(1)},${cy.toFixed(1)}" class="day-cell__diamond"/>`
+                    : '';
+            return `<g class="day-node day-node--${day.level}">${title}<rect x="${x}" y="${y}" width="${sz}" height="${sz}" rx="1.6" class="day-cell day-cell--${day.level}"/>${mark}</g>`;
+        }).join('');
+        return `<g class="year-map__week" style="--w:${weekIndex}">${cells}</g>`;
+    }).join('');
+
+    const summaryText = cal.activeDays > 0
+        ? `${metrics.totalSessions} сесии през ${cal.year} г. · ${cal.totalPages} стр. от сесии · връх: ${cal.maxPages} стр. за ден`
+        : `Все още няма записани сесии през ${cal.year} г.`;
+
+    const srRows = monthly.map(m =>
+        `<tr><td>${escapeHtml(m.label)}</td><td>${m.activeDays} дни</td><td>${m.pages} стр.</td><td>${m.sessions} сесии</td></tr>`
+    ).join('');
+
+    host.innerHTML = `
+        <div class="year-map__top">
+            <span class="year-map__eyebrow">Календарно съзвездие · ${escapeHtml(cal.year)}</span>
+            <span class="year-map__summary">${escapeHtml(summaryText)}</span>
+        </div>
+        <div class="year-map__scroll">
+            <svg class="year-map__svg" viewBox="0 0 ${svgWidth} ${svgHeight}" role="img"
+                 aria-label="Годишна карта на четенето за ${escapeHtml(cal.year)} г.: ${cal.activeDays} активни дни и ${cal.totalPages} прочетени страници.">
+                ${monthLabelsSvg}
+                ${dowLabels}
+                ${weeksSvg}
+            </svg>
+        </div>
+        <div class="year-map__footer">
+            <div class="year-map__legend" aria-label="Легенда за интензитет по форма и страници">
+                <span class="year-map__legend-item">
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="1.8" class="day-cell day-cell--0"/></svg>
+                    0 стр.
+                </span>
+                <span class="year-map__legend-item">
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1.2" class="day-cell day-cell--1"/></svg>
+                    1–10 стр.
+                </span>
+                <span class="year-map__legend-item">
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="2.8" y="2.8" width="8.4" height="8.4" rx="1.5" class="day-cell day-cell--2"/></svg>
+                    11–20 стр.
+                </span>
+                <span class="year-map__legend-item">
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="1.8" y="1.8" width="10.4" height="10.4" rx="1.8" class="day-cell day-cell--3"/><circle cx="7" cy="7" r="1.6" class="day-cell__mark"/></svg>
+                    21–34 стр.
+                </span>
+                <span class="year-map__legend-item">
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="1.5" y="1.5" width="11" height="11" rx="2" class="day-cell day-cell--4"/><polygon points="7,3.9 10.1,7 7,10.1 3.9,7" class="day-cell__diamond"/></svg>
+                    35+ стр. (връх)
+                </span>
+            </div>
+            <span class="year-map__avg">Средно ${metrics.avgPagesPerActiveDay} стр. на активен ден</span>
+        </div>
+        <table class="visually-hidden">
+            <caption>Годишна карта на четенето по месеци за ${escapeHtml(cal.year)} г.</caption>
+            <thead><tr><th>Месец</th><th>Активни дни</th><th>Страници</th><th>Сесии</th></tr></thead>
+            <tbody>${srRows}</tbody>
+        </table>`;
+}
+
+function renderGoalAndStreakRing(weekPages, weeklyGoal, todayPages, streak, longestStreak) {
+    const graphicHost = document.getElementById('journalRingGraphic');
+    const metaHost = document.getElementById('journalRingMeta');
+    if (!graphicHost || !metaHost) return;
+
+    const safeGoal = Math.max(1, Number(weeklyGoal) || 100);
+    const weekRatio = Math.min(1, Math.max(0, weekPages / safeGoal));
+    const weekPct = Math.round(weekRatio * 100);
+    const dailyTarget = Math.max(1, Math.round(safeGoal / 7));
+    const todayRatio = Math.min(1, Math.max(0, todayPages / dailyTarget));
+
+    const outerR = 96;
+    const outerC = +(2 * Math.PI * outerR).toFixed(2);
+    const outerOffset = +(outerC * (1 - weekRatio)).toFixed(2);
+
+    const innerR = 79;
+    const innerC = +(2 * Math.PI * innerR).toFixed(2);
+    const innerOffset = +(innerC * (1 - todayRatio)).toFixed(2);
+
+    const angleRad = (weekRatio * 360 - 90) * (Math.PI / 180);
+    const tipX = (116 + outerR * Math.cos(angleRad)).toFixed(1);
+    const tipY = (116 + outerR * Math.sin(angleRad)).toFixed(1);
+
+    const ticks = [0, 90, 180, 270].map(deg => {
+        const rad = (deg - 90) * (Math.PI / 180);
+        const x1 = (116 + 105 * Math.cos(rad)).toFixed(1);
+        const y1 = (116 + 105 * Math.sin(rad)).toFixed(1);
+        const x2 = (116 + 111 * Math.cos(rad)).toFixed(1);
+        const y2 = (116 + 111 * Math.sin(rad)).toFixed(1);
+        return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="goal-ring__tick"/>`;
+    }).join('');
+
+    graphicHost.innerHTML = `
+        <svg class="goal-ring__svg" viewBox="0 0 232 232" role="img"
+             aria-label="Пръстен на четенето: текуща серия ${streak} дни, седмична цел ${weekPages} от ${safeGoal} страници (${weekPct}%), днес ${todayPages} страници.">
+            ${ticks}
+            <circle cx="116" cy="116" r="${outerR}" class="goal-ring__track"/>
+            <circle cx="116" cy="116" r="${innerR}" class="goal-ring__inner-track"/>
+            <circle cx="116" cy="116" r="${outerR}" class="goal-ring__arc"
+                    style="--ring-c:${outerC};--ring-offset:${outerOffset}"
+                    stroke-dasharray="${outerC}" stroke-dashoffset="${outerOffset}"
+                    transform="rotate(-90 116 116)"/>
+            <circle cx="116" cy="116" r="${innerR}" class="goal-ring__inner-arc"
+                    style="--inner-c:${innerC};--inner-offset:${innerOffset}"
+                    stroke-dasharray="${innerC}" stroke-dashoffset="${innerOffset}"
+                    transform="rotate(-90 116 116)"/>
+            ${weekRatio > 0 ? `<circle cx="${tipX}" cy="${tipY}" r="4.8" class="goal-ring__tip"/>` : ''}
+        </svg>`;
+
+    metaHost.innerHTML = `
+        <div class="goal-ring-ledger__row">
+            <span class="goal-ring-ledger__key">
+                <i class="goal-ring-swatch goal-ring-swatch--outer" aria-hidden="true"></i>
+                Седмична цел
+            </span>
+            <strong>${weekPages} / ${safeGoal} стр. (${weekPct}%)</strong>
+        </div>
+        <div class="goal-ring-ledger__row">
+            <span class="goal-ring-ledger__key">
+                <i class="goal-ring-swatch goal-ring-swatch--inner" aria-hidden="true"></i>
+                Дневен пулс (цел ~${dailyTarget} стр.)
+            </span>
+            <strong>${todayPages} стр. днес</strong>
+        </div>
+        <div class="goal-ring-ledger__row">
+            <span class="goal-ring-ledger__key">Най-дълга серия</span>
+            <strong>${longestStreak} дни</strong>
+        </div>`;
+}
+
+function renderMonthlyHorizonChart(monthly, strongestMonth, metrics, logs, currentYear) {
+    const host = document.getElementById('journalMonthlyChart');
+    const callouts = document.getElementById('journalRhythmCallouts');
+    if (!host || !callouts) return;
+
+    callouts.innerHTML = `
+        <div class="journal-callout">
+            <span class="kicker">Най-силен месец</span>
+            <strong id="statStrongestMonth">${strongestMonth ? escapeHtml(strongestMonth.label) + ' (' + strongestMonth.pages + ' стр.)' : 'Няма данни'}</strong>
+        </div>
+        <div class="journal-callout">
+            <span class="kicker">Средно на сесия</span>
+            <strong id="statPagesPerSession">${metrics.avgPagesPerSession} стр.</strong>
+        </div>
+        <div class="journal-callout">
+            <span class="kicker">Страници на ден</span>
+            <strong id="statPagesPerDay">${metrics.avgPagesPerActiveDay} стр.</strong>
+        </div>`;
+
+    const maxMonthPages = Math.max(40, ...monthly.map(m => m.pages));
+    const leftX = 36;
+    const rightX = 594;
+    const baseLineY = 132;
+    const topY = 28;
+    const chartH = baseLineY - topY;
+    const stepX = (rightX - leftX) / 11;
+
+    const points = monthly.map((m, idx) => {
+        const x = +(leftX + idx * stepX).toFixed(1);
+        const ratio = m.pages / maxMonthPages;
+        const y = +(baseLineY - ratio * chartH).toFixed(1);
+        const isPeak = strongestMonth && strongestMonth.monthIndex === idx && m.pages > 0;
+        const r = m.pages === 0 ? 2.4 : Math.min(7.5, Math.max(3.8, 3 + m.avgPerSession / 10));
+        return { ...m, x, y, isPeak, r: +r.toFixed(1) };
+    });
+
+    const polylinePoints = points.map(p => `${p.x},${p.y}`).join(' ');
+    const areaPoints = `${leftX},${baseLineY} ${polylinePoints} ${rightX},${baseLineY}`;
+    const midY = +(baseLineY - chartH * 0.5).toFixed(1);
+
+    const nodesSvg = points.map((p, idx) => {
+        const labelY = Math.max(14, p.y - (p.isPeak ? 13 : 9));
+        const valText = p.pages > 0
+            ? `<text x="${p.x}" y="${labelY.toFixed(1)}" text-anchor="middle" class="horizon-node__val${p.isPeak ? ' horizon-node__val--peak' : ''}">${p.pages}</text>`
+            : '';
+        const peakRing = p.isPeak
+            ? `<circle cx="${p.x}" cy="${p.y}" r="11" class="horizon-node__beacon"/>`
+            : '';
+        return `
+            <g class="horizon-node" style="--m:${idx}">
+                <title>${escapeHtml(p.label)}: ${p.pages} стр. в ${p.sessions} сесии (средно ${p.avgPerSession} стр./сесия)</title>
+                <line x1="${p.x}" y1="${p.y}" x2="${p.x}" y2="${baseLineY}" class="horizon-node__stem"/>
+                ${peakRing}
+                <circle cx="${p.x}" cy="${p.y}" r="${p.r}" class="horizon-node__dot${p.pages > 0 ? ' is-active' : ''}${p.isPeak ? ' is-peak' : ''}"/>
+                ${valText}
+                <text x="${p.x}" y="${baseLineY + 18}" text-anchor="middle" class="horizon-node__month${p.isPeak ? ' is-peak' : ''}">${escapeHtml(p.shortLabel)}</text>
+            </g>`;
+    }).join('');
+
+    const yearSessions = JournalStats.normalizeValidLogs(logs)
+        .filter(l => l.dateISO.startsWith(currentYear + '-'))
+        .slice(0, 24)
+        .reverse();
+    const maxSessPages = Math.max(25, ...yearSessions.map(s => s.pages));
+    const pulseCenterY = 186;
+    const pulseMaxHalf = 18;
+    const pulseSvg = yearSessions.length ? yearSessions.map((s, idx) => {
+        const x = +(leftX + (yearSessions.length === 1 ? (rightX - leftX) / 2 : idx * ((rightX - leftX) / (yearSessions.length - 1)))).toFixed(1);
+        const half = Math.max(3, +((s.pages / maxSessPages) * pulseMaxHalf).toFixed(1));
+        const y1 = +(pulseCenterY - half).toFixed(1);
+        const y2 = +(pulseCenterY + half).toFixed(1);
+        const isMax = metrics.peakSession && String(metrics.peakSession.id) === String(s.id);
+        return `
+            <g class="session-pulse" style="--s:${idx}">
+                <title>Сесия от ${formatDateBG(s.dateISO)}: ${s.pages} стр.</title>
+                <line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" class="session-pulse__stem${isMax ? ' is-peak' : ''}"/>
+                <circle cx="${x}" cy="${y1}" r="${isMax ? 3.2 : 2}" class="session-pulse__tip${isMax ? ' is-peak' : ''}"/>
+            </g>`;
+    }).join('') : '';
+
+    const srRows = monthly.map(m =>
+        `<tr><td>${escapeHtml(m.label)}</td><td>${m.pages} стр.</td><td>${m.sessions}</td><td>${m.avgPerSession} стр.</td></tr>`
+    ).join('');
+
+    host.innerHTML = `
+        <svg class="horizon-svg" viewBox="0 0 624 218" role="img"
+             aria-label="Графика на месечния хоризонт за ${escapeHtml(currentYear)} г. Най-силен месец: ${strongestMonth ? escapeHtml(strongestMonth.label) + ' с ' + strongestMonth.pages + ' страници' : 'няма данни'}. Средно ${metrics.avgPagesPerSession} страници на сесия.">
+            <line x1="${leftX}" y1="${topY}" x2="${rightX}" y2="${topY}" class="horizon-grid"/>
+            <line x1="${leftX}" y1="${midY}" x2="${rightX}" y2="${midY}" class="horizon-grid"/>
+            <line x1="${leftX}" y1="${baseLineY}" x2="${rightX}" y2="${baseLineY}" class="horizon-axis"/>
+            <text x="4" y="${topY + 4}" class="horizon-scale">${maxMonthPages}</text>
+            <text x="4" y="${midY + 4}" class="horizon-scale">${Math.round(maxMonthPages / 2)}</text>
+            <text x="4" y="${baseLineY + 4}" class="horizon-scale">0</text>
+            <polygon points="${areaPoints}" class="horizon-area"/>
+            <polyline points="${polylinePoints}" class="horizon-ridge"/>
+            ${nodesSvg}
+            <line x1="${leftX}" y1="${pulseCenterY}" x2="${rightX}" y2="${pulseCenterY}" class="horizon-grid"/>
+            <text x="4" y="${pulseCenterY + 4}" class="horizon-scale">сесии</text>
+            ${pulseSvg}
+        </svg>
+        <div class="horizon-caption">
+            <span>Горен профил: общо страници по месеци (възелът отразява средно стр. в сесия)</span>
+            <span>Долен пулс: отделни сесии (${metrics.peakSession ? 'връх: ' + metrics.peakSession.pages + ' стр.' : 'няма сесии'})</span>
+        </div>
+        <table class="visually-hidden">
+            <caption>Месечно разпределение на четенето за ${escapeHtml(currentYear)} г.</caption>
+            <thead><tr><th>Месец</th><th>Страници</th><th>Сесии</th><th>Средно на сесия</th></tr></thead>
+            <tbody>${srRows}</tbody>
+        </table>`;
+}
+
+function renderAuthorsConstellationChart(authors, topAuthor, metrics) {
+    const host = document.getElementById('journalAuthorsChart');
+    const callout = document.getElementById('journalAuthorCallout');
+    if (!host || !callout) return;
+
+    callout.innerHTML = `
+        <div class="journal-callout">
+            <span class="kicker">Най-четен автор</span>
+            <strong id="statTopAuthor">${topAuthor ? escapeHtml(topAuthor.author) + ' (' + topAuthor.pages + ' стр.)' : 'Няма данни'}</strong>
+        </div>`;
+
+    const topSix = authors.slice(0, 6);
+    if (!topSix.length) {
+        host.innerHTML = `<p class="authors-chart-empty">Запиши сесия по книга, за да се очертаят най-четените автори.</p>`;
+        return;
+    }
+
+    const maxPages = Math.max(20, topSix[0].pages);
+    const trackStartX = 28;
+    const trackEndX = 330;
+    const trackSpan = trackEndX - trackStartX;
+    const rowStep = 34;
+    const svgHeight = topSix.length * rowStep + 18;
+
+    const rowsSvg = topSix.map((item, idx) => {
+        const y = 24 + idx * rowStep;
+        const lineY = y + 11;
+        const ratio = item.pages / maxPages;
+        const tipX = +(trackStartX + Math.max(12, ratio * trackSpan)).toFixed(1);
+        const marker = idx === 0
+            ? `<polygon points="${tipX},${lineY - 5.5} ${tipX + 5.5},${lineY} ${tipX},${lineY + 5.5} ${tipX - 5.5},${lineY}" class="author-row__diamond is-top"/><circle cx="${tipX}" cy="${lineY}" r="2" class="author-row__core"/>`
+            : idx < 3
+                ? `<polygon points="${tipX},${lineY - 4.2} ${tipX + 4.2},${lineY} ${tipX},${lineY + 4.2} ${tipX - 4.2},${lineY}" class="author-row__diamond"/>`
+                : `<circle cx="${tipX}" cy="${lineY}" r="3.6" class="author-row__node"/>`;
+
+        return `
+            <g class="author-row" style="--a:${idx}">
+                <text x="4" y="${y + 2}" class="author-row__rank">${idx + 1}</text>
+                <text x="${trackStartX}" y="${y}" class="author-row__name">${escapeHtml(item.author)}</text>
+                <text x="434" y="${y}" text-anchor="end" class="author-row__meta">${item.pages} стр. · ${item.sessions} сесии</text>
+                <line x1="${trackStartX}" y1="${lineY}" x2="${trackEndX}" y2="${lineY}" class="author-row__track"/>
+                <line x1="${trackStartX}" y1="${lineY}" x2="${tipX}" y2="${lineY}" class="author-row__fill${idx === 0 ? ' is-top' : ''}"/>
+                ${marker}
+            </g>`;
+    }).join('');
+
+    const srRows = topSix.map((a, idx) =>
+        `<tr><td>${idx + 1}</td><td>${escapeHtml(a.author)}</td><td>${a.pages} стр.</td><td>${a.sessions} сесии</td></tr>`
+    ).join('');
+
+    host.innerHTML = `
+        <svg class="authors-svg" viewBox="0 0 440 ${svgHeight}" role="img"
+             aria-label="Класация на най-четените автори по страници от сесии. Водещ автор: ${escapeHtml(topSix[0].author)} с ${topSix[0].pages} страници.">
+            ${rowsSvg}
+        </svg>
+        <div class="horizon-caption">
+            <span>Дължината на нишката и върхът отбелязват прочетените страници от сесии за всеки автор</span>
+            <span>Автори със сесии: ${authors.length}</span>
+        </div>
+        <table class="visually-hidden">
+            <caption>Най-четени автори по страници от сесии</caption>
+            <thead><tr><th>Място</th><th>Автор</th><th>Страници</th><th>Сесии</th></tr></thead>
+            <tbody>${srRows}</tbody>
+        </table>`;
+}
+
+let journalRevealObserver = null;
+function bindJournalReveals() {
+    const entries = [...document.querySelectorAll('#activityFeed .reveal')];
+    if (!entries.length) return;
+    if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+        entries.forEach(el => el.classList.add('is-in'));
+        return;
+    }
+    journalRevealObserver?.disconnect();
+    journalRevealObserver = new IntersectionObserver(items => {
+        for (const item of items) {
+            if (item.isIntersecting) {
+                item.target.classList.add('is-in');
+                journalRevealObserver.unobserve(item.target);
+            }
+        }
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    entries.forEach(el => journalRevealObserver.observe(el));
 }

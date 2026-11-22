@@ -191,41 +191,103 @@
 
         <section id="journal" class="journal" aria-labelledby="journalTitle">
             <div class="container">
-                <h2 id="journalTitle" class="section-title" tabindex="-1">Дневник</h2>
-                <nav class="journal__links" aria-label="Раздели на дневника">
-                    <a href="#activity">Активност</a>
-                    <a href="#stats">Статистика</a>
-                    <a href="#weeklyGoal">Седмична цел</a>
-                    <a href="#challenges">Предизвикателства</a>
-                    <a href="#topBooks">Топ 5</a>
-                </nav>
-            </div>
-            <section class="activity" id="activity">
-                <div class="container">
-                    <h3 class="section-title" tabindex="-1">Читателски записки</h3>
-                    <div id="activityFeed" class="activity__feed"></div>
-                </div>
-            </section>
-            <section class="stats" id="stats">
-                <div class="container">
-                    <div class="stats__header">
-                        <h3 class="section-title" tabindex="-1">Моята статистика</h3>
-                        <div class="stats__header-actions">
-                            <button id="editGoalBtn" class="btn btn--outline" aria-label="Редактирай цели">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                                Цели
-                            </button>
-                        </div>
+                <header class="journal__mast issue-mast">
+                    <div>
+                        <p class="kicker">Личен дневник · хроника и аналитика</p>
+                        <h2 id="journalTitle" class="section-title journal__title" tabindex="-1">Дневник</h2>
                     </div>
-                    <dl class="stats__grid">
-                        <div><dt>Книги</dt><dd id="statBooks">0</dd></div>
-                        <div><dt>Страници общо по книгите</dt><dd id="statPagesRead">0</dd></div>
-                        <div><dt>Среден напредък</dt><dd id="statAvgProgress">0%</dd></div>
-                        <div><dt>Текуща поредица (дни)</dt><dd id="streakValue">0</dd></div>
-                    </dl>
+                    <div class="journal__mast-meta">
+                        <p class="colophon" id="journalColophon">Читалня нощем · 2026</p>
+                        <nav class="journal__links" aria-label="Раздели на дневника">
+                            <a href="#stats">Годишна карта</a>
+                            <a href="#journalGoalRing">Днес и цел</a>
+                            <a href="#journalAnalytics">Ритъм и автори</a>
+                            <a href="#activity">Читателски записки</a>
+                        </nav>
+                    </div>
+                </header>
+            </div>
+
+            <section class="stats" id="stats" aria-labelledby="statsTitle">
+                <div class="container">
+                    <div class="journal-observatory">
+                        <div class="journal-map-col">
+                            <div class="journal-part-head">
+                                <div>
+                                    <p class="kicker">I · Годишна карта на четенето</p>
+                                    <h3 id="statsTitle" class="journal-part-title" tabindex="-1">Следите през годината</h3>
+                                </div>
+                                <dl class="stats__grid" aria-label="Обобщени показатели">
+                                    <div><dt>Книги</dt><dd id="statBooks">0</dd></div>
+                                    <div><dt>Страници по книгите</dt><dd id="statPagesRead">0</dd></div>
+                                    <div><dt>Среден напредък</dt><dd id="statAvgProgress">0%</dd></div>
+                                    <div><dt>Активни дни</dt><dd id="statActiveDays">0</dd></div>
+                                </dl>
+                            </div>
+                            <div id="journalYearMap" class="year-map-stage" aria-live="polite"></div>
+                        </div>
+
+                        <aside class="journal-ring-col" id="journalGoalRing" aria-labelledby="ringTitle">
+                            <div class="journal-ring-head">
+                                <div>
+                                    <p class="kicker">II · Днес и цел</p>
+                                    <h3 id="ringTitle" class="journal-part-title">Пръстен на серията</h3>
+                                </div>
+                                <button id="editGoalBtn" class="btn btn--outline btn--sm" aria-label="Редактирай цели">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 17h16M10 7V4m0 6v0M14 17v3m0-6v0"/></svg>
+                                    <span>Цели</span>
+                                </button>
+                            </div>
+                            <div class="goal-ring-figure">
+                                <div id="journalRingGraphic" class="goal-ring-svg-wrap"></div>
+                                <dl class="goal-ring-center">
+                                    <dt class="kicker">Текуща серия</dt>
+                                    <dd id="streakValue" class="goal-ring-streak">0</dd>
+                                    <dd class="goal-ring-unit">поредни дни</dd>
+                                </dl>
+                            </div>
+                            <div id="journalRingMeta" class="goal-ring-ledger"></div>
+                        </aside>
+                    </div>
+
+                    <div class="journal-analytics" id="journalAnalytics">
+                        <article class="journal-horizon-col" aria-labelledby="horizonTitle">
+                            <div class="journal-part-head">
+                                <div>
+                                    <p class="kicker">III · Месечен ритъм и страници на сесия</p>
+                                    <h3 id="horizonTitle" class="journal-part-title">Хоризонт на четенето и пулс на сесиите</h3>
+                                </div>
+                                <div class="journal-callouts" id="journalRhythmCallouts"></div>
+                            </div>
+                            <div id="journalMonthlyChart" class="horizon-chart-wrap"></div>
+                        </article>
+
+                        <article class="journal-authors-col" aria-labelledby="authorsTitle">
+                            <div class="journal-part-head">
+                                <div>
+                                    <p class="kicker">Литературен профил</p>
+                                    <h3 id="authorsTitle" class="journal-part-title">Най-четени автори</h3>
+                                </div>
+                                <div class="journal-callouts" id="journalAuthorCallout"></div>
+                            </div>
+                            <div id="journalAuthorsChart" class="authors-chart-wrap"></div>
+                        </article>
+                    </div>
                 </div>
             </section>
 
+            <section class="activity" id="activity" aria-labelledby="activityTitle">
+                <div class="container">
+                    <div class="activity__header">
+                        <div>
+                            <p class="kicker">IV · Хронология на сесиите</p>
+                            <h3 id="activityTitle" class="section-title" tabindex="-1">Читателски записки</h3>
+                        </div>
+                        <p class="activity__summary" id="activitySummary"></p>
+                    </div>
+                    <div id="activityFeed" class="activity__feed"></div>
+                </div>
+            </section>
         </section>
         <section id="issue" class="issue" aria-labelledby="issueTitle">
             <div class="container">
@@ -398,6 +460,7 @@
     <script src="src/services/challengeRepo.js"></script>
     <script src="src/utils/validate.js"></script>
     <script src="src/motion.js"></script>
+    <script src="src/stats.js"></script>
     <script src="src/issue.js"></script>
     <script src="src/shelf.js"></script>
     <script src="src/main.js"></script>
