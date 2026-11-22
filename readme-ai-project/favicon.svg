@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Colours follow the design tokens: primary 463473, dark primary e0cff6, dark foil c9c9de -->
+  <rect width="32" height="32" rx="7" fill="#463473"/>
+  <g transform="translate(4 4)" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 7C9 4 5 4 2 5v14c4-1 7-.5 10 2 3-2.5 6-3 10-2V5c-3-1-7-1-10 2Z" stroke="#e0cff6"/>
+    <path d="M12 7v14" stroke="#c9c9de"/>
+  </g>
+</svg>

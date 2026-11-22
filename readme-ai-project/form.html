@@ -6,35 +6,60 @@
     <title>Добави книга — BookBuddy</title>
     <script src="src/utils/appStorage.js"></script>
     <script src="src/utils/theme.js"></script>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="styles/style.css">
 </head>
-<body>
-    <!-- ===== Navbar ===== -->
-    <nav class="navbar" role="navigation" aria-label="Основна навигация">
+<body class="homepage">
+    <header class="navbar">
         <div class="container navbar__inner">
-            <a href="index.html" class="navbar__brand" aria-label="BookBuddy начало">
-                <svg class="navbar__logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                <span class="navbar__brand-text">BookBuddy</span>
+            <a href="index.html#home" class="navbar__brand" aria-label="BookBuddy – начало">
+                <span class="navbar__mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14M12 7C9 4 5 4 2 5v14c4-1 7-.5 10 2 3-2.5 6-3 10-2V5c-3-1-7-1-10 2Z"/></svg></span>
+                BookBuddy
             </a>
 
-            <ul class="navbar__links">
-                <li><a href="index.html#books" class="navbar__link">← Към библиотеката</a></li>
-            </ul>
+            <nav class="navbar__navigation" aria-label="Основна навигация">
+                <ul class="navbar__links">
+                    <li><a href="index.html#home" class="navbar__link">Начало</a></li>
+                    <li><a href="index.html#books" class="navbar__link">Библиотека</a></li>
+                    <li><a href="index.html#journal" class="navbar__link">Дневник</a></li>
+                    <li><a href="index.html#issue" class="navbar__link">Брой</a></li>
+                </ul>
+            </nav>
 
             <div class="navbar__actions">
-                <a href="index.html#books" class="btn btn--outline btn--pill">Библиотека</a>
-            </div>
-
-            <!-- Theme switcher -->
-            <div class="theme-switch">
-                <label for="themeSelect" class="theme-switch__label">Тема</label>
-                <select id="themeSelect" class="theme-switch__select">
-                    <option value="system">Системна</option>
-                    <option value="light">Светла</option>
-                    <option value="dark">Тъмна</option>
-                </select>
+                <a href="form.html" class="btn btn--outline navbar__add" aria-label="Добави книга" aria-current="page">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Добави книга</span>
+                </a>
+                <div class="theme-switch">
+                    <label for="themeSelect" class="theme-switch__label">Тема</label>
+                    <select id="themeSelect" class="theme-switch__select">
+                        <option value="system">Системна</option>
+                        <option value="light">Светла</option>
+                        <option value="dark">Тъмна</option>
+                    </select>
+                </div>
             </div>
         </div>
+    </header>
+
+    <nav class="bottom-nav" aria-label="Мобилна навигация">
+        <a href="index.html#home" class="bottom-nav__link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v11h-6v-7H9v7H3Z"/></svg>
+            Начало
+        </a>
+        <a href="index.html#books" class="bottom-nav__link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h4v16H2zM9 4h4v16H9zM16 5l4-1 3 15-4 1z"/></svg>
+            Библиотека
+        </a>
+        <a href="index.html#journal" class="bottom-nav__link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="15" height="18" rx="2"/><path d="M3 8h4m-4 8h4m3-8h6m-6 4h6"/></svg>
+            Дневник
+        </a>
+        <a href="index.html#issue" class="bottom-nav__link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v16H7a2 2 0 0 0-2 2V3zm0 18h14M9 8h6m-6 4h6"/></svg>
+            Брой
+        </a>
     </nav>
 
     <div class="demo-notice" id="demoNotice" hidden>
@@ -47,7 +72,7 @@
                 <div class="auth-card">
                     <div class="auth-card__header">
                         <svg class="auth-card__icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="12" y2="13"/><line x1="9" y1="10" x2="15" y2="10"/></svg>
-                        <h2 class="auth-card__title">Добави нова книга</h2>
+                        <h1 class="auth-card__title">Добави нова книга</h1>
                         <p class="auth-card__subtitle">Попълни данните за книгата и започни да следиш прогреса си.</p>
                     </div>
                     
@@ -111,8 +136,22 @@
 
     <!-- ===== Footer ===== -->
     <footer class="footer">
+        <div class="container">
+            <details class="footer__about">
+                <summary>Защо да избереш BookBuddy?</summary>
+                <dl>
+                    <dt><a href="index.html#books">Личен каталог</a></dt>
+                    <dd>Добави книги, следи напредъка и води бележки — на едно място.</dd>
+                    <dt><a href="index.html#stats">Подробна статистика</a></dt>
+                    <dd>Виж колко книги и страници си прочел и какъв е средният ти прогрес.</dd>
+                    <dt>Чисто и бързо</dt>
+                    <dd>Без реклами, без регистрация — работи изцяло в браузъра ти.</dd>
+                </dl>
+            </details>
+        </div>
         <div class="container footer__inner">
             <span>© 2026 BookBuddy. Всички права запазени.</span>
+            <a class="footer__credit" href="https://openlibrary.org/">Корици от Open Library</a>
         </div>
     </footer>
 
