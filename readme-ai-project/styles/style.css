@@ -629,7 +629,11 @@ ul{list-style:none}
 
 /* ==================== 15c. Toast ==================== */
 .toast{
-    position:fixed;bottom:var(--sp-8);left:50%;
+    position:fixed;
+    inset:auto auto var(--sp-8) 50%;
+    margin:0;
+    border:0;
+    overflow:visible;
     transform:translateX(-50%) translateY(20px);
     background:var(--c-primary);color:var(--c-on-primary);
     font-size:var(--fs-sm);font-weight:var(--fw-semibold);
@@ -637,7 +641,7 @@ ul{list-style:none}
     border-radius:var(--r-full);
     box-shadow:var(--sh-lg);
     opacity:0;pointer-events:none;
-    transition:all var(--t-base);
+    transition:transform var(--dur-base) var(--ease-out),opacity var(--dur-base) var(--ease-out);
     z-index:3000;
     width:max-content;max-width:calc(100% - 28px);text-align:center;
 }

@@ -1050,12 +1050,21 @@ function formatDateBG(isoStr) {
 let _editingLogId = null;
 
 /* ========== Toast ========== */
+let _toastTimer = null;
+
 function showToast(message) {
     const toast = document.getElementById('toast');
     if (!toast) return;
     toast.textContent = message;
+    if (typeof toast.showPopover === 'function') {
+        try {
+            if (toast.matches(':popover-open')) toast.hidePopover();
+            toast.showPopover();
+        } catch (_) {}
+    }
     toast.classList.add('toast--visible');
-    setTimeout(() => { toast.classList.remove('toast--visible'); }, 2200);
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => { toast.classList.remove('toast--visible'); }, 2200);
 }
 
 /* ========== Full Dashboard Refresh ========== */
