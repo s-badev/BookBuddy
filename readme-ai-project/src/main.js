@@ -959,7 +959,37 @@ function renderActivityFeed() {
     }
 
     if (!logs.length) {
-        container.innerHTML = '<p>Все още няма записани сесии. <a href="#home">Към четенето</a></p>';
+        const hasBooks = books.length > 0;
+        const primaryAction = hasBooks
+            ? `<button type="button" class="btn btn--primary" id="journalEmptyLogBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5 4 4M4 20l1-5L16 4a2.8 2.8 0 0 1 4 4L9 19z"/></svg>
+                    <span>Запиши първото четене</span>
+               </button>`
+            : `<a href="${escapeHtml(appPage('form.html'))}" class="btn btn--primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Добави книга и започни дневника</span>
+               </a>`;
+        container.innerHTML = `
+            <div class="journal-empty-scene">
+                <div class="journal-empty-scene__emblem" aria-hidden="true">
+                    <svg width="44" height="44" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M24 12c-4-3.2-10-4-18-2v28c8-2 14-1.2 18 2 4-3.2 10-4 18-2V10c-8-2-14-1.2-18 2v28"/>
+                        <path d="M31 10v13l-3.5-2.2L24 23V12"/>
+                    </svg>
+                </div>
+                <div class="journal-empty-scene__copy">
+                    <p class="kicker">Първа записка в дневника</p>
+                    <h4 class="journal-empty-scene__title">Страниците още пазят тишина</h4>
+                    <p class="journal-empty-scene__lead">Запиши първата си читателска сесия, за да светне годишната карта на четенето, да се завърти пръстенът на серията и да останат бележките ти в полето.</p>
+                    <div class="journal-empty-scene__actions">
+                        ${primaryAction}
+                        <a href="#home" class="reading-card__details">Към началото</a>
+                    </div>
+                </div>
+            </div>`;
+        document.getElementById('journalEmptyLogBtn')?.addEventListener('click', () => {
+            openLogModal(books[0]?.id ?? '');
+        });
         return;
     }
 
