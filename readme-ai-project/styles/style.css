@@ -481,9 +481,9 @@ ul{list-style:none}
 }
 .auth-card{
     background:var(--c-surface);
-    border:1px solid var(--c-border-light);
-    border-radius:var(--r-2xl);
-    box-shadow:var(--sh-lg);
+    border:1px solid var(--c-border);
+    border-radius:12px;
+    box-shadow:var(--sh-md);
     padding:var(--sp-10);
     position:relative;overflow:hidden;
 }
@@ -495,11 +495,11 @@ ul{list-style:none}
     text-align:center;margin-bottom:var(--sp-8);
 }
 .auth-card__icon{
-    color:var(--c-primary);margin:0 auto var(--sp-4);
+    color:var(--c-accent);margin:0 auto var(--sp-4);
 }
 .auth-card__title{
-    font-size:var(--fs-2xl);font-weight:var(--fw-bold);
-    color:var(--c-text);letter-spacing:-.02em;margin-bottom:var(--sp-2);
+    font:500 clamp(1.9rem,4vw,2.4rem)/1.08 var(--font-editorial);
+    color:var(--c-text);letter-spacing:-.035em;margin-bottom:var(--sp-2);
 }
 .auth-card__subtitle{
     font-size:var(--fs-sm);color:var(--c-text-secondary);line-height:1.6;
@@ -1704,6 +1704,20 @@ html:has(.shelf-preview[open]){overflow:hidden}
 /* — Count-up numbers: digits keep the final width while they run — */
 .count{display:inline-block}
 .stats__grid dd,.issue__figures dd,.goal-card__value{font-variant-numeric:tabular-nums}
+
+/* ==================== 18c. Form page shell ====================
+   The form page reuses the home navbar, bottom nav and footer. */
+.navbar__add[aria-current="page"]{
+    border-color:var(--c-accent);
+    color:var(--c-accent);
+    background:var(--c-accent-light);
+}
+@media(max-width:725px){
+    .homepage .theme-switch__label{
+        position:absolute;width:1px;height:1px;padding:0;overflow:hidden;
+        clip-path:inset(50%);white-space:nowrap;
+    }
+}
 
 /* ==================== 19. Interaction states ====================
    Every interactive element has :hover (pointer devices only), :focus-visible
