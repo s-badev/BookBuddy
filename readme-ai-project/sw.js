@@ -1,8 +1,8 @@
 const CACHE_PREFIX = 'bookbuddy-static-';
-const CACHE_NAME = CACHE_PREFIX + 'v3';
+const CACHE_NAME = CACHE_PREFIX + 'v4';
 const scope = new URL(self.registration.scope);
 const files = [
-    'index.html', 'form.html', 'styles/style.css',
+    'index.html', 'form.html', 'favicon.svg', 'styles/style.css',
     'src/main.js', 'src/form.js', 'src/issue.js', 'src/shelf.js', 'src/motion.js',
     'src/utils/appStorage.js', 'src/utils/theme.js', 'src/utils/validate.js',
     'src/services/bookRepo.js', 'src/services/logRepo.js',
