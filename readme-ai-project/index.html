@@ -23,7 +23,7 @@
                     <li><a href="#home" class="navbar__link" aria-current="location">Начало</a></li>
                     <li><a href="#books" class="navbar__link">Библиотека</a></li>
                     <li><a href="#journal" class="navbar__link">Дневник</a></li>
-                    <li><a href="#issue" class="navbar__link" id="issueNavLabel">Брой</a></li>
+                    <li><a href="#issue" class="navbar__link" id="issueNavLabel">Брой 2026</a></li>
                 </ul>
             </nav>
 
@@ -63,6 +63,7 @@
     <div class="demo-notice" id="demoNotice" hidden>
         <div class="container">Демо библиотека · <a href="index.html" data-personal-library>Към личната библиотека</a></div>
     </div>
+    <script>if (typeof isDemo !== 'undefined' && isDemo) document.getElementById('demoNotice').hidden = false;</script>
 
     <main>
         <div class="container home-content reading-overview" id="home">
