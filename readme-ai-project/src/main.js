@@ -1015,52 +1015,78 @@ function seedDemoData() {
     if (!isDemo) return;
     const now = Date.now();
     const today = new Date(now);
+    const year = today.getFullYear();
     const daysAgo = days => {
         const date = new Date(today);
         date.setDate(date.getDate() - days);
         return getDayISO(date);
     };
-    const priorDate = (today.getFullYear() - 1) + '-12-31';
+    const priorDate = (year - 1) + '-12-31';
     const books = [
         { id: 9000008, title: 'Дълбока работа', author: 'Кал Нюпорт', totalPages: 296, currentPage: 112,
             notes: 'Практични съвети за фокусирана работа и по-малко разсейване.' },
         { id: 9000007, title: 'Малкият принц', author: 'Антоан дьо Сент-Екзюпери', totalPages: 96, currentPage: 0, notes: '' },
         { id: 9000006, title: 'Атомни навици', author: 'Джеймс Клиър', totalPages: 320, currentPage: 320,
-            notes: 'Малки промени, натрупани с времето.', completion: { logId: 'demo-finished', dateISO: daysAgo(20) } },
+            notes: 'Малки промени, натрупани с времето.', completion: { logId: 'demo-finished', dateISO: year + '-04-18' } },
         { id: 9000005, title: 'Zen Speaks', author: 'Tsai Chih Chung', totalPages: 160, currentPage: 42,
             notes: '', isbn: '9780385472579' },
         { id: 9000004, title: 'Мисленето', author: 'Даниел Канеман', totalPages: 512, currentPage: 210, notes: '' },
-        { id: 9000003, title: 'Sapiens', author: 'Ювал Ноа Харари', totalPages: 443, currentPage: 443, notes: '' },
+        { id: 9000003, title: 'Sapiens', author: 'Ювал Ноа Харари', totalPages: 443, currentPage: 443,
+            notes: 'Поглед към човешката история, който остава.', completion: { logId: 'demo-m06a', dateISO: year + '-06-11' } },
         { id: 9000002, title: '1984', author: 'Джордж Оруел', totalPages: 328, currentPage: 328, notes: '',
             completion: { logId: 'demo-prior', dateISO: priorDate } },
         { id: 9000001, title: 'Невероятно дългото пътешествие през забравените библиотеки',
             author: 'Елена Николова', totalPages: 240, currentPage: 0, notes: '' },
-        { id: 8999999, title: 'Престъпление и наказание', author: 'Фьодор Достоевски', totalPages: 671, currentPage: 671, notes: '' },
+        { id: 8999999, title: 'Престъпление и наказание', author: 'Фьодор Достоевски', totalPages: 671, currentPage: 671,
+            notes: 'Тежка и голяма книга, която се носи дълго след края.', completion: { logId: 'demo-m02b', dateISO: year + '-02-28' } },
         { id: 8999998, title: 'Гордост и предразсъдъци', author: 'Джейн Остин', totalPages: 416, currentPage: 162, notes: '' },
         { id: 8999997, title: 'Името на розата', author: 'Умберто Еко', totalPages: 512, currentPage: 69, notes: '' },
-        { id: 8999996, title: 'Ана Каренина', author: 'Лев Толстой', totalPages: 864, currentPage: 864, notes: '' },
-        { id: 8999995, title: 'Братя Карамазови', author: 'Фьодор Достоевски', totalPages: 824, currentPage: 824, notes: '' },
-        { id: 8999994, title: 'Майстора и Маргарита', author: 'Михаил Булгаков', totalPages: 448, currentPage: 448, notes: '' }
+        { id: 8999996, title: 'Ана Каренина', author: 'Лев Толстой', totalPages: 864, currentPage: 864,
+            notes: '', completion: { logId: 'demo-m04b', dateISO: year + '-04-10' } },
+        { id: 8999995, title: 'Братя Карамазови', author: 'Фьодор Достоевски', totalPages: 824, currentPage: 824,
+            notes: '', completion: { logId: 'demo-m02a', dateISO: year + '-02-20' } },
+        { id: 8999994, title: 'Майстора и Маргарита', author: 'Михаил Булгаков', totalPages: 448, currentPage: 448,
+            notes: 'Любима препрочитана история.', completion: { logId: 'demo-m04c', dateISO: year + '-04-30' } }
     ].map(book => ({ ...book, createdAt: today.toISOString() }));
+
     const logs = [
         { id: 'demo-today', bookId: '9000008', dateISO: daysAgo(0), pages: 12,
             note: 'Оставих телефона в другата стая и прочетох цялата глава на спокойствие. Утре ще опитам отново.' },
-        { id: 'demo-d1a', bookId: '9000008', dateISO: daysAgo(1), pages: 12, note: '' },
-        { id: 'demo-d1b', bookId: '9000005', dateISO: daysAgo(1), pages: 8, note: '' },
-        { id: 'demo-d2a', bookId: '9000004', dateISO: daysAgo(2), pages: 9, note: 'Система 1 и Система 2.' },
+        { id: 'demo-d1a', bookId: '9000008', dateISO: daysAgo(1), pages: 12, note: 'Правила за дълбока концентрация без прекъсвания.' },
+        { id: 'demo-d1b', bookId: '9000005', dateISO: daysAgo(1), pages: 8, note: 'Кратки дзен притчи преди сън.' },
+        { id: 'demo-d2a', bookId: '9000004', dateISO: daysAgo(2), pages: 9, note: 'Система 1 и Система 2 — как прибързваме със заключенията.' },
         { id: 'demo-d2b', bookId: '8999998', dateISO: daysAgo(2), pages: 7, note: '' },
-        { id: 'demo-d3', bookId: '9000008', dateISO: daysAgo(3), pages: 8, note: '' },
-        { id: 'demo-d4', bookId: '8999997', dateISO: daysAgo(4), pages: 6, note: '' },
+        { id: 'demo-d3', bookId: '9000008', dateISO: daysAgo(3), pages: 8, note: 'За ритуалите на работното място.' },
+        { id: 'demo-d4', bookId: '8999997', dateISO: daysAgo(4), pages: 6, note: 'Лабиринтът на манастирската библиотека.' },
         { id: 'demo-d5', bookId: '9000005', dateISO: daysAgo(5), pages: 8, note: '' },
-        { id: 'demo-d6', bookId: '9000004', dateISO: daysAgo(6), pages: 11, note: '' },
+        { id: 'demo-d6', bookId: '9000004', dateISO: daysAgo(6), pages: 11, note: 'Евристика на наличността и когнитивни капани.' },
         { id: 'demo-d7', bookId: '9000008', dateISO: daysAgo(7), pages: 9, note: '' },
-        { id: 'demo-d8', bookId: '8999998', dateISO: daysAgo(8), pages: 10, note: '' },
+        { id: 'demo-d8', bookId: '8999998', dateISO: daysAgo(8), pages: 10, note: 'Първият разговор в Недърфийлд.' },
         { id: 'demo-d9', bookId: '8999997', dateISO: daysAgo(9), pages: 7, note: '' },
         { id: 'demo-d10', bookId: '9000005', dateISO: daysAgo(10), pages: 6, note: '' },
         { id: 'demo-d11', bookId: '9000004', dateISO: daysAgo(11), pages: 8, note: '' },
-        { id: 'demo-d12', bookId: '9000008', dateISO: daysAgo(12), pages: 7, note: '' },
+        { id: 'demo-d12', bookId: '9000008', dateISO: daysAgo(12), pages: 7, note: 'Начало на втората част.' },
         { id: 'demo-d13', bookId: '8999998', dateISO: daysAgo(13), pages: 8, note: '' },
-        { id: 'demo-finished', bookId: '9000006', dateISO: daysAgo(20), pages: 20, note: 'Последните страници.' },
+        { id: 'demo-m10a', bookId: '8999997', dateISO: year + '-10-24', pages: 26, note: 'Ръкописът със загадъчните бележки в полето.' },
+        { id: 'demo-m10b', bookId: '9000004', dateISO: year + '-10-14', pages: 22, note: 'За илюзията на валидността.' },
+        { id: 'demo-m09a', bookId: '9000008', dateISO: year + '-09-25', pages: 24, note: 'Първа среща с идеята за монохронно време.' },
+        { id: 'demo-m09b', bookId: '8999998', dateISO: year + '-09-12', pages: 28, note: '' },
+        { id: 'demo-m08a', bookId: '9000004', dateISO: year + '-08-28', pages: 32, note: 'Дълги летни следобеди с Канеман.' },
+        { id: 'demo-m08b', bookId: '9000004', dateISO: year + '-08-15', pages: 24, note: '' },
+        { id: 'demo-m07a', bookId: '8999998', dateISO: year + '-07-19', pages: 30, note: 'Писмата променят всичко.' },
+        { id: 'demo-m06a', bookId: '9000003', dateISO: year + '-06-11', pages: 38, note: 'Краят на Sapiens — научната революция и бъдещето.' },
+        { id: 'demo-m06b', bookId: '9000003', dateISO: year + '-06-04', pages: 34, note: '' },
+        { id: 'demo-m05a', bookId: '9000003', dateISO: year + '-05-16', pages: 28, note: 'Когнитивната революция и силата на общите митове.' },
+        { id: 'demo-m04c', bookId: '8999994', dateISO: year + '-04-30', pages: 36, note: 'Ръкописите не горят — финалният полет над Москва.' },
+        { id: 'demo-finished', bookId: '9000006', dateISO: year + '-04-18', pages: 40, note: 'Последните страници за силата на малките навици.' },
+        { id: 'demo-m04b', bookId: '8999996', dateISO: year + '-04-10', pages: 34, note: 'Последната част на Ана Каренина.' },
+        { id: 'demo-m03a', bookId: '9000006', dateISO: year + '-03-22', pages: 28, note: 'Четирите закона за промяна на поведението.' },
+        { id: 'demo-m03b', bookId: '8999996', dateISO: year + '-03-11', pages: 32, note: 'Коситбата на Левин — една от най-живите глави.' },
+        { id: 'demo-m02b', bookId: '8999999', dateISO: year + '-02-28', pages: 42, note: 'Епилогът в Сибир и тихото прераждане на Расколников.' },
+        { id: 'demo-m02c', bookId: '8999999', dateISO: year + '-02-24', pages: 35, note: 'Разговорите с Порфирий Петрович.' },
+        { id: 'demo-m02a', bookId: '8999995', dateISO: year + '-02-20', pages: 38, note: 'Речта при камъка на Илюша.' },
+        { id: 'demo-m02d', bookId: '8999995', dateISO: year + '-02-14', pages: 36, note: 'Легендата за Великия инквизитор.' },
+        { id: 'demo-m01a', bookId: '8999995', dateISO: year + '-01-25', pages: 30, note: 'Зимни вечери с Достоевски.' },
         { id: 'demo-prior', bookId: '9000002', dateISO: priorDate, pages: 24, note: 'Последната сесия за годината.' }
     ].map((log, index) => ({ ...log, createdAt: now - index }));
 
@@ -1068,7 +1094,6 @@ function seedDemoData() {
     appStorage.setItem(LogRepo.STORAGE_KEY, JSON.stringify(logs));
     appStorage.removeItem(ChallengeRepo.STORAGE_KEY);
 }
-
 function clearAllData() {
     for (const key of [BookRepo.STORAGE_KEY, LogRepo.STORAGE_KEY, SettingsRepo.STORAGE_KEY, ChallengeRepo.STORAGE_KEY]) {
         appStorage.removeItem(key);
