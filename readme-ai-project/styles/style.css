@@ -1667,6 +1667,7 @@ html:has(.shelf-preview[open]){overflow:hidden}
 
 /* ==================== 18c. Form page shell ====================
    The form page reuses the home navbar, bottom nav and footer. */
+.homepage .navbar__actions .theme-switch{margin-inline-start:var(--sp-2)}
 .navbar__add[aria-current="page"]{
     border-color:var(--c-accent);
     color:var(--c-accent);
