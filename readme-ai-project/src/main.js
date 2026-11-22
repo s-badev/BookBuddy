@@ -338,7 +338,7 @@ function renderFeaturedBook(books, logs) {
 
     if (featured) {
         const percent = calculateProgress(featured.currentPage, featured.totalPages);
-        document.getElementById('readingPages').textContent = featured.currentPage + ' от ' + featured.totalPages + ' стр.';
+        document.getElementById('readingPages').textContent = formatNumberBG(featured.currentPage) + ' от ' + formatNumberBG(featured.totalPages) + ' стр.';
         document.getElementById('readingPercent').textContent = percent + '%';
         document.getElementById('readingMeter').value = percent;
     } else {
@@ -348,16 +348,23 @@ function renderFeaturedBook(books, logs) {
     }
 }
 
+const bgNumberFormat = new Intl.NumberFormat('bg-BG', { useGrouping: 'always' });
+
+function formatNumberBG(value) {
+    const num = Number(value);
+    return Number.isFinite(num) ? bgNumberFormat.format(num) : '0';
+}
+
 /* ---------- Stats ---------- */
 function updateStats(books = BookRepo.getAllBooks()) {
     
     // Total Books
     const totalBooks = books.length;
-    setCountUp(document.getElementById('statBooks'), totalBooks);
+    setCountUp(document.getElementById('statBooks'), totalBooks, formatNumberBG);
     
     // Total Pages Read — derived ONLY from books (single source of truth)
     const totalPagesRead = books.reduce((sum, book) => sum + (Number(book.currentPage) || 0), 0);
-    setCountUp(document.getElementById('statPagesRead'), totalPagesRead, n => n.toLocaleString());
+    setCountUp(document.getElementById('statPagesRead'), totalPagesRead, formatNumberBG);
     
     // Average Progress
     let avgProgress = 0;
@@ -454,12 +461,12 @@ function renderGoal(weekPages, target) {
     const meter = document.getElementById('goalMeter');
     meter.max = target;
     meter.value = Math.min(weekPages, target);
-    meter.setAttribute('aria-valuetext', weekPages + ' от ' + target + ' страници');
-    setCountUp(document.getElementById('goalPages'), weekPages);
-    document.getElementById('goalTarget').textContent = '/' + target;
+    meter.setAttribute('aria-valuetext', formatNumberBG(weekPages) + ' от ' + formatNumberBG(target) + ' страници');
+    setCountUp(document.getElementById('goalPages'), weekPages, formatNumberBG);
+    document.getElementById('goalTarget').textContent = '/' + formatNumberBG(target);
     const remaining = Math.max(0, target - weekPages);
     document.getElementById('goalDetail').textContent = remaining > 0
-        ? 'Още ' + remaining + ' страници до целта.'
+        ? 'Още ' + formatNumberBG(remaining) + ' страници до целта.'
         : 'Седмичната цел е изпълнена.';
 }
 
@@ -508,7 +515,7 @@ function renderTopBooks(books) {
             <button type="button" class="rank-item" id="rank-book-${item.bookId}" data-details-book="${item.bookId}" aria-haspopup="dialog">
                 <span class="rank-num">${index + 1}</span>
                 <span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.author)}</small></span>
-                <small>${item.readPages} стр.</small>
+                <small>${formatNumberBG(item.readPages)} стр.</small>
             </button>
         </li>`).join('') : '<li class="rank-empty">Все още няма добавени книги.</li>';
 }
@@ -533,7 +540,7 @@ function renderChallenges(weekPages, streak) {
         return `
             <article class="challenge-item editorial-challenge">
                 <span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(challenge.description)}</small></span>
-                <span class="challenge-progress">${current} / ${target}</span>
+                <span class="challenge-progress">${formatNumberBG(current)} / ${formatNumberBG(target)}</span>
             </article>`;
     }).join('');
     if (changed) ChallengeRepo.saveChallenges(challenges);
@@ -895,7 +902,7 @@ function showBookDetails(focusId) {
             <div class="details-book__facts">
                 <p class="details-book__author">${escapeHtml(book.author)}</p>
                 <p class="book-card__status book-card__status--${status}">${bookStatusLabel(status)}</p>
-                <p>${book.currentPage} / ${book.totalPages} стр. · ${percent}%</p>
+                <p>${formatNumberBG(book.currentPage)} / ${formatNumberBG(book.totalPages)} стр. · ${percent}%</p>
                 <progress class="reading-meter" max="100" value="${percent}" aria-label="Напредък в книгата"></progress>
             </div>
         </div>
@@ -910,7 +917,7 @@ function showBookDetails(focusId) {
         <section>
             <h3>Читателски сесии</h3>
         ${logs.length ? `<ul class="details-sessions">${logs.map(log => `
-                <li><div>${sessionDateMarkup(log)} <strong>${Number(log.pages)} стр.</strong>
+                <li><div>${sessionDateMarkup(log)} <strong>${formatNumberBG(log.pages)} стр.</strong>
                     ${log.note ? '<p>' + escapeHtml(log.note) + '</p>' : ''}</div>
                     <button type="button" class="btn btn--ghost" id="details-edit-${escapeHtml(log.id)}"
                             data-edit-session="${escapeHtml(log.id)}" aria-label="Редактирай сесията ${log.dateISO ? 'от ' + formatDateBG(log.dateISO) : 'без дата'}">Редактирай</button>
@@ -954,7 +961,7 @@ function renderActivityFeed() {
     if (summary) {
         const totalSessionPages = logs.reduce((s, l) => s + (Number(l.pages) || 0), 0);
         summary.textContent = logs.length
-            ? logs.length + (logs.length === 1 ? ' записана сесия · ' : ' записани сесии · ') + totalSessionPages + ' стр. в хрониката'
+            ? formatNumberBG(logs.length) + (logs.length === 1 ? ' записана сесия · ' : ' записани сесии · ') + formatNumberBG(totalSessionPages) + ' стр. в хрониката'
             : 'Все още няма записани сесии';
     }
 
@@ -1006,7 +1013,7 @@ function renderActivityFeed() {
             <article class="journal-entry reveal is-in${index === 0 ? ' journal-entry--lead' : ''}" style="--entry-i:${Math.min(index, 12)}" data-log-id="${id}">
                 <div class="journal-entry__main">
                     <h4 class="journal-entry__title">${escapeHtml(book.title)}</h4>
-                    <p class="journal-entry__meta"><strong>${Number(log.pages)} стр. в тази сесия</strong> <span>· ${book.currentPage} от ${book.totalPages} стр. общо · ${escapeHtml(book.author)}</span></p>
+                    <p class="journal-entry__meta"><strong>${formatNumberBG(log.pages)} стр. в тази сесия</strong> <span>· ${formatNumberBG(book.currentPage)} от ${formatNumberBG(book.totalPages)} стр. общо · ${escapeHtml(book.author)}</span></p>
                 </div>
                 <div class="journal-entry__margin">
                     ${sessionDateMarkup(log)}
@@ -1267,11 +1274,11 @@ function renderAnnualCalendarMap(cal, metrics, monthly) {
     }).join('');
 
     const summaryText = cal.activeDays > 0
-        ? `${metrics.totalSessions} сесии през ${cal.year} г. · ${cal.totalPages} стр. от сесии · връх: ${cal.maxPages} стр. за ден`
+        ? `${formatNumberBG(metrics.totalSessions)} сесии през ${cal.year} г. · ${formatNumberBG(cal.totalPages)} стр. от сесии · връх: ${formatNumberBG(cal.maxPages)} стр. за ден`
         : `Все още няма записани сесии през ${cal.year} г.`;
 
     const srRows = monthly.map(m =>
-        `<tr><td>${escapeHtml(m.label)}</td><td>${m.activeDays} дни</td><td>${m.pages} стр.</td><td>${m.sessions} сесии</td></tr>`
+        `<tr><td>${escapeHtml(m.label)}</td><td>${m.activeDays} дни</td><td>${formatNumberBG(m.pages)} стр.</td><td>${m.sessions} сесии</td></tr>`
     ).join('');
 
     host.innerHTML = `
@@ -1281,7 +1288,7 @@ function renderAnnualCalendarMap(cal, metrics, monthly) {
         </div>
         <div class="year-map__scroll">
             <svg class="year-map__svg" viewBox="0 0 ${svgWidth} ${svgHeight}" role="img"
-                 aria-label="Годишна карта на четенето за ${escapeHtml(cal.year)} г.: ${cal.activeDays} активни дни и ${cal.totalPages} прочетени страници.">
+                 aria-label="Годишна карта на четенето за ${escapeHtml(cal.year)} г.: ${cal.activeDays} активни дни и ${formatNumberBG(cal.totalPages)} прочетени страници.">
                 ${monthLabelsSvg}
                 ${dowLabels}
                 ${weeksSvg}
@@ -1374,18 +1381,18 @@ function renderGoalAndStreakRing(weekPages, weeklyGoal, todayPages, streak, long
                 <i class="goal-ring-swatch goal-ring-swatch--outer" aria-hidden="true"></i>
                 Седмична цел
             </span>
-            <strong>${weekPages} / ${safeGoal} стр. (${weekPct}%)</strong>
+            <strong>${formatNumberBG(weekPages)} / ${formatNumberBG(safeGoal)} стр. (${weekPct}%)</strong>
         </div>
         <div class="goal-ring-ledger__row">
             <span class="goal-ring-ledger__key">
                 <i class="goal-ring-swatch goal-ring-swatch--inner" aria-hidden="true"></i>
-                Дневен пулс (цел ~${dailyTarget} стр.)
+                Дневен пулс (цел ~${formatNumberBG(dailyTarget)} стр.)
             </span>
-            <strong>${todayPages} стр. днес</strong>
+            <strong>${formatNumberBG(todayPages)} стр. днес</strong>
         </div>
         <div class="goal-ring-ledger__row">
             <span class="goal-ring-ledger__key">Най-дълга серия</span>
-            <strong>${longestStreak} дни</strong>
+            <strong>${formatNumberBG(longestStreak)} дни</strong>
         </div>`;
 }
 
@@ -1397,15 +1404,15 @@ function renderMonthlyHorizonChart(monthly, strongestMonth, metrics, logs, curre
     callouts.innerHTML = `
         <div class="journal-callout">
             <span class="kicker">Най-силен месец</span>
-            <strong id="statStrongestMonth">${strongestMonth ? escapeHtml(strongestMonth.label) + ' (' + strongestMonth.pages + ' стр.)' : 'Няма данни'}</strong>
+            <strong id="statStrongestMonth">${strongestMonth ? escapeHtml(strongestMonth.label) + ' (' + formatNumberBG(strongestMonth.pages) + ' стр.)' : 'Няма данни'}</strong>
         </div>
         <div class="journal-callout">
             <span class="kicker">Средно на сесия</span>
-            <strong id="statPagesPerSession">${metrics.avgPagesPerSession} стр.</strong>
+            <strong id="statPagesPerSession">${formatNumberBG(metrics.avgPagesPerSession)} стр.</strong>
         </div>
         <div class="journal-callout">
             <span class="kicker">Страници на ден</span>
-            <strong id="statPagesPerDay">${metrics.avgPagesPerActiveDay} стр.</strong>
+            <strong id="statPagesPerDay">${formatNumberBG(metrics.avgPagesPerActiveDay)} стр.</strong>
         </div>`;
 
     const maxMonthPages = Math.max(40, ...monthly.map(m => m.pages));
@@ -1508,7 +1515,7 @@ function renderAuthorsConstellationChart(authors, topAuthor, metrics) {
     callout.innerHTML = `
         <div class="journal-callout">
             <span class="kicker">Най-четен автор</span>
-            <strong id="statTopAuthor">${topAuthor ? escapeHtml(topAuthor.author) + ' (' + topAuthor.pages + ' стр.)' : 'Няма данни'}</strong>
+            <strong id="statTopAuthor">${topAuthor ? escapeHtml(topAuthor.author) + ' (' + formatNumberBG(topAuthor.pages) + ' стр.)' : 'Няма данни'}</strong>
         </div>`;
 
     const topSix = authors.slice(0, 6);
@@ -1539,7 +1546,7 @@ function renderAuthorsConstellationChart(authors, topAuthor, metrics) {
             <g class="author-row" style="--a:${idx}">
                 <text x="4" y="${y + 2}" class="author-row__rank">${idx + 1}</text>
                 <text x="${trackStartX}" y="${y}" class="author-row__name">${escapeHtml(item.author)}</text>
-                <text x="434" y="${y}" text-anchor="end" class="author-row__meta">${item.pages} стр. · ${item.sessions} сесии</text>
+                <text x="434" y="${y}" text-anchor="end" class="author-row__meta">${formatNumberBG(item.pages)} стр. · ${item.sessions} сесии</text>
                 <line x1="${trackStartX}" y1="${lineY}" x2="${trackEndX}" y2="${lineY}" class="author-row__track"/>
                 <line x1="${trackStartX}" y1="${lineY}" x2="${tipX}" y2="${lineY}" class="author-row__fill${idx === 0 ? ' is-top' : ''}"/>
                 ${marker}
@@ -1547,7 +1554,7 @@ function renderAuthorsConstellationChart(authors, topAuthor, metrics) {
     }).join('');
 
     const srRows = topSix.map((a, idx) =>
-        `<tr><td>${idx + 1}</td><td>${escapeHtml(a.author)}</td><td>${a.pages} стр.</td><td>${a.sessions} сесии</td></tr>`
+        `<tr><td>${idx + 1}</td><td>${escapeHtml(a.author)}</td><td>${formatNumberBG(a.pages)} стр.</td><td>${a.sessions} сесии</td></tr>`
     ).join('');
 
     host.innerHTML = `

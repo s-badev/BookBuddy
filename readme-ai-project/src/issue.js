@@ -1,5 +1,5 @@
 const issueYearFormat = new Intl.DateTimeFormat('bg-BG', { month: 'long', timeZone: 'UTC' });
-const issueNumberFormat = new Intl.NumberFormat('bg-BG');
+const issueNumberFormat = new Intl.NumberFormat('bg-BG', { useGrouping: 'always' });
 
 function initIssue() {
     document.getElementById('issueYear').addEventListener('change', () => {

@@ -99,7 +99,7 @@ function fillShelfSpread(book) {
     const statusLabel = document.getElementById('shelfPreviewStatus');
     statusLabel.className = 'book-card__status book-card__status--' + status;
     statusLabel.textContent = bookStatusLabel(status);
-    document.getElementById('shelfPreviewPages').textContent = book.currentPage + ' / ' + book.totalPages + ' стр. · ' + percent + '%';
+    document.getElementById('shelfPreviewPages').textContent = formatNumberBG(book.currentPage) + ' / ' + formatNumberBG(book.totalPages) + ' стр. · ' + percent + '%';
     document.getElementById('shelfPreviewMeter').value = percent;
     document.getElementById('shelfPreviewFront').innerHTML = createCover(book, 'eager');
 
@@ -112,10 +112,10 @@ function fillShelfSpread(book) {
     document.getElementById('shelfPreviewSessions').innerHTML = shown.length
         ? shown.map(log => `
             <li>
-                <p class="spread__session-when">${sessionDateMarkup(log)} · ${Number(log.pages)} стр.</p>
+                <p class="spread__session-when">${sessionDateMarkup(log)} · ${formatNumberBG(log.pages)} стр.</p>
                 ${log.note ? `<p class="spread__session-note">${escapeHtml(log.note)}</p>` : ''}
             </li>`).join('') +
-          (more > 0 ? `<li class="spread__session-more">И още ${more} в „За книгата“.</li>` : '')
+          (more > 0 ? `<li class="spread__session-more">И още ${formatNumberBG(more)} в „За книгата“.</li>` : '')
         : '<li class="spread__session-more">Все още няма записани сесии.</li>';
 }
 
