@@ -1,11 +1,11 @@
 const CACHE_PREFIX = 'bookbuddy-static-';
-const CACHE_NAME = CACHE_PREFIX + 'v5';
+const CACHE_NAME = CACHE_PREFIX + 'v6';
 const scope = new URL(self.registration.scope);
 const files = [
     'index.html', 'form.html', 'favicon.svg', 'styles/style.css',
-    'src/main.js', 'src/form.js', 'src/issue.js', 'src/shelf.js', 'src/motion.js', 'src/stats.js',
+    'src/main.js', 'src/form.js', 'src/coverSearch.js', 'src/issue.js', 'src/shelf.js', 'src/motion.js', 'src/stats.js',
     'src/utils/appStorage.js', 'src/utils/theme.js', 'src/utils/validate.js',
-    'src/services/bookRepo.js', 'src/services/logRepo.js',
+    'src/services/coverService.js', 'src/services/bookRepo.js', 'src/services/logRepo.js',
     'src/services/settingsRepo.js', 'src/services/challengeRepo.js'
 ];
 const cacheKeys = new Set(files.map(file => new URL(file, scope).href));
