@@ -530,7 +530,7 @@ function renderTopBooks(books) {
     const top = getTopBooks(books, 5);
     document.getElementById('topBooksThisWeek').innerHTML = top.length ? top.map((item, index) => `
         <li>
-            <button type="button" class="rank-item" id="rank-book-${item.bookId}" data-details-book="${item.bookId}" aria-haspopup="dialog">
+            <button type="button" class="rank-item" id="rank-book-${escapeHtml(item.bookId)}" data-details-book="${escapeHtml(item.bookId)}" aria-haspopup="dialog">
                 <span class="rank-num">${index + 1}</span>
                 <span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.author)}</small></span>
                 <small>${formatNumberBG(item.readPages)} стр.</small>
@@ -950,8 +950,8 @@ function showBookDetails(focusId) {
             <summary>Управление на книгата</summary>
             <form class="details-progress" id="detailsProgressForm">
                 <label for="detailsProgress">Текуща страница</label>
-                <input type="number" name="currentPage" id="detailsProgress" value="${book.currentPage}"
-                       min="0" max="${book.totalPages}" required>
+                <input type="number" name="currentPage" id="detailsProgress" value="${escapeHtml(book.currentPage ?? '')}"
+                       min="0" max="${escapeHtml(book.totalPages ?? '')}" required>
                 <button type="submit" class="btn btn--outline">Запази напредъка</button>
             </form>
             <button type="button" class="btn btn--ghost btn--ghost-danger" id="detailsDeleteBook">Изтрий книгата</button>

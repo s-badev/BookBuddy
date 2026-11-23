@@ -83,13 +83,13 @@ function renderIssue(books, logs, minPages) {
     const monthName = month ? issueYearFormat.format(new Date(month + '-01')) : '';
     const streak = longestStreakInYear(days, minPages);
     const bookIndex = finished.length ? `<ol class="issue__index">${finished.map(({ book, date }) => `
-        <li><button type="button" id="issue-book-${book.id}" data-details-book="${book.id}" aria-haspopup="dialog">${escapeHtml(book.title)}</button>
+        <li><button type="button" id="issue-book-${escapeHtml(book.id)}" data-details-book="${escapeHtml(book.id)}" aria-haspopup="dialog">${escapeHtml(book.title)}</button>
         <time datetime="${date}">${formatDateBG(date)}</time></li>`).join('')}</ol>`
         : '<p>Няма потвърдени завършени книги през тази година.</p>';
     const undatedIndex = undated.length ? `<details class="issue__undated">
         <summary>Прочетени книги без потвърдена дата (${undated.length})</summary>
         <ul class="issue__index">${undated.map(book => `
-            <li><button type="button" id="undated-book-${book.id}" data-details-book="${book.id}" aria-haspopup="dialog">${escapeHtml(book.title)}</button></li>`).join('')}</ul>
+            <li><button type="button" id="undated-book-${escapeHtml(book.id)}" data-details-book="${escapeHtml(book.id)}" aria-haspopup="dialog">${escapeHtml(book.title)}</button></li>`).join('')}</ul>
     </details>` : '';
 
     document.getElementById('issueContent').innerHTML = `
