@@ -541,27 +541,20 @@ function renderTopBooks(books) {
 function renderChallenges(weekPages, streak) {
     ChallengeRepo.seedDefaultChallengesIfEmpty();
     const challenges = ChallengeRepo.getChallenges();
-    let changed = false;
 
     document.getElementById('challengesList').innerHTML = challenges.map(challenge => {
         const weekly = challenge.type === 'weekly_pages';
         const byStreak = challenge.type === 'streak_days';
         const current = weekly ? weekPages : byStreak ? streak : 0;
         const target = Math.max(Number(challenge.target) || 0, 1);
-        const completed = current >= target;
         const title = challenge.id === 'streak_14'
             ? 'Серия 14 дни' : challenge.title;
-        if ((weekly || completed) && challenge.active === completed) {
-            challenge.active = !completed;
-            changed = true;
-        }
         return `
             <article class="challenge-item editorial-challenge">
                 <span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(challenge.description)}</small></span>
                 <span class="challenge-progress">${formatNumberBG(current)} / ${formatNumberBG(target)}</span>
             </article>`;
     }).join('');
-    if (changed) ChallengeRepo.saveChallenges(challenges);
 }
 
 /* ========== Settings Modal ========== */
