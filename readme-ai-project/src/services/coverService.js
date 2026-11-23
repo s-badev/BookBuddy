@@ -34,8 +34,13 @@ const CoverService = (() => {
         return normalized ? 'https://covers.openlibrary.org/b/isbn/' + normalized + '-M.jpg?default=false' : null;
     }
 
+    function storedCoverUrl(value) {
+        if (typeof CoverUpload !== 'undefined' && CoverUpload.isValidCoverDataUrl(value)) return value;
+        return normalizeCoverUrl(value);
+    }
+
     function coverCandidates(book) {
-        return [...new Set([normalizeCoverUrl(book.coverUrl), isbnCoverUrl(book.isbn)].filter(Boolean))];
+        return [...new Set([storedCoverUrl(book?.coverUrl), isbnCoverUrl(book?.isbn)].filter(Boolean))];
     }
 
     function debounce(callback, delay = 300) {
