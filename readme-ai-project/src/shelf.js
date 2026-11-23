@@ -103,7 +103,9 @@ function fillShelfSpread(book) {
     statusLabel.textContent = bookStatusLabel(status);
     document.getElementById('shelfPreviewPages').textContent = formatNumberBG(book.currentPage) + ' / ' + formatNumberBG(book.totalPages) + ' стр. · ' + percent + '%';
     document.getElementById('shelfPreviewMeter').value = percent;
-    document.getElementById('shelfPreviewFront').innerHTML = createCover(book);
+    const front = document.getElementById('shelfPreviewFront');
+    front.innerHTML = createCover(book);
+    if (typeof hydrateCoverImages === 'function') hydrateCoverImages(front);
 
     const note = (book.notes || '').trim();
     document.getElementById('shelfPreviewNotes').textContent = note || 'Няма добавена бележка.';

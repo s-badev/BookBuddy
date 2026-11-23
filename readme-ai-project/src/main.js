@@ -12,7 +12,17 @@ document.addEventListener('DOMContentLoaded', function() {
     initIssue();
     initDemoButtons();
     refreshAll();
+    consumeQuotaNotice();
 });
+
+function consumeQuotaNotice() {
+    const prefix = 'bookbuddy_quota_notice:';
+    if (typeof window !== 'undefined' && typeof window.name === 'string' && window.name.startsWith(prefix)) {
+        const message = window.name.slice(prefix.length);
+        window.name = '';
+        if (message) showToast(message);
+    }
+}
 
 function initNavigation() {
     const links = document.querySelectorAll('.navbar__navigation a, .bottom-nav a');
@@ -141,11 +151,36 @@ function renderCatalogue(allBooks = BookRepo.getAllBooks()) {
     booksList.querySelectorAll('[data-shelf-row]').forEach(row => {
         row.scrollLeft = shelfScrollPositions.get(row.dataset.shelfRow) || 0;
     });
+    hydrateCoverImages(booksList);
     closeShelfForCatalogueChange();
 }
 
 function formatBookCount(count) {
     return count + (count === 1 ? ' книга' : ' книги');
+}
+
+const pendingCoverSources = new Map();
+let nextCoverToken = 1;
+
+function hydrateCoverImages(root = document) {
+    if (!root || typeof root.querySelectorAll !== 'function') return;
+    root.querySelectorAll('img.book-cover__image[data-cover-token]').forEach(image => {
+        const token = image.dataset.coverToken;
+        delete image.dataset.coverToken;
+        const entry = pendingCoverSources.get(token);
+        pendingCoverSources.delete(token);
+        if (!entry || !entry.url) {
+            image.remove();
+            return;
+        }
+        if (entry.fallback) {
+            image.dataset.fallbackSrc = entry.fallback;
+        }
+        image.src = entry.url;
+        if (image.complete && image.naturalWidth > 1 && image.naturalHeight > 1) {
+            image.parentElement?.classList.add('book-cover--loaded');
+        }
+    });
 }
 
 function initCoverImages() {
@@ -171,6 +206,13 @@ function initCoverImages() {
         const image = event.target;
         if (image instanceof HTMLImageElement && image.classList.contains('book-cover__image')) useFallback(image);
     }, true);
+
+    if (typeof MutationObserver === 'function' && document.body) {
+        new MutationObserver(() => hydrateCoverImages(document)).observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
 }
 
 const COVER_ART_MAP = {
@@ -203,10 +245,15 @@ function createCover(book, candidates = CoverService.coverCandidates(book)) {
     const status = getBookStatus(book);
     const art = coverArtOf(book);
     const [url, fallback] = candidates;
-    const image = url ? `
+    let image = '';
+    if (url) {
+        const token = String(nextCoverToken++);
+        pendingCoverSources.set(token, { url, fallback: fallback || '' });
+        const loading = url.startsWith('data:') ? 'eager' : 'lazy';
+        image = `
             <img class="book-cover__image" alt="Корица на „${escapeHtml(book.title)}“"
-                 loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(url)}"
-                 ${fallback ? `data-fallback-src="${escapeHtml(fallback)}"` : ''}>` : '';
+                 loading="${loading}" referrerpolicy="no-referrer" data-cover-token="${token}">`;
+    }
     return `
         <span class="book-cover book-cover--${status} cover-art--${art}" aria-hidden="true">
             <span class="cover-art"><i></i><i></i><i></i><i></i><i></i></span>
@@ -347,6 +394,7 @@ function renderFeaturedBook(books, logs) {
     cover.dataset.detailsBook = details.dataset.detailsBook = featured?.id ?? '';
     cover.setAttribute('aria-label', featured ? 'Отвори „' + featured.title + '“' : 'За книгата');
     cover.innerHTML = featured ? createHeroBook(featured) : '';
+    hydrateCoverImages(cover);
 
     if (featured) {
         const percent = calculateProgress(featured.currentPage, featured.totalPages);
@@ -946,6 +994,7 @@ function showBookDetails(focusId) {
             </form>
             <button type="button" class="btn btn--ghost btn--ghost-danger" id="detailsDeleteBook">Изтрий книгата</button>
         </details>`);
+    hydrateCoverImages(dialog);
     if (!dialog.open) dialog.showModal();
     if (focusId) (document.getElementById(focusId) || document.getElementById('detailsLogBtn')).focus();
 }
@@ -1046,6 +1095,7 @@ function renderActivityFeed() {
             </article>`;
     }).join('');
 
+    hydrateCoverImages(container);
     bindJournalReveals();
 }
 
