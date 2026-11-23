@@ -1136,7 +1136,13 @@ function seedDemoData() {
         { id: 8999995, title: 'Братя Карамазови', author: 'Фьодор Достоевски', totalPages: 824, currentPage: 824,
             notes: '', completion: { logId: 'demo-m02a', dateISO: year + '-02-20' } },
         { id: 8999994, title: 'Майстора и Маргарита', author: 'Михаил Булгаков', totalPages: 448, currentPage: 448,
-            notes: 'Любима препрочитана история.', completion: { logId: 'demo-m04c', dateISO: year + '-04-30' } }
+            notes: 'Любима препрочитана история.', completion: { logId: 'demo-m04c', dateISO: year + '-04-30' } },
+        { id: 8999993, title: 'Чичовци', author: 'Иван Вазов', totalPages: 112, currentPage: 112, notes: '',
+            completion: { dateISO: year + '-08-10' } },
+        { id: 8999992, title: 'Под игото', author: 'Иван Вазов', totalPages: 432, currentPage: 432, notes: '',
+            completion: { dateISO: year + '-08-17' } },
+        { id: 8999991, title: 'Война и мир', author: 'Лев Толстой', totalPages: 1196, currentPage: 1196, notes: '',
+            completion: { dateISO: year + '-07-21' } }
     ].map(book => ({ ...book, createdAt: today.toISOString() }));
 
     const logs = [
