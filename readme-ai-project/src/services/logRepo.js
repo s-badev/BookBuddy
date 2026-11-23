@@ -38,7 +38,7 @@ const LogRepo = {
         };
 
         if (this.hasDuplicate(logs, newLog)) return null;
-        if (Number.isSafeInteger(log.appliedPages) && log.appliedPages !== newLog.pages) {
+        if (Number.isSafeInteger(log.appliedPages) && log.appliedPages >= 0) {
             newLog.appliedPages = log.appliedPages;
         }
 
@@ -74,7 +74,6 @@ const LogRepo = {
         if (idx === -1) return null;
         const edited = { ...logs[idx], ...updates };
         if (this.hasDuplicate(logs, edited)) return null;
-        if (edited.appliedPages === edited.pages) delete edited.appliedPages;
         logs[idx] = edited;
         appStorage.setItem(this.STORAGE_KEY, JSON.stringify(logs));
         return logs[idx];
