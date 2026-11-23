@@ -29,7 +29,7 @@ test('book appearance is stable, page-sensitive and within the prototype bounds'
 });
 
 test('all prototype spine colours have at least 4.5:1 contrast', () => {
-    assert.equal(palette.length, 15);
+    assert.equal(palette.length, 20);
     for (const { spine, ink } of palette) {
         assert.ok(contrastRatio(spine, ink) >= 4.5, spine + ' / ' + ink);
     }

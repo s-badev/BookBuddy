@@ -3,7 +3,7 @@ const ShelfLayout = (() => {
     const colors = [
         '#7d8a99', '#233a63', '#a45c2f', '#b8b1a0', '#7a2a2a', '#3b2a22',
         '#4a1f3a', '#3d1f2b', '#1f3a2e', '#8b6a2b', '#0f4c5c', '#2d4a3a',
-        '#6b1d22', '#e8e4da', '#2a2a33'
+        '#6b1d22', '#e8e4da', '#2a2a33', '#141414', '#14233f', '#5b6b4a', '#c9a227', '#d9d2bf'
     ];
     const kinds = ['cloth', 'label', 'paper'];
 

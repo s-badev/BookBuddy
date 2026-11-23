@@ -96,18 +96,18 @@ function initBooksToolbar() {
         var val = this.value;
         _searchTimer = setTimeout(function() {
             bookViewState.query = val.trim();
-            renderCatalogue();
+            renderCatalogue(undefined, true);
         }, 250);
     });
 
     filterSelect.addEventListener('change', function() {
         bookViewState.filter = this.value;
-        renderCatalogue();
+        renderCatalogue(undefined, true);
     });
 
     sortSelect.addEventListener('change', function() {
         bookViewState.sort = this.value;
-        renderCatalogue();
+        renderCatalogue(undefined, true);
     });
 
     document.getElementById('booksList').addEventListener('click', event => {
@@ -115,33 +115,16 @@ function initBooksToolbar() {
         clearTimeout(_searchTimer);
         bookViewState.query = searchInput.value = '';
         bookViewState.filter = filterSelect.value = 'all';
-        renderCatalogue();
+        renderCatalogue(undefined, true);
         searchInput.focus();
     });
 }
 
-const shelfScrollPositions = new Map();
-
-function renderCatalogue(allBooks = BookRepo.getAllBooks()) {
-    const booksList = document.getElementById('booksList');
-    booksList.querySelectorAll('[data-shelf-row]').forEach(row => shelfScrollPositions.set(row.dataset.shelfRow, row.scrollLeft));
+function renderCatalogue(allBooks = BookRepo.getAllBooks(), animate = false) {
     const books = applyBookViewState(allBooks, bookViewState);
     document.getElementById('libraryCount').textContent = formatBookCount(allBooks.length);
     document.getElementById('bookResultsStatus').textContent = 'Намерени: ' + formatBookCount(books.length);
-
-    booksList.innerHTML = books.length ? shelfMarkup(books) : allBooks.length ? `
-            <div class="empty-state empty-state--compact">
-                <p class="empty-state__title">Няма намерени книги</p>
-                <button type="button" class="btn btn--outline" id="clearBookFilters">Изчисти търсенето и филтъра</button>
-            </div>` : `
-            <div class="empty-state empty-state--compact">
-                <p class="empty-state__title">Все още няма книги</p>
-                <a class="btn btn--primary" href="${escapeHtml(appPage('form.html'))}">Добави книга</a>
-            </div>`;
-    booksList.querySelectorAll('[data-shelf-row]').forEach(row => {
-        row.scrollLeft = shelfScrollPositions.get(row.dataset.shelfRow) || 0;
-    });
-    closeShelfForCatalogueChange();
+    renderLibraryShelf(books, allBooks.length, animate);
 }
 
 function formatBookCount(count) {
@@ -199,24 +182,47 @@ function formatCoverTitle(book) {
     return mid > 0 ? title.slice(0, mid) + '\n' + title.slice(mid + 1) : title;
 }
 
-function createCover(book, candidates = CoverService.coverCandidates(book)) {
-    const status = getBookStatus(book);
-    const art = coverArtOf(book);
+function createCoverElement(book, candidates = CoverService.coverCandidates(book)) {
+    const cover = document.createElement('span');
+    cover.className = 'book-cover book-cover--' + getBookStatus(book) + ' cover-art--' + coverArtOf(book);
+    cover.setAttribute('aria-hidden', 'true');
+    const art = document.createElement('span');
+    art.className = 'cover-art';
+    for (let index = 0; index < 5; index++) art.append(document.createElement('i'));
+
+    const copy = document.createElement('span');
+    copy.className = 'book-cover__copy';
+    const author = document.createElement('span');
+    author.className = 'book-cover__author';
+    author.textContent = book.author;
+    const title = document.createElement('span');
+    title.className = 'book-cover__title';
+    title.textContent = formatCoverTitle(book);
+    copy.append(author, title);
+
+    const imprint = document.createElement('span');
+    imprint.className = 'book-cover__imprint';
+    const monogram = document.createElement('span');
+    monogram.textContent = 'BB';
+    imprint.append(document.createElement('b'), monogram);
+    cover.append(art, copy, imprint);
+
     const [url, fallback] = candidates;
-    const image = url ? `
-            <img class="book-cover__image" alt="Корица на „${escapeHtml(book.title)}“"
-                 loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(url)}"
-                 ${fallback ? `data-fallback-src="${escapeHtml(fallback)}"` : ''}>` : '';
-    return `
-        <span class="book-cover book-cover--${status} cover-art--${art}" aria-hidden="true">
-            <span class="cover-art"><i></i><i></i><i></i><i></i><i></i></span>
-            <span class="book-cover__copy">
-                <span class="book-cover__author">${escapeHtml(book.author)}</span>
-                <span class="book-cover__title">${escapeHtml(formatCoverTitle(book))}</span>
-            </span>
-            <span class="book-cover__imprint"><b></b><span>BB</span></span>
-            ${image}
-        </span>`;
+    if (url) {
+        const image = document.createElement('img');
+        image.className = 'book-cover__image';
+        image.alt = 'Корица на „' + book.title + '“';
+        image.loading = 'lazy';
+        image.referrerPolicy = 'no-referrer';
+        if (fallback) image.dataset.fallbackSrc = fallback;
+        image.src = url;
+        cover.append(image);
+    }
+    return cover;
+}
+
+function createCover(book) {
+    return createCoverElement(book).outerHTML;
 }
 
 function createHeroBook(book) {
