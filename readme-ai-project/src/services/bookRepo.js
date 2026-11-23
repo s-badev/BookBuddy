@@ -21,6 +21,8 @@ const BookRepo = {
             createdAt: new Date().toISOString()
         };
         if (book.isbn) newBook.isbn = book.isbn;
+        const coverUrl = CoverService.normalizeCoverUrl(book.coverUrl);
+        if (coverUrl) newBook.coverUrl = coverUrl;
         books.push(newBook);
         appStorage.setItem(this.STORAGE_KEY, JSON.stringify(books));
         return newBook;
@@ -76,6 +78,11 @@ const BookRepo = {
             delete books[idx].isbn;
         } else if (updatedData.isbn !== undefined) {
             books[idx].isbn = updatedData.isbn;
+        }
+        if (updatedData.coverUrl !== undefined) {
+            const coverUrl = CoverService.normalizeCoverUrl(updatedData.coverUrl);
+            if (coverUrl) books[idx].coverUrl = coverUrl;
+            else delete books[idx].coverUrl;
         }
         if (books[idx].currentPage !== Number(previous.currentPage) ||
             books[idx].totalPages !== Number(previous.totalPages)) {
