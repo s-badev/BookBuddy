@@ -195,3 +195,13 @@ test('assembles a unique saved cover and ISBN fallback, keeping legacy behavior'
     assert.equal(service.coverCandidates({ coverUrl: fallback, isbn }).length, 1);
     assert.equal(service.coverCandidates({ coverUrl: 'https://bad.example/a' }).length, 0);
 });
+
+test('ignores structurally corrupt cached results and handles empty optional arguments', async () => {
+    const { service, store, now, calls } = setup(async () => response(google()));
+    store.set(key, JSON.stringify([{
+        key: 'search:8:книга', time: now(), value: { available: true, items: [null] }
+    }]));
+    assert.equal((await service.search('Книга', null))[0].title, 'Книга');
+    assert.equal(calls.length, 1);
+    assert.equal((await service.resolveCover(null)).url, null);
+});

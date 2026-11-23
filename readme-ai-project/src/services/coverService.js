@@ -170,7 +170,8 @@ const CoverService = (() => {
         });
     }
 
-    function searchWithStatus(query, { limit = 8 } = {}) {
+    function searchWithStatus(query, options) {
+        let limit = options?.limit ?? 8;
         query = text(query).slice(0, 240);
         limit = Number.isFinite(limit) ? Math.max(1, Math.min(40, Math.trunc(limit))) : 8;
         if (!query) return Promise.resolve({ items: [], available: true });
@@ -182,7 +183,10 @@ const CoverService = (() => {
             const second = await openLibrary({ q: query }, limit);
             return { available: first.available || second.available,
                 items: distinct([...second.items, ...first.items]).slice(0, limit) };
-        }, value => value?.available === true && Array.isArray(value.items) && value.items.length > 0, empty());
+        }, value => value?.available === true && Array.isArray(value.items) && value.items.length > 0 &&
+            value.items.every(item => typeof item?.id === 'string' && typeof item.title === 'string' &&
+                Array.isArray(item.authors) && item.authors.every(author => typeof author === 'string') &&
+                (item.coverUrl === null || item.coverUrl === normalizeCoverUrl(item.coverUrl))), empty());
     }
 
     async function search(query, options) {
@@ -209,7 +213,9 @@ const CoverService = (() => {
         });
     }
 
-    function resolveCover({ isbn, title, author } = {}) {
+    function resolveCover(book) {
+        const { isbn } = book ?? {};
+        let { title, author } = book ?? {};
         const normalized = isbnOf(isbn);
         title = text(title).slice(0, 160);
         author = text(author).slice(0, 80);
@@ -228,7 +234,8 @@ const CoverService = (() => {
             const libraryMatch = second.items.find(item => item.coverUrl && item.coverUrl !== byIsbn && matches(item));
             if (libraryMatch && await probeCover(libraryMatch.coverUrl)) return { url: libraryMatch.coverUrl, source: 'openlibrary' };
             return none;
-        }, value => Boolean(normalizeCoverUrl(value?.url)), none);
+        }, value => typeof value?.url === 'string' && value.url === normalizeCoverUrl(value.url) &&
+            ['google', 'openlibrary'].includes(value.source), none);
     }
 
     return { search, searchWithStatus, resolveCover, normalizeCoverUrl, coverCandidates, debounce };
