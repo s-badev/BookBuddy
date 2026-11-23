@@ -1093,6 +1093,7 @@ ul{list-style:none}
 }
 .book-cover__image{
     position:absolute;
+    z-index:2;
     inset:0;
     width:100%;
     height:100%;
@@ -3317,3 +3318,22 @@ html:has(.shelf-preview[open]){overflow:hidden}
 .cover-search__description strong{font-size:var(--fs-sm)}
 .cover-search__description small{color:var(--c-text-secondary);font-size:var(--fs-xs)}
 .cover-search__clear{align-self:flex-start;white-space:normal;text-align:start}
+
+/* Thumbnail slots keep their dimensions while providers load or fail. */
+.shelf-spine__cover{
+    position:absolute;
+    inset-block-start:9px;
+    inset-inline-start:50%;
+    width:34px;
+    aspect-ratio:2/3;
+    transform:translateX(-50%);
+}
+.shelf-spine--pictured::before{display:none}
+.shelf-spine--pictured .shelf-spine__title{top:67px;font-size:.9rem}
+.journal-entry__main--cover{
+    display:grid;
+    grid-template-columns:36px minmax(0, 1fr);
+    align-items:start;
+    gap:10px;
+}
+.journal-entry__cover{display:block;width:36px;aspect-ratio:2/3}

@@ -149,16 +149,27 @@ function formatBookCount(count) {
 }
 
 function initCoverImages() {
-    // Image events do not bubble. Capture them for newly rendered covers too.
+    function useFallback(image) {
+        const next = image.dataset.fallbackSrc;
+        delete image.dataset.fallbackSrc;
+        image.parentElement.classList.remove('book-cover--loaded');
+        if (next) image.src = next;
+        else image.remove();
+    }
+
+    // Capture non-bubbling image events, including covers rendered after initialization.
     document.addEventListener('load', event => {
         const image = event.target;
-        if (image instanceof HTMLImageElement && image.classList.contains('book-cover__image')) {
+        if (!(image instanceof HTMLImageElement) || !image.classList.contains('book-cover__image')) return;
+        if (image.naturalWidth > 1 && image.naturalHeight > 1) {
             image.parentElement.classList.add('book-cover--loaded');
+        } else {
+            useFallback(image);
         }
     }, true);
     document.addEventListener('error', event => {
         const image = event.target;
-        if (image instanceof HTMLImageElement && image.classList.contains('book-cover__image')) image.remove();
+        if (image instanceof HTMLImageElement && image.classList.contains('book-cover__image')) useFallback(image);
     }, true);
 }
 
@@ -188,13 +199,14 @@ function formatCoverTitle(book) {
     return mid > 0 ? title.slice(0, mid) + '\n' + title.slice(mid + 1) : title;
 }
 
-function createCover(book, loading = 'lazy', allowImage = true) {
+function createCover(book, candidates = CoverService.coverCandidates(book)) {
     const status = getBookStatus(book);
     const art = coverArtOf(book);
-    const isbn = allowImage ? Validate.normalizeISBN(book.isbn ?? '') : '';
-    const image = isbn ? `
-            <img class="book-cover__image" alt="" loading="${loading}" referrerpolicy="no-referrer"
-                 src="https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false">` : '';
+    const [url, fallback] = candidates;
+    const image = url ? `
+            <img class="book-cover__image" alt="Корица на „${escapeHtml(book.title)}“"
+                 loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(url)}"
+                 ${fallback ? `data-fallback-src="${escapeHtml(fallback)}"` : ''}>` : '';
     return `
         <span class="book-cover book-cover--${status} cover-art--${art}" aria-hidden="true">
             <span class="cover-art"><i></i><i></i><i></i><i></i><i></i></span>
@@ -220,7 +232,7 @@ function createHeroBook(book) {
                     <span class="spine"></span>
                     <span class="fore-edge"></span>
                     <span class="bottom-edge"></span>
-                    ${createCover(book, 'eager', false)}
+                    ${createCover(book)}
                 </span>
             </span>
         </span>`;
@@ -898,7 +910,7 @@ function showBookDetails(focusId) {
     document.getElementById('detailsTitle').textContent = book.title;
     document.getElementById('detailsContent').innerHTML = `
         <div class="details-book">
-            ${createCover(book, 'eager')}
+            ${createCover(book)}
             <div class="details-book__facts">
                 <p class="details-book__author">${escapeHtml(book.author)}</p>
                 <p class="book-card__status book-card__status--${status}">${bookStatusLabel(status)}</p>
@@ -1011,9 +1023,12 @@ function renderActivityFeed() {
             : `<p class="journal-entry__note journal-entry__note--quiet">Без бележка към сесията.</p>`;
         return `
             <article class="journal-entry reveal is-in${index === 0 ? ' journal-entry--lead' : ''}" style="--entry-i:${Math.min(index, 12)}" data-log-id="${id}">
-                <div class="journal-entry__main">
-                    <h4 class="journal-entry__title">${escapeHtml(book.title)}</h4>
-                    <p class="journal-entry__meta"><strong>${formatNumberBG(log.pages)} стр. в тази сесия</strong> <span>· ${formatNumberBG(book.currentPage)} от ${formatNumberBG(book.totalPages)} стр. общо · ${escapeHtml(book.author)}</span></p>
+                <div class="journal-entry__main journal-entry__main--cover">
+                    <span class="journal-entry__cover">${createCover(book)}</span>
+                    <div>
+                        <h4 class="journal-entry__title">${escapeHtml(book.title)}</h4>
+                        <p class="journal-entry__meta"><strong>${formatNumberBG(log.pages)} стр. в тази сесия</strong> <span>· ${formatNumberBG(book.currentPage)} от ${formatNumberBG(book.totalPages)} стр. общо · ${escapeHtml(book.author)}</span></p>
+                    </div>
                 </div>
                 <div class="journal-entry__margin">
                     ${sessionDateMarkup(log)}

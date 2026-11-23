@@ -18,13 +18,15 @@ function shelfMarkup(books) {
             <div class="shelf-row" data-shelf-row="${status}">
                 ${entries.map(book => {
                     const width = Math.round(Math.max(46, Math.min(76, 41 + 1.25 * Math.sqrt(Number(book.totalPages) || 0))));
-                    const author = width >= 68 && book.title.length <= 14 && book.author.length <= 20
+                    const covers = CoverService.coverCandidates(book);
+                    const author = !covers.length && width >= 68 && book.title.length <= 14 && book.author.length <= 20
                         ? `<span class="shelf-spine__author" aria-hidden="true">${escapeHtml(book.author)}</span>` : '';
                     return `<div class="shelf-slot">
-                        <button type="button" class="shelf-spine shelf-spine--${status}" style="--spine-width:${width}px"
+                        <button type="button" class="shelf-spine shelf-spine--${status}${covers.length ? ' shelf-spine--pictured' : ''}" style="--spine-width:${width}px"
                                 id="shelf-book-${book.id}" data-shelf-book="${book.id}"
                                 aria-haspopup="dialog" aria-controls="shelfPreview"
                                 aria-label="Преглед на ${escapeHtml(book.title)}">
+                            ${covers.length ? `<span class="shelf-spine__cover">${createCover(book, covers)}</span>` : ''}
                             <span class="shelf-spine__title" aria-hidden="true">${escapeHtml(book.title)}</span>
                             ${author}
                         </button>
@@ -101,7 +103,7 @@ function fillShelfSpread(book) {
     statusLabel.textContent = bookStatusLabel(status);
     document.getElementById('shelfPreviewPages').textContent = formatNumberBG(book.currentPage) + ' / ' + formatNumberBG(book.totalPages) + ' стр. · ' + percent + '%';
     document.getElementById('shelfPreviewMeter').value = percent;
-    document.getElementById('shelfPreviewFront').innerHTML = createCover(book, 'eager');
+    document.getElementById('shelfPreviewFront').innerHTML = createCover(book);
 
     const note = (book.notes || '').trim();
     document.getElementById('shelfPreviewNotes').textContent = note || 'Няма добавена бележка.';
