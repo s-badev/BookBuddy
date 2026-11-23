@@ -78,6 +78,20 @@
                     </div>
                     
                     <form id="bookForm" class="auth-form">
+                        <div class="form-group" id="coverSearchPicker">
+                            <label for="coverSearch">Търси книга по заглавие или автор</label>
+                            <div class="cover-search__picker">
+                                <input type="search" id="coverSearch" role="combobox" aria-autocomplete="list"
+                                       aria-expanded="false" aria-controls="coverSearchResults"
+                                       aria-describedby="coverSearchStatus" autocomplete="off" maxlength="240"
+                                       placeholder="напр. Под игото">
+                                <ul id="coverSearchResults" class="cover-search__results" role="listbox"
+                                    aria-label="Намерени книги" hidden></ul>
+                            </div>
+                            <p class="form-hint cover-search__status" id="coverSearchStatus" role="status"></p>
+                            <input type="hidden" name="coverUrl" id="coverUrl">
+                            <button type="button" id="clearSelectedCover" class="btn btn--ghost btn--sm cover-search__clear" hidden>Премахни избраната корица</button>
+                        </div>
                         <div class="form-group">
                             <label for="title">Заглавие на книгата <span class="required">*</span></label>
                             <div class="input-icon-wrap">
@@ -98,7 +112,7 @@
                             <label for="isbn">ISBN за корица <small>(по желание)</small></label>
                             <input type="text" id="isbn" name="isbn" placeholder="напр. 978-0-385-47257-9"
                                    aria-describedby="isbnHelp" spellcheck="false">
-                            <small class="form-hint" id="isbnHelp">Запази ISBN, за да потърсиш корица в Open Library. Изтрий ISBN и запази книгата, за да върнеш типографската корица.</small>
+                            <small class="form-hint" id="isbnHelp">При липса на избрана корица BookBuddy търси по ISBN в Open Library. Остави ISBN празен и премахни избраната корица за типографско оформление.</small>
                         </div>
 
                         <div class="form-row">
@@ -160,5 +174,6 @@
     <script src="src/services/coverService.js"></script>
     <script src="src/services/bookRepo.js"></script>
     <script src="src/form.js"></script>
+    <script src="src/coverSearch.js"></script>
 </body>
 </html>
