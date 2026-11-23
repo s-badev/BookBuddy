@@ -3337,3 +3337,82 @@ html:has(.shelf-preview[open]){overflow:hidden}
     gap:10px;
 }
 .journal-entry__cover{display:block;width:36px;aspect-ratio:2/3}
+
+/* Cover upload ("Своя корица") */
+.cover-upload{
+    padding:12px 14px;
+    border:1px solid var(--c-border);
+    border-inline-start:3px solid var(--c-accent);
+    border-radius:4px;
+    background:var(--c-subtle);
+    gap:10px;
+}
+.cover-upload__head{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:4px 12px;
+}
+.cover-upload__title{
+    font:600 var(--fs-sm)/1.3 var(--font);
+    color:var(--c-text);
+}
+.cover-upload__privacy{
+    font-size:var(--fs-xs);
+    color:var(--c-text-secondary);
+}
+.cover-upload__actions{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:8px 12px;
+}
+.cover-upload__btn{
+    background:var(--c-surface);
+    border-color:var(--c-line);
+    border-radius:4px;
+}
+.cover-upload__remove{
+    color:var(--c-text-secondary);
+}
+.cover-upload__preview{
+    margin:2px 0 0;
+    padding:10px 12px;
+    border:1px solid var(--c-border);
+    border-radius:4px;
+    background:var(--c-surface);
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+.cover-upload__preview[hidden]{
+    display:none;
+}
+.cover-upload__frame{
+    flex:none;
+    padding:6px;
+    border-radius:3px;
+    background:var(--c-art);
+    border:1px solid var(--c-line);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+.cover-upload__img{
+    display:block;
+    width:auto;
+    height:auto;
+    max-width:96px;
+    max-height:144px;
+    object-fit:contain;
+    border-radius:2px;
+}
+.cover-upload__meta{
+    font:italic var(--fs-xs)/1.45 var(--font-editorial);
+    color:var(--c-text-secondary);
+    overflow-wrap:anywhere;
+}
+.cover-upload__error{
+    margin:0;
+}

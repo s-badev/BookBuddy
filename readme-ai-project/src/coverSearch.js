@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let version = 0;
 
     function updateSelection() {
+        const controller = typeof CoverUpload !== 'undefined' ? CoverUpload.getFormController() : null;
+        if (controller) {
+            clearCover.hidden = true;
+            return;
+        }
         clearCover.hidden = !savedUrl.value;
     }
 
@@ -92,7 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
         isbn.value = book.isbn13 || book.isbn10 || '';
         isbn.setCustomValidity('');
         if (book.pageCount) document.getElementById('totalPages').value = book.pageCount;
-        savedUrl.value = CoverService.normalizeCoverUrl(book.coverUrl) || '';
+        const controller = typeof CoverUpload !== 'undefined' ? CoverUpload.getFormController() : null;
+        if (controller) {
+            controller.setSearchCover(book.coverUrl, book.source);
+        } else {
+            savedUrl.value = CoverService.normalizeCoverUrl(book.coverUrl) || '';
+        }
         input.value = book.title;
         closeResults();
         updateSelection();
@@ -153,7 +163,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function removeSavedCover() {
-        savedUrl.value = '';
+        const controller = typeof CoverUpload !== 'undefined' ? CoverUpload.getFormController() : null;
+        if (controller) {
+            controller.clearSearchCover();
+        } else {
+            savedUrl.value = '';
+        }
         updateSelection();
     }
     clearCover.addEventListener('click', () => {

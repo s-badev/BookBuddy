@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalPagesInput = document.getElementById('totalPages');
     const isbnInput = document.getElementById('isbn');
     const coverInput = document.getElementById('coverUrl');
+    const coverSourceInput = document.getElementById('coverSource');
 
     // --- Edit mode detection ---
     const params = new URLSearchParams(window.location.search);
@@ -23,7 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
             totalPagesInput.value = editingBook.totalPages;
             currentPageInput.value = editingBook.currentPage;
             isbnInput.value = editingBook.isbn || '';
-            coverInput.value = CoverService.normalizeCoverUrl(editingBook.coverUrl) || '';
+            coverInput.value = BookRepo.normalizeCoverUrl(editingBook.coverUrl) || '';
+            if (coverSourceInput) {
+                coverSourceInput.value = BookRepo.normalizeCoverSource(editingBook.coverSource, coverInput.value) || '';
+            }
             notesTextarea.value = editingBook.notes || '';
             charCount.textContent = `${(editingBook.notes || '').length} / 300`;
 
@@ -90,7 +94,8 @@ document.addEventListener('DOMContentLoaded', function() {
             currentPage: parseInt(document.getElementById('currentPage').value) || 0,
             notes: document.getElementById('notes').value.trim(),
             isbn,
-            coverUrl: coverInput.value
+            coverUrl: coverInput.value,
+            coverSource: coverSourceInput ? coverSourceInput.value : undefined
         };
 
         // Validate form data

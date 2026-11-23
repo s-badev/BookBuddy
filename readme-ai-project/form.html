@@ -90,7 +90,31 @@
                             </div>
                             <p class="form-hint cover-search__status" id="coverSearchStatus" role="status"></p>
                             <input type="hidden" name="coverUrl" id="coverUrl">
+                            <input type="hidden" name="coverSource" id="coverSource">
                             <button type="button" id="clearSelectedCover" class="btn btn--ghost btn--sm cover-search__clear" hidden>Премахни избраната корица</button>
+                        </div>
+
+                        <div class="form-group cover-upload" id="coverUploadGroup">
+                            <div class="cover-upload__head">
+                                <label for="coverFileInput" class="cover-upload__title" id="coverUploadLabel">Своя корица</label>
+                                <small class="form-hint cover-upload__privacy" id="coverUploadPrivacy">Снимката остава само на твоето устройство.</small>
+                            </div>
+                            <input type="file" id="coverFileInput" class="visually-hidden" accept="image/*"
+                                   aria-describedby="coverUploadPrivacy coverUploadError">
+                            <div class="cover-upload__actions">
+                                <button type="button" id="coverUploadBtn" class="btn btn--outline cover-upload__btn">
+                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                                    <span>Качи или снимай корица</span>
+                                </button>
+                                <button type="button" id="removeCoverBtn" class="btn btn--ghost btn--sm cover-upload__remove" hidden>Премахни корицата</button>
+                            </div>
+                            <figure class="cover-upload__preview" id="coverPreviewWrap" hidden>
+                                <div class="cover-upload__frame">
+                                    <img id="coverPreviewImg" class="cover-upload__img" alt="Преглед на избраната корица">
+                                </div>
+                                <figcaption class="cover-upload__meta" id="coverPreviewMeta"></figcaption>
+                            </figure>
+                            <p class="field-error cover-upload__error" id="coverUploadError" role="alert" aria-live="polite"></p>
                         </div>
                         <div class="form-group">
                             <label for="title">Заглавие на книгата <span class="required">*</span></label>
@@ -171,6 +195,7 @@
     </footer>
 
     <script src="src/utils/validate.js"></script>
+    <script src="src/coverUpload.js"></script>
     <script src="src/services/coverService.js"></script>
     <script src="src/services/bookRepo.js"></script>
     <script src="src/form.js"></script>
