@@ -732,6 +732,9 @@ function getJournalLogs(books) {
 function sessionEffect(book, previous, next) {
     const total = Number(book.totalPages);
     const current = Number(book.currentPage) || 0;
+    if (!Number.isSafeInteger(total) || total < 1) {
+        return { page: current, appliedPages: 0, completion: null, progressHeld: 'missing-total' };
+    }
     let completion = book.completion || null;
     const ownedCompletion = completion && previous && String(completion.logId) === String(previous.id);
     const knownApplied = Number.isSafeInteger(previous?.appliedPages) && previous.appliedPages >= 0;
@@ -750,7 +753,7 @@ function sessionEffect(book, previous, next) {
         return { page: current, appliedPages: oldApplied, completion };
     }
 
-    if (ambiguous) return { page: current, appliedPages: undefined, completion, preservedLegacyProgress: true };
+    if (ambiguous) return { page: current, appliedPages: undefined, completion, progressHeld: 'legacy' };
 
     const base = Math.max(0, current - oldApplied);
     const appliedPages = Math.min(next?.pages ?? 0, Math.max(0, total - base));
@@ -804,17 +807,17 @@ function handleLogSubmit(event) {
         form.elements.logPages.focus();
         return;
     }
-    let preservedLegacyProgress = effect.preservedLegacyProgress;
+    let progressHeld = effect.progressHeld;
     if (oldLog && !previous) {
         const oldBook = BookRepo.getBookById(Number(oldLog.bookId));
         if (oldBook) {
             const removal = sessionEffect(oldBook, oldLog, null);
-            preservedLegacyProgress ||= removal.preservedLegacyProgress;
-            if (!removal.preservedLegacyProgress) BookRepo.updateProgress(oldBook.id, removal.page, removal.completion);
+            progressHeld ||= removal.progressHeld;
+            if (!removal.progressHeld) BookRepo.updateProgress(oldBook.id, removal.page, removal.completion);
         }
     }
     if (effect.completion && effect.completion.logId === undefined) effect.completion.logId = saved.id;
-    if (!effect.preservedLegacyProgress) BookRepo.updateProgress(book.id, effect.page, effect.completion);
+    if (!effect.progressHeld) BookRepo.updateProgress(book.id, effect.page, effect.completion);
     // `book` still holds the state before this session.
     const finished = getBookStatus(book) !== 'finished' &&
         getBookStatus(BookRepo.getBookById(book.id)) === 'finished';
@@ -827,7 +830,7 @@ function handleLogSubmit(event) {
         opener.focus({ preventScroll: true });
     }
     const message = finished ? finishedToast(book) : oldLog ? 'Записът е обновен!' : 'Сесията е записана!';
-    showToast(preservedLegacyProgress ? message + ' Напредъкът от стария запис е запазен.' : message);
+    showToast(message + progressHoldMessage(progressHeld));
 }
 
 let detailsContext = null;
@@ -1062,14 +1065,18 @@ function deleteReadingSession(id) {
     const book = BookRepo.getBookById(Number(log.bookId));
     const effect = book ? sessionEffect(book, log, null) : null;
     LogRepo.deleteLog(id);
-    if (effect && !effect.preservedLegacyProgress) {
+    if (effect && !effect.progressHeld) {
         BookRepo.updateProgress(book.id, effect.page, effect.completion);
     }
     refreshAll();
     document.querySelector('#activity h3').focus({ preventScroll: true });
-    showToast(effect?.preservedLegacyProgress
-        ? 'Записът е изтрит. Напредъкът от стария запис е запазен.'
-        : 'Записът е изтрит.');
+    showToast('Записът е изтрит.' + progressHoldMessage(effect?.progressHeld));
+}
+
+function progressHoldMessage(reason) {
+    if (reason === 'legacy') return ' Напредъкът от стария запис е запазен.';
+    if (reason === 'missing-total') return ' За промяна на напредъка въведи общ брой страници.';
+    return '';
 }
 
 function formatDateBG(isoStr) {

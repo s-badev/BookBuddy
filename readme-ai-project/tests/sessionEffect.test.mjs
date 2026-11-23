@@ -14,7 +14,7 @@ test('ambiguous legacy edits and deletes preserve the stored end-of-book progres
         const effect = sessionEffect(finished, older, next);
         assert.equal(effect.page, 100);
         assert.equal(effect.appliedPages, undefined);
-        assert.equal(effect.preservedLegacyProgress, true);
+        assert.equal(effect.progressHeld, 'legacy');
     }
 });
 
@@ -22,7 +22,7 @@ test('metadata-only edits do not give a capped legacy session an invented page d
     const effect = sessionEffect(finished, older, { ...older, note: 'Updated' });
     assert.equal(effect.page, 100);
     assert.equal(effect.appliedPages, undefined);
-    assert.equal(effect.preservedLegacyProgress, undefined);
+    assert.equal(effect.progressHeld, undefined);
 });
 
 test('known page contributions and unambiguous legacy edits still apply correctly', () => {
@@ -44,4 +44,13 @@ test('persist the known page contribution even when it equals all pages read', (
     assert.equal(repo.getLogById(newRecord.id).appliedPages, 4);
     repo.updateLog(newRecord.id, { pages: 6, appliedPages: 6 });
     assert.equal(repo.getLogById(newRecord.id).appliedPages, 6);
+});
+
+test('a reading session without a known total preserves the book and records zero applied pages', () => {
+    for (const totalPages of [undefined, null, 0, 'unknown']) {
+        const effect = sessionEffect({ currentPage: 15, totalPages }, null, older);
+        assert.equal(effect.page, 15);
+        assert.equal(effect.appliedPages, 0);
+        assert.equal(effect.progressHeld, 'missing-total');
+    }
 });
