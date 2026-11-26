@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'bookbuddy-static-';
-const CACHE_NAME = CACHE_PREFIX + 'v12';
+const CACHE_NAME = CACHE_PREFIX + 'v13';
 const scope = new URL(self.registration.scope);
 const files = [
     'index.html', 'form.html', 'favicon.svg', 'styles/style.css',

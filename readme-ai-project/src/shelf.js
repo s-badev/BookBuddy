@@ -275,7 +275,13 @@ function navigateShelf(event) {
 
 function initLibraryShelf() {
     const host = document.getElementById('booksList');
-    host.addEventListener('keydown', navigateShelf);
+    host.addEventListener('keydown', event => {
+        event.target.classList.remove('shelf-spine--pointer-focus');
+        navigateShelf(event);
+    });
+    host.addEventListener('focusout', event => {
+        event.target.classList.remove('shelf-spine--pointer-focus');
+    });
     host.addEventListener('focusin', event => {
         const button = event.target.closest('[data-shelf-book]');
         if (!button) return;
@@ -308,13 +314,13 @@ function initBookshelf() {
             event.target.closest('.shelf-slot')?.querySelector('[data-shelf-book]');
         if (spine && !activeShelf) showShelfPreview(Number(spine.dataset.shelfBook), spine);
     });
-    document.getElementById('shelfPreviewClose').addEventListener('click', closeShelfPreview);
+    document.getElementById('shelfPreviewClose').addEventListener('click', event => closeShelfPreview(event.detail > 0));
     dialog.addEventListener('cancel', event => {
         event.preventDefault();
         closeShelfPreview();
     });
     dialog.addEventListener('click', event => {
-        if (event.target === dialog) closeShelfPreview();
+        if (event.target === dialog) closeShelfPreview(event.detail > 0);
     });
     dialog.addEventListener('close', () => {
         if (activeShelf && !dialog.open) finishShelfPreview(activeShelf);
@@ -409,7 +415,7 @@ function showShelfPreview(bookId, source, focusId) {
         bookId, dialog,
         row: row?.dataset.shelfRow,
         index: row ? Array.from(row.querySelectorAll('[data-shelf-book]')).indexOf(source) : 0,
-        closing: false, closeFade: null
+        closing: false, closeFade: null, pointerDismissal: false
     };
     activeShelf = state;
     fillShelfSpread(book);
@@ -428,10 +434,11 @@ function showShelfPreview(bookId, source, focusId) {
     }
 }
 
-function closeShelfPreview() {
+function closeShelfPreview(pointerDismissal = false) {
     const state = activeShelf;
     if (!state || state.closing) return;
     state.closing = true;
+    state.pointerDismissal = pointerDismissal;
     if (reducedMotion.matches) {
         finishShelfPreview(state);
         return;
@@ -463,17 +470,19 @@ function isShelfSpineVisible(source) {
 }
 
 function restoreShelfFocus(state) {
-    const original = document.getElementById('shelf-book-' + state.bookId);
-    if (original) {
-        original.focus({ preventScroll: true });
-        return;
+    let spine = document.getElementById('shelf-book-' + state.bookId);
+    if (!spine) {
+        const row = [...document.querySelectorAll('[data-shelf-row]')].find(element => element.dataset.shelfRow === state.row);
+        const nearby = Array.from(row?.querySelectorAll('[data-shelf-book]') || [])
+            .map((button, index) => ({ button, distance: Math.abs(index - state.index) }))
+            .sort((a, b) => a.distance - b.distance)
+            .find(({ button }) => isShelfSpineVisible(button));
+        spine = nearby?.button;
     }
-    const row = [...document.querySelectorAll('[data-shelf-row]')].find(element => element.dataset.shelfRow === state.row);
-    const nearby = Array.from(row?.querySelectorAll('[data-shelf-book]') || [])
-        .map((spine, index) => ({ spine, distance: Math.abs(index - state.index) }))
-        .sort((a, b) => a.distance - b.distance)
-        .find(({ spine }) => isShelfSpineVisible(spine));
-    const target = nearby?.spine || document.getElementById('bookSearch');
+
+    // Chrome can retain keyboard focus styling when the already-focused close button is clicked.
+    spine?.classList.toggle('shelf-spine--pointer-focus', state.pointerDismissal);
+    const target = spine || document.getElementById('bookSearch');
     target.focus({ preventScroll: true });
 }
 
