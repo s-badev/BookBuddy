@@ -321,9 +321,14 @@ function initBookshelf() {
     document.getElementById('shelfPreviewLog').addEventListener('click', () => useShelfAction('log'));
     document.getElementById('shelfPreviewDetails').addEventListener('click', () => useShelfAction('details'));
     reducedMotion.addEventListener('change', () => {
-        if (reducedMotion.matches) settleShelfOnLayoutChange();
+        const state = activeShelf;
+        if (!state || !reducedMotion.matches) return;
+        if (state.closing) finishShelfPreview(state);
+        else {
+            state.fade?.cancel();
+            state.fade = null;
+        }
     });
-    window.addEventListener('resize', settleShelfOnLayoutChange);
     window.addEventListener('pagehide', closeShelfForCatalogueChange);
 }
 
@@ -388,146 +393,23 @@ function fillShelfSpread(book) {
     }
 }
 
-const shelfOpenMs = 520;
-const shelfReturnMs = 390;
+const shelfFadeMs = 140;
 
-function captureShelfSource(source) {
-    const binding = source.querySelector('.shelf-binding');
-    const plane = binding || source;
-    const style = getComputedStyle(plane);
-    const transform = getComputedStyle(binding ? source.parentElement : source).transform;
-    const matrix = new DOMMatrix(transform === 'none' ? undefined : transform);
-    return {
-        binding, rect: plane.getBoundingClientRect(),
-        paintedWidth: parseFloat(style.width), paintedHeight: parseFloat(style.height),
-        angle: Math.atan2(matrix.b, matrix.a)
-    };
-}
-
-function measureShelfFlight(state, before) {
-    const { source, book, dialog } = state;
-    if (!measureShelfSpine(source)) return null;
-    const target = dialog.querySelector('#shelfPreviewFront');
-    const destination = target.getBoundingClientRect();
-    const panel = dialog.querySelector('.spread__book').getBoundingClientRect();
-    if (!destination.width || destination.top < panel.top - 1 || destination.bottom > panel.bottom + 1) return null;
-
-    const { binding, rect, paintedWidth, paintedHeight, angle } = before || captureShelfSource(source);
-    const faceOut = source.classList.contains('shelf-faceout__book');
-    const look = ShelfLayout.bookLook(book);
-    const height = binding || faceOut ? paintedHeight : look.height;
-    const width = height * 2 / 3;
-    const thickness = binding ? paintedWidth : look.thickness;
-    const sourceX = rect.left + rect.width / 2;
-    const sourceY = rect.top + rect.height / 2;
-    const start = {
-        x: sourceX, y: sourceY, z: 0, roll: angle * 180 / Math.PI, yaw: 0, pitch: 0, sx: 1, sy: 1, sz: 1
-    };
-    if (binding) {
-        // At 90°, the whole spine is on a single plane. Offset its center and depth
-        // so that plane occupies the exact visible rectangle before the book moves.
-        start.yaw = 90;
-        start.x += Math.cos(angle) * thickness / 2;
-        start.y += Math.sin(angle) * thickness / 2;
-        start.z = -width / 2;
-    } else if (!faceOut) {
-        // A flat book presents its bottom page edge at rest.
-        start.pitch = 90;
-        start.sx = paintedWidth / width;
-        start.sz = paintedHeight / thickness;
-        start.y -= paintedHeight / 2;
-        start.z = -height / 2;
-    }
-    const end = {
-        x: destination.left + destination.width / 2, y: destination.top + destination.height / 2,
-        z: 0, roll: 0, yaw: 0, pitch: 0, sx: destination.width / width, sy: destination.height / height, sz: 1
-    };
-    return { binding, height, width, thickness, start, end, destination };
-}
-
-function shelfFlightFrames({ width, height, start, end }) {
-    const pull = {
-        ...start,
-        x: start.x + (end.x - start.x) * .1,
-        y: start.y - 19,
-        z: start.z + 40
-    };
-    const turn = {
-        ...end,
-        x: end.x + (pull.x - end.x) * .13,
-        y: end.y + (pull.y - end.y) * .13,
-        z: 14, yaw: start.yaw * .17, pitch: start.pitch ? start.pitch * .17 : -7, roll: start.roll * .22
-    };
-    // Keep the viewing center on the volume so an off-center slot does not
-    // still show the cover edge at its resting 90° angle.
-    return [start, pull, turn, end].map((pose, index) => ({
-        offset: [0, .27, .82, 1][index],
-        easing: ['cubic-bezier(.30,0,.27,1)', 'cubic-bezier(.45,0,.25,1)', 'ease-out', 'linear'][index],
-        transform: `translate3d(${pose.x - width / 2}px,${pose.y - height / 2}px,0) perspective(1200px) translateZ(${pose.z}px)
-            rotateZ(${pose.roll}deg) rotateY(${pose.yaw}deg) rotateX(${pose.pitch}deg)
-            scale3d(${pose.sx},${pose.sy},${pose.sz})`
-    }));
-}
-
-function makeShelfFlight(state, geometry) {
-    const { binding, height, width, thickness, destination } = geometry;
-    const scene = hideShelfDecoration(shelfElement('div', 'shelf-flight', state.dialog));
-    const volume = shelfElement('div', 'shelf-flight__book', scene);
-    const style = getComputedStyle(state.source);
-    const palette = ShelfLayout.bookLook(state.book).palette;
-    volume.style.width = width + 'px';
-    volume.style.height = height + 'px';
-    volume.style.setProperty('--flight-thickness', thickness + 'px');
-    volume.style.setProperty('--spine-cloth', style.getPropertyValue('--spine-cloth').trim() || palette.spine);
-    volume.style.setProperty('--spine-ink', style.getPropertyValue('--spine-ink').trim() || palette.ink);
-    for (const property of ['--shelf-serif', '--shelf-sans', '--c-binding-gilt', '--c-binding-label', '--c-binding-label-ink']) {
-        volume.style.setProperty(property, style.getPropertyValue(property));
-    }
-
-    const front = shelfElement('div', 'shelf-flight__front', volume);
-    const art = shelfElement('div', 'shelf-flight__art', front);
-    // Keep the cover's layout at its final size so the move back into the panel
-    // cannot change its type, image fitting, or fallback.
-    art.style.width = destination.width + 'px';
-    art.style.height = destination.height + 'px';
-    art.style.transform = `scale(${width / destination.width},${height / destination.height})`;
-    art.append(state.cover);
-    const spine = binding ? binding.cloneNode(true) : shelfElement('div', 'shelf-binding');
-    spine.classList.add('shelf-flight__spine');
-    volume.append(spine);
-    for (const face of ['back', 'edge', 'top', 'bottom']) {
-        shelfElement('div', 'shelf-flight__' + face, volume);
-    }
-    return { scene, volume };
-}
-
-function stopShelfFlight(state) {
-    const motion = state.motion;
-    if (!motion) return;
-    state.motion = null;
-    state.dialog.querySelector('#shelfPreviewFront').append(state.cover);
-    motion.scene.remove();
-    motion.animations.forEach(animation => animation.cancel());
-}
-
-function runShelfFlight(state, geometry) {
-    const { scene, volume } = makeShelfFlight(state, geometry);
-    const options = {
-        duration: state.closing ? shelfReturnMs : shelfOpenMs,
-        direction: state.closing ? 'reverse' : 'normal',
+function fadeShelfPreview(state, opacity, from = Number(getComputedStyle(state.dialog).opacity)) {
+    state.fade?.cancel();
+    const fade = state.dialog.animate([{ opacity: from }, { opacity }], {
+        duration: shelfFadeMs,
+        easing: 'ease-out',
         fill: 'both'
-    };
-    const flight = volume.animate(shelfFlightFrames(geometry), options);
-    const shade = state.dialog.querySelector('.shelf-preview__shade')
-        .animate([{ opacity: 0 }, { opacity: 1 }], options);
-    const panel = state.dialog.querySelector('.spread__book')
-        .animate([{ opacity: 0 }, { opacity: 0, offset: .27 }, { opacity: 1 }], options);
-    const moving = { scene, animations: [flight, shade, panel] };
-    state.motion = moving;
-    flight.finished.then(() => {
-        if (activeShelf !== state || state.motion !== moving) return;
+    });
+    state.fade = fade;
+    fade.finished.then(() => {
+        if (activeShelf !== state || state.fade !== fade) return;
         if (state.closing) finishShelfPreview(state);
-        else stopShelfFlight(state);
+        else {
+            state.fade = null;
+            fade.cancel();
+        }
     }, () => {});
 }
 
@@ -538,50 +420,30 @@ function showShelfPreview(bookId, source, focusId) {
     const dialog = document.getElementById('shelfPreview');
     const row = source?.closest('[data-shelf-row]');
     const state = {
-        bookId, book, source, dialog,
+        bookId, dialog,
         row: row?.dataset.shelfRow,
         index: row ? Array.from(row.querySelectorAll('[data-shelf-book]')).indexOf(source) : 0,
-        slot: source?.parentElement,
-        closing: false, motion: null
+        closing: false, fade: null
     };
-    // Capture the painted spine before showModal changes pointer/focus state.
-    const before = !focusId && !reducedMotion.matches && measureShelfSpine(source) ? captureShelfSource(source) : null;
     activeShelf = state;
     fillShelfSpread(book);
-    state.cover = dialog.querySelector('#shelfPreviewFront .book-cover');
     dialog.showModal();
     dialog.querySelector('.spread__book').scrollTop = 0;
-    const geometry = before && measureShelfFlight(state, before);
-    state.slot?.classList.add('shelf-slot--vacant');
     if (focusId) document.getElementById(focusId).focus({ preventScroll: true });
-    if (geometry) runShelfFlight(state, geometry);
+    else if (!reducedMotion.matches) fadeShelfPreview(state, 1, 0);
 }
 
 function closeShelfPreview() {
     const state = activeShelf;
     if (!state || state.closing) return;
     state.closing = true;
-    if (!reducedMotion.matches && state.motion && Number(state.motion.animations[0].currentTime) > 16) {
-        for (const animation of state.motion.animations) {
-            animation.reverse();
-            animation.updatePlaybackRate(-shelfOpenMs / shelfReturnMs);
-        }
-        return;
-    }
-    const geometry = !reducedMotion.matches && !state.motion && measureShelfFlight(state);
-    if (geometry) runShelfFlight(state, geometry);
-    else finishShelfPreview(state);
-}
-
-function settleShelfOnLayoutChange() {
-    if (!activeShelf?.motion) return;
-    if (activeShelf.closing) finishShelfPreview(activeShelf);
-    else stopShelfFlight(activeShelf);
+    if (reducedMotion.matches) finishShelfPreview(state);
+    else fadeShelfPreview(state, 0);
 }
 
 // A spine counts as reachable when enough of it is visible inside its row and the viewport.
-function measureShelfSpine(source) {
-    if (!source?.isConnected) return null;
+function isShelfSpineVisible(source) {
+    if (!source?.isConnected) return false;
     const rect = source.closest('.shelf-slot').getBoundingClientRect();
     const row = source.closest('[data-shelf-row]').getBoundingClientRect();
     const header = document.querySelector('.navbar').getBoundingClientRect().bottom;
@@ -589,26 +451,28 @@ function measureShelfSpine(source) {
     const bottom = nav.offsetHeight ? nav.getBoundingClientRect().top : innerHeight;
     const visibleWidth = Math.min(rect.right, row.right, innerWidth) - Math.max(rect.left, row.left, 0);
     const visibleHeight = Math.min(rect.bottom, row.bottom, bottom) - Math.max(rect.top, row.top, header);
-    return visibleWidth >= 12 && visibleHeight >= 24 ? rect : null;
+    return visibleWidth >= 12 && visibleHeight >= 24;
 }
 
 function restoreShelfFocus(state) {
     const original = document.getElementById('shelf-book-' + state.bookId);
+    if (original) {
+        original.focus({ preventScroll: true });
+        return;
+    }
     const row = [...document.querySelectorAll('[data-shelf-row]')].find(element => element.dataset.shelfRow === state.row);
     const nearby = Array.from(row?.querySelectorAll('[data-shelf-book]') || [])
         .map((spine, index) => ({ spine, distance: Math.abs(index - state.index) }))
         .sort((a, b) => a.distance - b.distance)
-        .find(({ spine }) => measureShelfSpine(spine));
-    const target = measureShelfSpine(original) ? original : nearby?.spine;
-    if (target) target.focus({ preventScroll: true });
-    else document.getElementById('bookSearch').focus({ preventScroll: true });
+        .find(({ spine }) => isShelfSpineVisible(spine));
+    const target = nearby?.spine || document.getElementById('bookSearch');
+    target.focus({ preventScroll: true });
 }
 
 function finishShelfPreview(state, nextAction) {
     if (activeShelf !== state) return;
     activeShelf = null;
-    stopShelfFlight(state);
-    state.slot?.classList.remove('shelf-slot--vacant');
+    state.fade?.cancel();
     document.getElementById('shelfPreviewFront').replaceChildren();
     if (state.dialog.open) state.dialog.close();
     if (nextAction) nextAction();
