@@ -957,8 +957,17 @@ ul{list-style:none}
 
 /* ==================== Library ==================== */
 .books{padding-block:24px 36px}
-.books__header{margin-bottom:10px}
+.books__header{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px 16px;
+    margin-bottom:10px;
+}
 .books__header .section-subtitle{font-size:var(--fs-sm)}
+.books__demo-actions{display:flex;flex-wrap:wrap;gap:8px}
+.books__header .btn{min-height:44px;white-space:normal}
 .books-toolbar{
     display:grid;
     grid-template-columns:minmax(0,1fr) auto auto;

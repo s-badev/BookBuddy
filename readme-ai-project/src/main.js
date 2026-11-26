@@ -1153,7 +1153,49 @@ function seedDemoData() {
             completion: { dateISO: year + '-08-17' } },
         { id: 8999991, title: 'Война и мир', author: 'Лев Толстой', totalPages: 1196, currentPage: 1196, notes: '',
             completion: { dateISO: year + '-07-21' } }
-    ].map(book => ({ ...book, createdAt: today.toISOString() }));
+    ];
+    const reading = [
+        ['Времеубежище', 'Георги Господинов', 384, 138],
+        ['Дюн', 'Франк Хърбърт', 688, 246],
+        ['Шогун', 'Джеймс Клавел', 1152, 312],
+        ['Кратка история на почти всичко', 'Бил Брайсън', 576, 97],
+        ['Стив Джобс', 'Уолтър Айзъксън', 656, 402],
+        ['Шестото измиране', 'Елизабет Колбърт', 352, 68],
+        ['Мъж на име Уве', 'Фредрик Бакман', 352, 181],
+        ['Крадецът на книги', 'Маркус Зюсак', 560, 45],
+        ['Пътят на кралете', 'Брандън Сандерсън', 1008, 724],
+        ['Пътуване към себе си', 'Блага Димитрова', 288, 62]
+    ].map(([title, author, totalPages, currentPage]) => ({ title, author, totalPages, currentPage }));
+    const finished = [
+        ['Тютюн', 'Димитър Димов', 736],
+        ['Железният светилник', 'Димитър Талев', 472],
+        ['И не остана нито един', 'Агата Кристи', 256],
+        ['Баща Горио', 'Оноре дьо Балзак', 320],
+        ['Оръжия, вируси и стомана', 'Джаред Даймънд', 528],
+        ['Човекът в търсене на смисъл', 'Виктор Франкъл', 192]
+    ].map(([title, author, totalPages]) => ({ title, author, totalPages, currentPage: totalPages }));
+    const wishlist = [
+        ['Физика на тъгата', 'Георги Господинов', 336],
+        ['Възвишение', 'Милен Русков', 448],
+        ['Калуня-каля', 'Георги Божинов', 360],
+        ['Диви разкази', 'Николай Хайтов', 256],
+        ['Септември', 'Гео Милев', 64],
+        ['Стихотворения', 'Пейо Яворов', 144],
+        ['Убийство в Ориент експрес', 'Агата Кристи', 288],
+        ['Момичето с драконовата татуировка', 'Стиг Ларшон', 576],
+        ['Игра на тронове', 'Джордж Р. Р. Мартин', 832],
+        ['Властелинът на пръстените', 'Дж. Р. Р. Толкин', 1136],
+        ['Лявата ръка на мрака', 'Урсула Ле Гуин', 336],
+        ['Проблемът с трите тела', 'Лю Цъсин', 432],
+        ['Хиперион', 'Дан Симънс', 528],
+        ['Космос', 'Карл Сейгън', 416],
+        ['Дневникът на Ане Франк', 'Ане Франк', 352],
+        ['Рубикон', 'Том Холанд', 448],
+        ['Думи на сияние', 'Брандън Сандерсън', 1088]
+    ].map(([title, author, totalPages]) => ({ title, author, totalPages, currentPage: 0 }));
+    const addedBooks = [...reading, ...finished, ...wishlist].map((book, index) => ({
+        ...book, id: 8999990 - index, notes: ''
+    }));
 
     const logs = [
         { id: 'demo-today', bookId: '9000008', dateISO: daysAgo(0), pages: 12,
@@ -1196,15 +1238,20 @@ function seedDemoData() {
         { id: 'demo-prior', bookId: '9000002', dateISO: priorDate, pages: 24, note: 'Последната сесия за годината.' }
     ].map((log, index) => ({ ...log, createdAt: now - index }));
 
-    appStorage.setItem(BookRepo.STORAGE_KEY, JSON.stringify(books));
+    const createdAt = today.toISOString();
+    appStorage.setItem(BookRepo.STORAGE_KEY, JSON.stringify([...books, ...addedBooks].map(book => ({ ...book, createdAt }))));
     appStorage.setItem(LogRepo.STORAGE_KEY, JSON.stringify(logs));
     appStorage.removeItem(ChallengeRepo.STORAGE_KEY);
 }
-function clearAllData() {
+function clearLibraryStorage() {
     for (const key of [BookRepo.STORAGE_KEY, LogRepo.STORAGE_KEY, SettingsRepo.STORAGE_KEY, ChallengeRepo.STORAGE_KEY]) {
         appStorage.removeItem(key);
     }
     appStorage.removeItem('bookbuddy_theme');
+}
+
+function clearPersonalData() {
+    clearLibraryStorage();
     ThemeSwitcher.applyTheme('system');
     document.getElementById('themeSelect').value = 'system';
     refreshAll();
@@ -1218,22 +1265,31 @@ function initDemoButtons() {
         appStorage.setItem('bookbuddy_demo_initialized', '1');
     }
 
-    const seed = document.getElementById('seedDemoBtn');
-    seed.hidden = !isDemo;
+    const personalClear = document.getElementById('clearDataBtn');
+    personalClear.hidden = isDemo;
     document.getElementById('openDemoLink').hidden = isDemo;
-    seed.addEventListener('click', () => {
-        if (!isDemo || !confirm('Да заменя ли книгите и сесиите в тази демо библиотека с примерните записи?')) return;
-        seedDemoData();
-        refreshAll();
-        showToast('Демо данните са възстановени.');
-    });
+    document.getElementById('demoLibraryActions').hidden = !isDemo;
 
-    document.getElementById('clearDataBtn').addEventListener('click', () => {
-        const scope = isDemo ? 'в тази демо библиотека' : 'в личната библиотека';
-        if (confirm('Да изтрия ли всички книги, сесии, настройки, тема и данни за предизвикателствата ' + scope + '?')) {
-            clearAllData();
-        }
-    });
+    if (isDemo) {
+        document.getElementById('seedDemoBtn').addEventListener('click', () => {
+            if (!confirm('Да заменя ли книгите и сесиите в тази демо библиотека с примерните записи?')) return;
+            seedDemoData();
+            refreshAll();
+            showToast('Демо данните са възстановени.');
+        });
+        document.getElementById('clearDemoBtn').addEventListener('click', () => {
+            if (!confirm('Да изчистя ли примерната библиотека и да се върна към моята библиотека?')) return;
+            clearLibraryStorage();
+            appStorage.removeItem('bookbuddy_demo_initialized');
+            window.location.replace(document.getElementById('personalLibraryLink').href);
+        });
+    } else {
+        personalClear.addEventListener('click', () => {
+            if (confirm('Да изтрия ли всички книги, сесии, настройки, тема и данни за предизвикателствата в личната библиотека?')) {
+                clearPersonalData();
+            }
+        });
+    }
 }
 
 

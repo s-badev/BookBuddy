@@ -64,7 +64,7 @@
     </nav>
 
     <div class="demo-notice" id="demoNotice" hidden>
-        <div class="container">Демо библиотека · <a href="index.html" data-personal-library>Към личната библиотека</a></div>
+        <div class="container">Демо библиотека</div>
     </div>
     <script>if (typeof isDemo !== 'undefined' && isDemo) document.getElementById('demoNotice').hidden = false;</script>
 
@@ -166,8 +166,16 @@
         <section class="books" id="books">
             <div class="container">
                 <div class="books__header">
-                    <h2 class="section-title" id="library" tabindex="-1">Моята библиотека</h2>
-                    <p class="section-subtitle" id="libraryCount"></p>
+                    <div>
+                        <h2 class="section-title" id="library" tabindex="-1">Моята библиотека</h2>
+                        <p class="section-subtitle" id="libraryCount"></p>
+                    </div>
+                    <a href="index.html?demo=1#library" id="openDemoLink" class="btn btn--primary">Зареди примерни книги</a>
+                    <div class="books__demo-actions" id="demoLibraryActions" hidden>
+                        <a href="index.html#library" id="personalLibraryLink" class="btn btn--outline" data-personal-library>Към моята библиотека</a>
+                        <button type="button" id="seedDemoBtn" class="btn btn--outline">Възстанови демо данните</button>
+                        <button type="button" id="clearDemoBtn" class="btn btn--outline">Изчисти примерните данни</button>
+                    </div>
                 </div>
 
                 <!-- Books toolbar: search / filter / sort -->
@@ -332,9 +340,7 @@
             <span>© 2026 BookBuddy. Всички права запазени.</span>
             <a class="footer__credit" href="https://openlibrary.org/">Open Library</a> · <a class="footer__credit" href="https://books.google.com/">Google Books</a>
             <div class="footer__actions">
-                <a href="index.html?demo=1" target="_blank" rel="noopener" id="openDemoLink" class="btn btn--ghost btn--sm">Отвори демо библиотека</a>
-                <button type="button" id="seedDemoBtn" class="btn btn--ghost btn--sm" hidden>Възстанови демо данните</button>
-                <button type="button" id="clearDataBtn" class="btn btn--ghost btn--sm btn--ghost-danger">Изчисти данните</button>
+                <button type="button" id="clearDataBtn" class="btn btn--ghost btn--sm btn--ghost-danger">Изчисти личните данни</button>
             </div>
         </div>
     </footer>
