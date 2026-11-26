@@ -2472,6 +2472,7 @@ html:has(.shelf-preview[open]){overflow:hidden}
 .cover-art{position:absolute;inset:0;pointer-events:none;z-index:0}
 .cover-art i{position:absolute;display:block;border:1px solid currentColor;opacity:.45}
 .book-cover--finished .cover-art i{border-color:var(--c-foil);opacity:.55}
+.cover-art--deep .book-cover__imprint b{border-block:0}
 .cover-art--deep .cover-art i{border-radius:50%;width:90%;height:42%;left:28%;bottom:0;transform:rotate(-32deg)}
 .cover-art--deep .cover-art i:nth-child(2){bottom:6%;left:22%}
 .cover-art--deep .cover-art i:nth-child(3){bottom:12%;left:16%}
