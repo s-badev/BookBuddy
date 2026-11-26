@@ -99,9 +99,11 @@ function makeShelfStack(books, parent) {
         slot.style.setProperty('--spine-ink', look.palette.ink);
         slot.style.setProperty('--spine-width', stackBookWidth(book) + 'px');
         const button = makeShelfButton(book, 'shelf-flat', slot);
-        for (const className of ['shelf-flat__board', 'shelf-flat__pages', 'shelf-flat__board']) {
-            hideShelfDecoration(shelfElement('span', className, button));
-        }
+        hideShelfDecoration(shelfElement('span', 'shelf-flat__board', button));
+        const spine = hideShelfDecoration(shelfElement('span', 'shelf-binding shelf-binding--' + look.kind, button));
+        shelfElement('span', 'shelf-flat__title', spine).textContent = book.title;
+        shelfElement('span', 'shelf-binding__shine', spine);
+        hideShelfDecoration(shelfElement('span', 'shelf-flat__board', button));
     }
 }
 
