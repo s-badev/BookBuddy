@@ -1705,7 +1705,16 @@ html:has(.shelf-preview[open]){overflow:hidden}
     color:var(--c-text);
 }
 .shelf-preview::backdrop{background:transparent}
-.shelf-preview__shade{position:fixed;inset:0;z-index:-1;pointer-events:none;background:#080e20b8}
+.shelf-preview__shade{position:fixed;inset:0;z-index:-2;pointer-events:none;background:#080e20b8}
+.shelf-preview::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:-1;
+    border-radius:6px;
+    box-shadow:var(--sh-xl);
+    pointer-events:none;
+}
 
 .spread__book{
     display:grid;
@@ -1713,20 +1722,31 @@ html:has(.shelf-preview[open]){overflow:hidden}
     max-height:calc(100dvh - 32px);
     overflow:auto;
     border-radius:6px;
-    box-shadow:var(--sh-xl);
 }
 .spread__leaf{
     min-width:0;
     padding:clamp(20px,3vw,34px);
-    background:var(--c-surface);
 }
 .spread__leaf--left{
+    position:relative;
+    isolation:isolate;
+    border-inline-end:1px solid transparent;
+}
+.spread__leaf--left::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    inset-inline-end:-1px;
+    z-index:-1;
+    pointer-events:none;
     border-radius:6px 0 0 6px;
     border-inline-end:1px solid var(--c-line);
+    background:var(--c-surface);
     box-shadow:inset -14px 0 18px -14px var(--c-gutter-shade);
 }
 .spread__leaf--right{
     padding-top:64px;
+    background:var(--c-surface);
     border-radius:0 6px 6px 0;
     box-shadow:inset 14px 0 18px -14px var(--c-gutter-shade);
 }
@@ -1738,6 +1758,9 @@ html:has(.shelf-preview[open]){overflow:hidden}
 }
 .shelf-preview__front{width:100%;aspect-ratio:2/3}
 .shelf-preview__front .book-cover{height:100%}
+.shelf-preview__front .book-cover__image{opacity:0;transition:opacity 120ms ease-out}
+.shelf-preview__front .book-cover--loaded .book-cover__image{opacity:1}
+.shelf-preview--opening .shelf-preview__front:not(.shelf-preview__front--image-ready) .book-cover__image{opacity:0}
 .shelf-preview__info{display:grid;gap:4px;min-width:0;overflow-wrap:anywhere}
 .shelf-preview__info h2{
     font:500 clamp(1.5rem,3vw,2.3rem)/1.04 var(--font-editorial);
@@ -1786,6 +1809,12 @@ html:has(.shelf-preview[open]){overflow:hidden}
     .spread__book{grid-template-columns:minmax(0,1fr)}
     .spread__leaf--left{
         padding-top:62px;
+        border-inline-end:0;
+        border-bottom:1px solid transparent;
+    }
+    .spread__leaf--left::before{
+        inset-inline-end:0;
+        bottom:-1px;
         border-radius:6px 6px 0 0;
         border-inline-end:0;
         border-bottom:1px solid var(--c-line);
@@ -1794,6 +1823,22 @@ html:has(.shelf-preview[open]){overflow:hidden}
     .spread__leaf--right{padding-top:20px;border-radius:0 0 6px 6px;box-shadow:none}
     .spread__hero{grid-template-columns:minmax(0,110px) minmax(0,1fr)}
 }
+
+@media(prefers-reduced-motion:no-preference){
+    .shelf-preview--opening .shelf-preview__shade{animation:shelf-preview-shade-in 156ms ease-out both}
+    .shelf-preview--opening .shelf-preview__front{animation:shelf-preview-cover-in 156ms cubic-bezier(.2,.75,.25,1) both}
+    .shelf-preview--opening::before,
+    .shelf-preview--opening .spread__leaf--left::before,
+    .shelf-preview--opening :is(.spread__leaf--right,.shelf-preview__info,.shelf-preview__actions,.shelf-preview__close){
+        animation:shelf-preview-panel-in 188ms ease-out 72ms both;
+    }
+}
+@keyframes shelf-preview-shade-in{from{opacity:0}to{opacity:1}}
+@keyframes shelf-preview-cover-in{
+    from{opacity:0;transform:scale(.96)}
+    to{opacity:1;transform:scale(1)}
+}
+@keyframes shelf-preview-panel-in{from{opacity:0}to{opacity:1}}
 
 /* ==================== 18b. Motion components ====================
    Built on the motion tokens. Every effect animates only transform and

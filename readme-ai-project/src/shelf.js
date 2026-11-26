@@ -326,10 +326,7 @@ function initBookshelf() {
         const state = activeShelf;
         if (!state || !reducedMotion.matches) return;
         if (state.closing) finishShelfPreview(state);
-        else {
-            state.fade?.cancel();
-            state.fade = null;
-        }
+        else state.dialog.classList.remove('shelf-preview--opening');
     });
     window.addEventListener('pagehide', closeShelfForCatalogueChange);
 }
@@ -369,7 +366,14 @@ function fillShelfSpread(book) {
     statusLabel.textContent = bookStatusLabel(status);
     document.getElementById('shelfPreviewPages').textContent = formatNumberBG(book.currentPage) + ' / ' + formatNumberBG(book.totalPages) + ' стр. · ' + percent + '%';
     document.getElementById('shelfPreviewMeter').value = percent;
-    document.getElementById('shelfPreviewFront').replaceChildren(createCoverElement(book));
+    const front = document.getElementById('shelfPreviewFront');
+    const cover = createCoverElement(book);
+    const image = cover.querySelector('img');
+    if (image) image.loading = 'eager';
+    front.replaceChildren(cover);
+    const imageReady = Boolean(image?.complete && image.naturalWidth > 1 && image.naturalHeight > 1);
+    cover.classList.toggle('book-cover--loaded', imageReady);
+    front.classList.toggle('shelf-preview__front--image-ready', imageReady);
 
     const note = (book.notes || '').trim();
     document.getElementById('shelfPreviewNotes').textContent = note || 'Няма добавена бележка.';
@@ -395,26 +399,6 @@ function fillShelfSpread(book) {
     }
 }
 
-const shelfFadeMs = 140;
-
-function fadeShelfPreview(state, opacity, from = Number(getComputedStyle(state.dialog).opacity)) {
-    state.fade?.cancel();
-    const fade = state.dialog.animate([{ opacity: from }, { opacity }], {
-        duration: shelfFadeMs,
-        easing: 'ease-out',
-        fill: 'both'
-    });
-    state.fade = fade;
-    fade.finished.then(() => {
-        if (activeShelf !== state || state.fade !== fade) return;
-        if (state.closing) finishShelfPreview(state);
-        else {
-            state.fade = null;
-            fade.cancel();
-        }
-    }, () => {});
-}
-
 function showShelfPreview(bookId, source, focusId) {
     const book = BookRepo.getBookById(bookId);
     if (!book || activeShelf) return;
@@ -425,22 +409,44 @@ function showShelfPreview(bookId, source, focusId) {
         bookId, dialog,
         row: row?.dataset.shelfRow,
         index: row ? Array.from(row.querySelectorAll('[data-shelf-book]')).indexOf(source) : 0,
-        closing: false, fade: null
+        closing: false, closeFade: null
     };
     activeShelf = state;
     fillShelfSpread(book);
+    const reveal = !focusId && !reducedMotion.matches;
+    if (reveal) dialog.classList.add('shelf-preview--opening');
     dialog.showModal();
     dialog.querySelector('.spread__book').scrollTop = 0;
     if (focusId) document.getElementById(focusId).focus({ preventScroll: true });
-    else if (!reducedMotion.matches) fadeShelfPreview(state, 1, 0);
+    if (reveal) {
+        const panelFade = document.getElementById('shelfPreviewClose').getAnimations()
+            .find(animation => animation.animationName === 'shelf-preview-panel-in');
+        if (panelFade) panelFade.finished.then(() => {
+            if (activeShelf === state && !state.closing) dialog.classList.remove('shelf-preview--opening');
+        }, () => {});
+        else dialog.classList.remove('shelf-preview--opening');
+    }
 }
 
 function closeShelfPreview() {
     const state = activeShelf;
     if (!state || state.closing) return;
     state.closing = true;
-    if (reducedMotion.matches) finishShelfPreview(state);
-    else fadeShelfPreview(state, 0);
+    if (reducedMotion.matches) {
+        finishShelfPreview(state);
+        return;
+    }
+
+    // Freeze the reveal so that the panel cannot appear while the preview is closing.
+    for (const animation of state.dialog.getAnimations({ subtree: true })) {
+        if (animation.animationName?.startsWith('shelf-preview-')) animation.pause();
+    }
+    state.closeFade = state.dialog.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: 140,
+        easing: 'ease-out',
+        fill: 'both'
+    });
+    state.closeFade.finished.then(() => finishShelfPreview(state), () => {});
 }
 
 // A spine counts as reachable when enough of it is visible inside its row and the viewport.
@@ -474,9 +480,10 @@ function restoreShelfFocus(state) {
 function finishShelfPreview(state, nextAction) {
     if (activeShelf !== state) return;
     activeShelf = null;
-    state.fade?.cancel();
-    document.getElementById('shelfPreviewFront').replaceChildren();
+    state.closeFade?.cancel();
     if (state.dialog.open) state.dialog.close();
+    state.dialog.classList.remove('shelf-preview--opening');
+    document.getElementById('shelfPreviewFront').replaceChildren();
     if (nextAction) nextAction();
     else restoreShelfFocus(state);
 }
