@@ -1463,13 +1463,6 @@ ul{list-style:none}
 .shelf-binding::before,.shelf-binding::after{
     content:"";position:absolute;inset-inline:0;pointer-events:none;
 }
-.shelf-binding--cloth::before,.shelf-binding--cloth::after{
-    height:5px;
-    border-block:1px solid var(--c-binding-gilt);
-    opacity:.85;
-}
-.shelf-binding--cloth::before{top:10%}
-.shelf-binding--cloth::after{bottom:14%}
 .shelf-binding--label::before{
     inset:10% 10% 34%;
     border:1px solid #fff4;
@@ -1591,6 +1584,7 @@ ul{list-style:none}
     height:auto;
     border-block:0;
     border-inline:1px solid var(--c-binding-gilt);
+    opacity:.85;
 }
 .shelf-flat .shelf-binding--cloth::before{left:3px;right:auto}
 .shelf-flat .shelf-binding--cloth::after{left:auto;right:3px}
