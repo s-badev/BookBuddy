@@ -1406,8 +1406,6 @@ ul{list-style:none}
     position:relative;
     height:var(--shelf-stage-height);
     padding-inline:6px;
-    perspective:1200px;
-    perspective-origin:50% 30%;
 }
 .shelf-line{
     display:flex;
@@ -1444,10 +1442,9 @@ ul{list-style:none}
     position:absolute;
     inset:0;
     width:100%;
-    transform-style:preserve-3d;
-    transition:transform .55s cubic-bezier(.2,.75,.2,1),opacity 120ms linear;
+    transition:transform 140ms ease-out,opacity 120ms linear;
 }
-.shelf-binding,.shelf-volume__front,.shelf-volume__back{
+.shelf-binding{
     position:absolute;top:0;left:0;display:block;height:100%;backface-visibility:hidden;
 }
 .shelf-binding{
@@ -1456,7 +1453,6 @@ ul{list-style:none}
     border-radius:1.5px 1px 1px 1.5px;
     background:var(--spine-cloth);
     color:var(--spine-ink);
-    transform:translateZ(calc(var(--spine-width) / 2));
     box-shadow:3px 0 6px #0009,inset 0 2px 3px #ffffff1f,inset 0 -3px 5px #0006;
 }
 .shelf-binding__shine{
@@ -1521,15 +1517,7 @@ ul{list-style:none}
 .shelf-binding--label .shelf-spine__author{top:70%;bottom:7%}
 .shelf-binding--paper .shelf-spine__title{top:7%;bottom:24%;font-family:var(--shelf-sans);font-weight:700;letter-spacing:.01em}
 .shelf-binding--paper .shelf-spine__author{top:74%;bottom:11%}
-.shelf-volume__front,.shelf-volume__back{
-    width:var(--spine-face);
-    transform-origin:0 50%;
-    background:var(--spine-cloth);
-    border-radius:2px;
-}
-.shelf-volume__front{left:var(--spine-width);transform:translateX(100%) rotateY(90deg)}
-.shelf-volume__back{transform:rotateY(90deg)}
-.shelf-volume__front .book-cover,.shelf-faceout__book .book-cover{width:100%;height:100%;border-radius:2px}
+.shelf-faceout__book .book-cover{width:100%;height:100%;border-radius:2px}
 .shelf-faceout{
     flex:none;
     width:var(--face-width);
@@ -1637,14 +1625,9 @@ ul{list-style:none}
     outline:2px solid var(--c-shelf-focus);
     outline-offset:2px;
 }
-.shelf-volume:focus-visible .shelf-binding{
-    outline:2px solid var(--c-shelf-focus);
-    outline-offset:2px;
-}
+
 @media (hover:hover) and (pointer:fine) and (min-width:701px){
-    .shelf-slot:hover .shelf-volume,.shelf-volume:focus-visible{
-        transform:translate3d(calc(var(--spine-width) * .28 - var(--pull-inset,0px)),-12px,140px) rotateY(-68deg);
-    }
+    .shelf-slot:hover .shelf-volume{transform:translateY(-4px)}
     .shelf-faceout__book:hover,.shelf-faceout__book:focus-visible{transform:rotate(0) translateY(-12px)}
     .shelf-flat:hover,.shelf-flat:focus-visible{transform:translateY(-2px)}
 }
@@ -1668,15 +1651,10 @@ ul{list-style:none}
     .shelf-slot,.shelf-stack,.shelf-faceout{scroll-snap-align:start}
     .shelf-slot,.shelf-volume,.shelf-binding,.shelf-faceout__book{transform:none}
     .shelf-volume,.shelf-faceout__book{transition:opacity 120ms linear}
-    .shelf-volume__front,.shelf-volume__back{display:none}
     .shelf-label{left:14px}
 }
 @media (prefers-reduced-motion:reduce){
     .bookshelf :is(.shelf-spine,.shelf-faceout__book){transition:none}
-}
-@media (prefers-reduced-motion:reduce) and (hover:hover) and (pointer:fine) and (min-width:701px){
-    .shelf-slot:hover .shelf-volume,.shelf-volume:focus-visible,
-    .shelf-faceout__book:hover,.shelf-faceout__book:focus-visible{transform:translateY(-4px)}
 }
 
 /* ==================== Book spread (shelf preview) ==================== */
@@ -1696,13 +1674,64 @@ html:has(.shelf-preview[open]){overflow:hidden}
     background:transparent;
     color:var(--c-text);
 }
-.shelf-preview::backdrop{background:#080e20b8}
+.shelf-preview::backdrop{background:transparent}
+.shelf-preview__shade,.shelf-flight{position:fixed;inset:0;pointer-events:none}
+.shelf-preview__shade{z-index:-1;background:#080e20b8}
+.shelf-flight{z-index:3;overflow:clip}
+.shelf-flight__book{
+    position:absolute;
+    top:0;
+    left:0;
+    transform-style:preserve-3d;
+    transform-origin:50% 50% 0;
+}
+.shelf-flight__book > *{
+    position:absolute;
+    display:block;
+    backface-visibility:hidden;
+}
+.shelf-flight__front,.shelf-flight__back{inset:0;border-radius:2px;background:var(--spine-cloth)}
+.shelf-flight__art{transform-origin:0 0}
+.shelf-flight__art .book-cover{width:100%;height:100%}
+.shelf-flight__back{transform:translateZ(calc(-1 * var(--flight-thickness))) rotateY(180deg)}
+.shelf-flight__spine,.shelf-flight__edge{
+    top:0;
+    width:var(--flight-thickness);
+    height:100%;
+    transform-origin:0 50%;
+}
+.shelf-flight__spine{
+    left:0;
+    transform:rotateY(-90deg) translateX(-100%);
+    box-shadow:inset 0 2px 3px #ffffff1f,inset 0 -3px 5px #0006;
+}
+.shelf-flight__edge{left:100%;transform:rotateY(90deg)}
+.shelf-flight__top,.shelf-flight__bottom{
+    width:100%;
+    height:var(--flight-thickness);
+    transform-origin:50% 0;
+}
+.shelf-flight__top{top:0;transform:rotateX(90deg) translateY(-100%)}
+.shelf-flight__bottom{top:100%;transform:rotateX(-90deg)}
+.shelf-flight__edge,.shelf-flight__top,.shelf-flight__bottom{
+    background:var(--spine-cloth);
+}
+.shelf-flight__edge::after,.shelf-flight__top::after,.shelf-flight__bottom::after{
+    content:"";
+    position:absolute;
+    inset:2px 4px 2px 7px;
+    background:repeating-linear-gradient(180deg,#e8dfc9 0 1.6px,#bfb494 1.6px 2.6px);
+}
+.shelf-flight__edge::after{
+    inset:2px;
+    background:repeating-linear-gradient(90deg,#e8dfc9 0 1.6px,#bfb494 1.6px 2.6px);
+}
+
 .spread__book{
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));
     max-height:calc(100dvh - 32px);
     overflow:auto;
-    perspective:1800px;
     border-radius:6px;
     box-shadow:var(--sh-xl);
 }
@@ -1715,13 +1744,11 @@ html:has(.shelf-preview[open]){overflow:hidden}
 .spread__leaf--left{
     border-radius:6px 0 0 6px;
     border-inline-end:1px solid var(--c-line);
-    transform-origin:right center;
     box-shadow:inset -14px 0 18px -14px var(--c-gutter-shade);
 }
 .spread__leaf--right{
     padding-top:64px;
     border-radius:0 6px 6px 0;
-    transform-origin:left center;
     box-shadow:inset 14px 0 18px -14px var(--c-gutter-shade);
 }
 .spread__hero{
@@ -1764,30 +1791,12 @@ html:has(.shelf-preview[open]){overflow:hidden}
     position:absolute;
     top:12px;
     right:12px;
-    z-index:2;
+    z-index:4;
     min-height:40px;
     padding-inline:12px;
     background:var(--c-surface);
 }
 
-/* Opening: both leaves swing out from the gutter; closing folds them back. */
-.shelf-preview.is-opening::backdrop,
-.shelf-preview.is-opening .spread__book{animation:spread-fade var(--dur-base) var(--ease-out) both}
-.shelf-preview.is-opening .spread__leaf--left{animation:leaf-open-left calc(var(--dur-slow) * 1.5) var(--ease-out) both}
-.shelf-preview.is-opening .spread__leaf--right{animation:leaf-open-right calc(var(--dur-slow) * 1.5) var(--ease-out) both}
-.shelf-preview.is-opening .shelf-preview__close{animation:spread-fade var(--dur-base) var(--ease-out) var(--dur-base) both}
-.shelf-preview.is-closing::backdrop,
-.shelf-preview.is-closing .spread__book,
-.shelf-preview.is-closing .shelf-preview__close{animation:spread-fade-out var(--dur-base) var(--ease-in) both}
-.shelf-preview.is-closing .spread__leaf--left{animation:leaf-close-left var(--dur-base) var(--ease-in) both}
-.shelf-preview.is-closing .spread__leaf--right{animation:leaf-close-right var(--dur-base) var(--ease-in) both}
-@keyframes spread-fade{from{opacity:0}}
-@keyframes spread-fade-out{to{opacity:0}}
-@keyframes leaf-open-left{from{opacity:.6;transform:rotateY(-70deg)}}
-@keyframes leaf-open-right{from{opacity:.6;transform:rotateY(70deg)}}
-@keyframes leaf-close-left{to{opacity:0;transform:rotateY(-50deg)}}
-@keyframes leaf-close-right{to{opacity:0;transform:rotateY(50deg)}}
-@keyframes leaf-rise{from{opacity:0;transform:translateY(16px)}}
 .details-manage summary{cursor:pointer}
 .details-progress{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-block:10px 3px}
 .details-progress input{
@@ -1805,11 +1814,6 @@ html:has(.shelf-preview[open]){overflow:hidden}
     }
     .spread__leaf--right{padding-top:20px;border-radius:0 0 6px 6px;box-shadow:none}
     .spread__hero{grid-template-columns:minmax(0,110px) minmax(0,1fr)}
-    /* Stacked leaves rise instead of swinging. */
-    .shelf-preview.is-opening .spread__leaf--left{animation-name:leaf-rise}
-    .shelf-preview.is-opening .spread__leaf--right{animation-name:leaf-rise;animation-delay:var(--dur-fast)}
-    .shelf-preview.is-closing .spread__leaf--left,
-    .shelf-preview.is-closing .spread__leaf--right{animation-name:spread-fade-out}
 }
 
 /* ==================== 18b. Motion components ====================
