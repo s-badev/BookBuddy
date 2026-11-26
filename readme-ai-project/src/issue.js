@@ -43,6 +43,7 @@ function renderIssue(books, logs, minPages) {
     document.getElementById('issueTitle').textContent = 'Брой ' + year;
     document.getElementById('issueNavLabel').textContent = 'Брой ' + year;
     document.getElementById('issueMobileLink').setAttribute('aria-label', 'Брой ' + year);
+    document.getElementById('issueFooterLink').textContent = 'Брой ' + year;
 
     const logsById = new Map(logs.map(log => [String(log.id), log]));
     const booksById = new Map(books.map(book => [String(book.id), book]));
